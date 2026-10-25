@@ -20,7 +20,7 @@
 </head>
 <body>
     <h1>🎯 ガリ穴スナイパー（チャットスクリプト）</h1>
-    <p>下のコードをTampermonkeyなどにコピーして使うニャ！</p>
+    <p>下のコードをTampermonkeyなどにコピーして使う</p>
     <pre><code>// ==UserScript==
 // @name         デュラララチャット ガリ穴スナイパー！
 // @namespace    http://tampermonkey.net/
@@ -33,7 +33,7 @@
 (function() {
     'use strict';
 
-    // 複数対応のトリガーワードを設定だニャ
+    // 複数対応のトリガーワードを設定
     const TRIGGER_WORD_1 = "ガリ穴";
     const TRIGGER_WORD_2 = "ガリ汁";
     
@@ -89,7 +89,7 @@
                             const myNameEl = document.querySelector('#user_name');
                             const myName = myNameEl ? myNameEl.textContent.trim() : "";
 
-                            // 「ガリ穴」または「ガリ汁」のどちらかに反応するように設定だニャ！
+                            // 「ガリ穴」または「ガリ汁」のどちらかに反応するように設定
                             if ((text.includes(TRIGGER_WORD_1) || text.includes(TRIGGER_WORD_2)) && sender !== myName) {
                                 console.log(`✨ [${sender}] のトリガーワードをキャッチ！変動パターンで詠唱！`);
                                 triggerAutoReply();
@@ -123,7 +123,7 @@
                 
                 setTimeout(() => { 
                     isSending = false; 
-                    console.log("🛡️ クールダウン解除ニャ。");
+                    console.log("🛡️ クールダウン解除。");
                 }, 3000);
             }, 400);
         } else {
