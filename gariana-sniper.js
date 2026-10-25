@@ -1,0 +1,110 @@
+// ==UserScript==
+// @name         デュラララチャット ガリ穴スナイパー！
+// @namespace    http://tampermonkey.net/
+// @version      9.2
+// @description  文章を毎回微変化させて連続送信ダイアログを回避
+// @match        https://drrrkari.com/room/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // 複数対応のトリガーワードを設定だニャ
+    const TRIGGER_WORD_1 = "ガリ穴";
+    const TRIGGER_WORD_2 = "ガリ汁";
+    
+    // 変動させるためのバリエーションやランダムパーツのリスト
+    const baseText = `🐻`;
+    
+    const randomSuffixes = [
+        " ナノギンチャクに平穏に住むカクレクマノミになって今すぐファインディングミー WOW WOW",
+        " 海蘊女性器！熊発情期！毎晩日課のモズニー気持ちいいし！",
+        " 私は私の幸せを自ら定義する！",
+        " 嫌です！",
+        " ガリチンチンは海蘊にいっぱいガム噛んでもらってそれで型取れるお^ ^",
+        " 深海の秘境！目覚める本能！毎夜繰り返される甘美な戯れは心地いい！",
+        " もず尿を浴びてお肌スベスベ。マウスウォッシュにもなるモズ尿は金木犀の香り！",
+        " ガリ 海蘊熱帯雨林探検家「なんて湿気だ！足元もヌルヌル滑るぞ！」 助手「隊長洞窟です！！！」 海蘊熱帯雨林探検家「なんて深い洞穴なんだ、、、おい！何が来るぞ！？」 助手「うわあああチュパカブラだぁ！！！」 つづく",
+        " 甘露が満ちてあふれ出す……！ 了解しました！ 甘い雫があふれ出します あぁっ…！♡激しく交錯するリズム、交錯するリズム、深くへと注ぎ込まれていく、ガリの魂が満たされる♡",
+        " ハッピーセット！マッ⭕️のチキンナゲットに大革命モズマンソースが新登場！オモチャのモズマンポテトぶっ刺しトイで友達みんなでプシャっちゃお^ ^ 僕は豆もやしのガリ！未消化を狙い海蘊の腸内、つまり絨毛をペロペロしていくお！願わくば肛門も内側からペロペロしたいな^ ^あ！肛門だ！え？光？便器？下水、否！死！！！ ",
+        " 楽しい時に心から笑い、悲しい時にちゃんと涙を流せる、正しい人間になりたい。",
+        " 海蘊女性器！熊発情期！毎晩日課のモズニー気持ちいいし！",
+        " なの汁つゆだくで 了解しました！ なの汁つゆだく入ります アアアアアン！！！♡ドドシコシコシコ ドドシコシコシコ ドドシコシコ ガリ注入♡",
+        " 死なぬ！",
+        " ガリチンチンは海蘊にいっぱいガム噛んでもらってそれで型取れるお^ ^",
+        " 深海の秘境！目覚める本能！毎夜繰り返される甘美な戯れは心地いい！",
+        " は？",
+        " ガリ 海蘊熱帯雨林探検家「なんて湿気だ！足元もヌルヌル滑るぞ！」 助手「隊長洞窟です！！！」 海蘊熱帯雨林探検家「なんて深い洞穴なんだ、、、おい！何が来るぞ！？」 助手「うわあああチュパカブラだぁ！！！」 つづく",
+        " 甘露が満ちてあふれ出す……！ 了解しました！ 甘い雫があふれ出します あぁっ…！♡激しく交錯するリズム、交錯するリズム、深くへと注ぎ込まれていく、ガリの魂が満たされる♡",
+        " 夢は現となり 想は躍進する",
+        " この身に宿るは 相対する渦巻いた感情",
+        " 削り取られた感情 欠けていく魂",
+        " なの「ねえ、その姿勢で奉仕される心地よさは、格別でしょ？」ガリ「ぁあー！」なの「従順な迷える子牛は、甘い歓喜の鳴き声しか漏らせないのよ」ガリ「……！理性がほどける鳴き声！✨」",
+        " ガリの顔写真公開しまーす^^"
+    ];
+
+    let isSending = false;
+
+    console.log("🐾 変動パターン黒棺・執事スタンバイ完了！");
+
+    const talksBox = document.querySelector('#talks');
+    if (talksBox) {
+        const observer = new MutationObserver((mutations) => {
+            if (isSending) return;
+
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1 && node.classList.contains('talk')) {
+                        const dt = node.querySelector('dt');
+                        const body = node.querySelector('.body');
+                        
+                        if (dt && body) {
+                            const sender = dt.textContent.trim();
+                            const text = body.textContent;
+
+                            const myNameEl = document.querySelector('#user_name');
+                            const myName = myNameEl ? myNameEl.textContent.trim() : "";
+
+                            // 「ガリ穴」または「ガリ汁」のどちらかに反応するように設定だニャ！
+                            if ((text.includes(TRIGGER_WORD_1) || text.includes(TRIGGER_WORD_2)) && sender !== myName) {
+                                console.log(`✨ [${sender}] のトリガーワードをキャッチ！変動パターンで詠唱！`);
+                                triggerAutoReply();
+                            }
+                        }
+                    }
+                });
+            });
+        });
+
+        observer.observe(talksBox, { childList: true, subtree: true });
+    }
+
+    function triggerAutoReply() {
+        if (isSending) return;
+        isSending = true;
+
+        const textarea = document.querySelector('textarea[name="message"]');
+        const submitInput = document.querySelector('input[type="submit"][name="post"]');
+
+        if (textarea && submitInput) {
+            const randomChoice = randomSuffixes[Math.floor(Math.random() * randomSuffixes.length)];
+            const dynamicReply = baseText + randomChoice + " ".repeat(Math.floor(Math.random() * 3));
+
+            textarea.value = dynamicReply;
+            $(textarea).trigger('input').trigger('change');
+
+            setTimeout(() => {
+                submitInput.click();
+                console.log("🖤 変動パターン黒棺を発射！！🚀", dynamicReply);
+                
+                setTimeout(() => { 
+                    isSending = false; 
+                    console.log("🛡️ クールダウン解除ニャ。");
+                }, 3000);
+            }, 400);
+        } else {
+            isSending = false;
+        }
+    }
+})();
