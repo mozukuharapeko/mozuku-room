@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>挨拶らくちん機能</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #3498db;
+        }
+        pre {
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .note {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>👋 挨拶らくちん機能（チャットスクリプト）</h1>
+    <p class="note">下のコードをTampermonkeyなどにコピーして使うニャ！</p>
+    <pre><code>// ==UserScript==
+// @name         DRRR自動挨拶ボット
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  新しい人の入室を検知して自動で挨拶を挿入するニャ
+// @match        https://drrrkari.com/room/*
+// @grant        none
+// ==/UserScript==
+
+(function(){
+    if(window.drrrBotRunning){
+        console.log('すでにDRRR自動挨拶ボットは起動中だニャ！');
+        return;
+    }
+    window.drrrBotRunning = true;
+    console.log('【ブックマーク完璧版】DRRR強制挿入ボットを起動したニャ！✨');
+
+    let lastProcessedName = "";
+    let isBusy = false;
+
+    setInterval(() => {
+        if(isBusy) return;
+
+        const inputField = document.querySelector('textarea, input[type="text"]');
+        if(!inputField) return;
+
+        const elements = document.querySelectorAll('body *');
+        let targetLogText = "";
+
+        for(let el of elements){
+            if(el.children.length === 0){
+                const text = el.textContent || '';
+                if(text.includes('入室しました') && !text.includes('海藻')){
+                    targetLogText = text;
+                    break;
+                }
+            }
+        }
+
+        if(targetLogText){
+            if(targetLogText !== lastProcessedName){
+                lastProcessedName = targetLogText;
+                isBusy = true;
+
+                const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+                if(nativeSetter){
+                    nativeSetter.call(inputField, 'こんばんは！よしなにー♡');
+                } else {
+                    inputField.value = 'こんばんは！よしなにー♡';
+                }
+
+                inputField.dispatchEvent(new Event('input', {bubbles: true}));
+                inputField.dispatchEvent(new Event('change', {bubbles: true}));
+                console.log('新しい人にだけ挨拶を1回挿入したニャ！🎉');
+
+                setTimeout(() => {
+                    isBusy = false;
+                }, 5000);
+            }
+        }
+    }, 1000);
+})();</code></pre>
+</body>
+</html>
