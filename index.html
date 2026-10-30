@@ -278,6 +278,12 @@
                 "おめでとうございます！本日の『一番暇だった大賞』にノミネートされました。"
             ];
             const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            
+            // クリップボードにもこっそりコピーしちゃう！
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(randomMsg).catch(err => console.log(err));
+            }
+
             alert(randomMsg);
         }
     </script>
