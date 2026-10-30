@@ -66,6 +66,45 @@
         .menu-item.featured span {
             color: #e0e7ff;
         }
+        /* デュラララスクリプトまとめ枠 */
+        .menu-group {
+            background: #fff;
+            padding: 18px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid #2ecc71;
+        }
+        .menu-group-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+        .sub-menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sub-menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fbfe;
+            padding: 12px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #34495e;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .sub-menu-item:hover {
+            background: #eaf2f8;
+        }
+        .sub-menu-item span {
+            color: #bdc3c7;
+            font-size: 1rem;
+        }
         footer {
             text-align: center;
             font-size: 0.8rem;
@@ -80,7 +119,7 @@
     <div class="welcome-msg">リンク 🐾</div>
 
     <div class="menu-list">
-        <!-- 0. 他己診断メーカー（新機能！一番目立つ位置） -->
+        <!-- 0. 他己診断メーカー -->
         <a href="./tako.html" class="menu-item featured">
             🐙 他己診断メーカー <span>&gt;</span>
         </a>
@@ -90,7 +129,7 @@
             💬 デュラララチャット <span>&gt;</span>
         </a>
 
-        <!-- 2. 今作った避難所掲示板へのリンク -->
+        <!-- 2. 避難所掲示板へのリンク -->
         <a href="https://mozukuharapeko.github.io/bbs/" class="menu-item" target="_blank">
             🛡️ 避難所掲示板 <span>&gt;</span>
         </a>
@@ -100,15 +139,18 @@
             ⚙️ デュラララカスタマイズの使い方 <span>&gt;</span>
         </a>
 
-        <!-- 4. ガリ穴スナイパーへのリンク -->
-        <a href="./gariana-sniper.html" class="menu-item" target="_blank">
-            🎯 ガリ穴スナイパー <span>&gt;</span>
-        </a>
-
-        <!-- 5. 挨拶らくちん機能へのリンク -->
-        <a href="./greeting.html" class="menu-item" target="_blank">
-            👋 挨拶らくちん機能 <span>&gt;</span>
-        </a>
+        <!-- 4. デュラララスクリプト（まとめて表示！） -->
+        <div class="menu-group">
+            <div class="menu-group-title">🛠️ デュラララスクリプト</div>
+            <div class="sub-menu-list">
+                <a href="./gariana-sniper.html" class="sub-menu-item" target="_blank">
+                    🎯 ガリ穴スナイパー <span>&gt;</span>
+                </a>
+                <a href="./greeting.html" class="sub-menu-item" target="_blank">
+                    👋 挨拶らくちん機能 <span>&gt;</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <footer>
