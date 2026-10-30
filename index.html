@@ -165,11 +165,23 @@
             color: #a0aec0;
             font-size: 0.9rem;
         }
+
+        /* へやぬしリンクグループ */
+        .owner-group {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 14px;
+            padding: 18px;
+            border-left: 5px solid #e84393;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 👑 ヘッダータイトルを追加！ -->
+    <!-- 👑 ヘッダータイトル -->
     <header class="site-header">
         <h1 class="site-title">💕もずべや💕</h1>
     </header>
@@ -189,7 +201,7 @@
         </a>
 
         <!-- 💬 デュラララチャット -->
-        <a href="https://drrrkari.com/" target="_blank" class="menu-card card-blue">
+        <a href="https://drrrkari.com/" target="_blank" class="menu-card card-blue" rel="noopener noreferrer">
             <span class="icon-text">💬 デュラララチャット</span>
             <span class="arrow">&gt;</span>
         </a>
@@ -228,6 +240,25 @@
                 </a>
                 <a href="#" class="script-item" onclick="showFakeScriptAlert(); return false;">
                     <span>🌐 相手のIPアドレス暴露スクリプト</span>
+                    <span class="arrow">&gt;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 🌸 へやぬし「海蘊」リンク -->
+        <div class="owner-group">
+            <div class="script-title">🌸 へやぬし「海蘊」</div>
+            <div class="script-list">
+                <a href="https://www.youtube.com/channel/UCfOz2I8b2IhpIpGB0I1UgMA" target="_blank" rel="noopener noreferrer" class="script-item">
+                    <span>📺 YouTubeチャンネル</span>
+                    <span class="arrow">&gt;</span>
+                </a>
+                <a href="https://www.tiktok.com/@harapeko029sana4989" target="_blank" rel="noopener noreferrer" class="script-item">
+                    <span>🎵 TikTok</span>
+                    <span class="arrow">&gt;</span>
+                </a>
+                <a href="https://suno.com/create?redirected_from=signin&referrer=%2F%40mozuku4989" target="_blank" rel="noopener noreferrer" class="script-item">
+                    <span>🎶 Suno (楽曲制作)</span>
                     <span class="arrow">&gt;</span>
                 </a>
             </div>
