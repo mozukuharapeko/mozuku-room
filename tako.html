@@ -13,7 +13,7 @@
 
     <!-- ヘッダー -->
     <header class="bg-indigo-600 text-white shadow-md py-4 px-6 flex justify-between items-center">
-        <h1 class="text-xl font-bold tracking-wider cursor-pointer" onclick="location.href='tako.html'">🐙 他己診断メーカー</h1>
+        <h1 class="text-xl font-bold tracking-wider cursor-pointer" onclick="goToHome()">🐙 他己診断メーカー</h1>
         <span id="header-subtitle" class="text-xs bg-indigo-500 px-3 py-1 rounded-full">ベータ版</span>
     </header>
 
@@ -60,9 +60,12 @@
                 <!-- 動的に15問が生成されます -->
             </div>
 
-            <div class="pt-2">
+            <div class="pt-2 space-y-3">
                 <button onclick="submitAnswers()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-100 cursor-pointer">
                     回答を送信してみんなの結果を見る！ 🚀
+                </button>
+                <button onclick="goToHome()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition cursor-pointer">
+                    🏠 トップに戻る
                 </button>
             </div>
         </div>
@@ -99,9 +102,10 @@
                 </div>
             </div>
 
-            <div class="text-center pt-2">
-                <button onclick="location.href='tako.html'" class="text-xs text-slate-500 hover:text-indigo-600 underline cursor-pointer">
-                    ホーム（トップページ）に戻る 🏠
+            <!-- トップに戻るボタン（トップURLへ直行するニャ！） -->
+            <div class="pt-2">
+                <button onclick="goToHome()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+                    🏠 トップページ（ホーム）に戻る
                 </button>
             </div>
         </div>
@@ -152,6 +156,11 @@
             }
         };
 
+        // 指定のトップページ（mozuku-room）へ移動する関数ニャ
+        function goToHome() {
+            window.location.href = "https://mozukuharapeko.github.io/mozuku-room/";
+        }
+
         function showView(viewName) {
             document.getElementById("view-home").classList.add("hidden");
             document.getElementById("view-answer").classList.add("hidden");
@@ -189,7 +198,7 @@
                 return;
             }
             saveTargetName(nameInput);
-            window.location.href = `tako.html?target=${encodeURIComponent(nameInput)}`;
+            window.location.href = `?target=${encodeURIComponent(nameInput)}`;
         }
 
         function renderTargetList() {
@@ -214,10 +223,10 @@
                             <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-2">回答 ${count} 件</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="location.href='tako.html?target=${encodeURIComponent(name)}'" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                            <button onclick="location.href='?target=${encodeURIComponent(name)}'" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
                                 ✏️ 診断する
                             </button>
-                            <button onclick="location.href='tako.html?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                            <button onclick="location.href='?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
                                 📊 結果を見る
                             </button>
                         </div>
@@ -273,7 +282,7 @@
             });
             localStorage.setItem(storageKey, JSON.stringify(existingData));
 
-            window.location.href = `tako.html?target=${encodeURIComponent(currentTarget)}#result`;
+            window.location.href = `?target=${encodeURIComponent(currentTarget)}#result`;
             location.reload();
         }
 
