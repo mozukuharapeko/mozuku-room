@@ -15,9 +15,9 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
-    <!-- ヘッダー -->
+    <!-- ヘッダー（ここの文字が変わるまで待ってね！） -->
     <header class="bg-indigo-600 text-white shadow-md py-4 px-6 flex justify-between items-center">
-        <h1 class="text-xl font-bold tracking-wider cursor-pointer" onclick="goToHome()">🐙 他己診断メーカー</h1>
+        <h1 class="text-xl font-bold tracking-wider cursor-pointer" onclick="goToHome()">🐙 他己診断メーカー (最新版)</h1>
         <span id="header-subtitle" class="text-xs bg-indigo-500 px-3 py-1 rounded-full">ベータ版</span>
     </header>
 
@@ -35,7 +35,7 @@
                 <div class="pt-4 space-y-3">
                     <input type="text" id="input-target-name" placeholder="例：海蘊（あなたの名前）" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center text-lg">
                     <button onclick="createTargetPage()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg shadow-indigo-100 cursor-pointer">
-                        診断ページを作成する ✨
+                        診断ページを作成する 🚀
                     </button>
                 </div>
             </div>
@@ -114,26 +114,34 @@
 
     <!-- スクリプト -->
     <script>
-        // 1. Firebase設定
-        var firebaseConfig = {
-            apiKey: "AIzaSyAXcW4KhtikAUOlTn--58r_998yl27x_QQ",
-            authDomain: "takoshindan.firebaseapp.com",
-            projectId: "takoshindan",
-            storageBucket: "takoshindan.firebasestorage.app",
-            messagingSenderId: "420410722790",
-            appId: "1:420410722790:web:ccf1e564b7d192b5e8ee27",
-            measurementId: "G-LQF2S7KLWX"
-        };
+        console.log("スクリプトの読み込みをスタートしたニャ！");
 
-        // Firebase初期化
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
+        // 1. Firebaseの安全な初期化
+        var db = null;
+        try {
+            var firebaseConfig = {
+                apiKey: "AIzaSyAXcW4KhtikAUOlTn--58r_998yl27x_QQ",
+                authDomain: "takoshindan.firebaseapp.com",
+                projectId: "takoshindan",
+                storageBucket: "takoshindan.firebasestorage.app",
+                messagingSenderId: "420410722790",
+                appId: "1:420410722790:web:ccf1e564b7d192b5e8ee27",
+                measurementId: "G-LQF2S7KLWX"
+            };
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+            console.log("Firebase接続OKニャ！");
+        } catch (e) {
+            console.error("Firebaseの準備中にエラーが起きたニャ:", e);
+        }
 
         var currentTarget = "";
         var radarChartInstance = null;
 
         var questions = [
-            { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
+            { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
             { id: 2, text: "大金を手に入れたら一番最初にやらかしそうなことは？", options: ["秒で堅実に貯金する", "全額使ってロマン投資で消滅", "SNSでマウント取って炎上する", "周りに配り歩いて自滅する"] },
             { id: 3, text: "この人を動物に例えるならどれに近い？", options: ["気まぐれに甘えてくる猫", "すべてを見通す仙人", "トラブルメーカー風のラスボス", "実体のない概念"] },
             { id: 4, text: "機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
@@ -150,21 +158,27 @@
             { id: 15, text: "ズバリ、この人の総合的な（やばさ・面白さ）のレベルは？", options: ["Lv.10：普通にしっかり者", "Lv.50：時々斜め上を行く変わり者", "Lv.100：底が知れないミステリアス", "Lv.MAX：観測不能の天然記念物"] }
         ];
 
-        function goToHome() {
+        // 全ての関数を window にくっつけて、どこからでも確実に呼べるようにするニャ！
+        window.goToHome = function() {
             window.location.href = "https://mozukuharapeko.github.io/mozuku-room/";
-        }
+        };
 
-        function showView(viewName) {
+        window.showView = function(viewName) {
             document.getElementById("view-home").classList.add("hidden");
             document.getElementById("view-answer").classList.add("hidden");
             document.getElementById("view-result").classList.add("hidden");
             document.getElementById("view-" + viewName).classList.remove("hidden");
-        }
+        };
 
-        function createTargetPage() {
+        window.createTargetPage = function() {
+            console.log("createTargetPage が呼ばれたニャ！");
             var nameInput = document.getElementById("input-target-name").value.trim();
             if (!nameInput) {
                 alert("お名前を入力してほしいニャ！");
+                return;
+            }
+            if (!db) {
+                alert("Firebaseがまだ読み込めていないニャ。少し待つかリロードしてね！");
                 return;
             }
 
@@ -177,10 +191,14 @@
                 console.error("Error creating target:", error);
                 alert("作成エラーニャ: " + error.message);
             });
-        }
+        };
 
-        function renderTargetList() {
+        window.renderTargetList = function() {
             var container = document.getElementById("target-list-container");
+            if (!db) {
+                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">データベースに接続できないニャ💦</p>';
+                return;
+            }
 
             db.collection("tako_diagnoses").get().then(function(snapshot) {
                 if (snapshot.empty) {
@@ -202,10 +220,10 @@
                                 <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-2">回答 ${count} 件</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button onclick="location.href='?target=${encodeURIComponent(name)}'" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                                <button onclick="window.location.href='?target=${encodeURIComponent(name)}'" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
                                     ✏️ 診断する
                                 </button>
-                                <button onclick="location.href='?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                                <button onclick="window.location.href='?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
                                     📊 結果を見る
                                 </button>
                             </div>
@@ -217,10 +235,10 @@
                 console.error("Error fetching list:", error);
                 container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">読み込みエラーが発生したニャ</p>';
             });
-        }
+        };
 
-        function showAnswerView(name) {
-            showView("answer");
+        window.showAnswerView = function(name) {
+            window.showView("answer");
             document.getElementById("answer-title").innerText = name + " さんについての他己診断";
             
             var container = document.getElementById("question-container");
@@ -243,9 +261,9 @@
                 html += '</div></div>';
                 container.innerHTML += html;
             });
-        }
+        };
 
-        function submitAnswers() {
+        window.submitAnswers = function() {
             var answers = {};
             for (var i = 1; i <= questions.length; i++) {
                 var selected = document.querySelector('input[name="q_' + i + '"]:checked');
@@ -254,6 +272,11 @@
                     return;
                 }
                 answers[i] = parseInt(selected.value);
+            }
+
+            if (!db) {
+                alert("Firebase接続エラーニャ。");
+                return;
             }
 
             var btn = document.getElementById("btn-submit");
@@ -271,20 +294,23 @@
                 responses: firebase.firestore.FieldValue.arrayUnion(newResponse)
             }, { merge: true }).then(function() {
                 window.location.href = "?target=" + encodeURIComponent(currentTarget) + "#result";
+                window.location.reload();
             }).catch(function(error) {
                 console.error("Error submitting answers:", error);
                 alert("送信エラーニャ: " + error.message);
                 btn.disabled = false;
                 btn.innerText = "回答を送信してみんなの結果を見る！ 🚀";
             });
-        }
+        };
 
-        function showResultView(name) {
-            showView("result");
+        window.showResultView = function(name) {
+            window.showView("result");
             document.getElementById("result-title").innerText = name + " さんの他己診断結果";
             
             var shareUrl = window.location.href.split('#')[0];
             document.getElementById("share-url-text").innerText = shareUrl;
+
+            if (!db) return;
 
             db.collection("tako_diagnoses").doc(name).get().then(function(docSnap) {
                 var data = [];
@@ -301,22 +327,22 @@
                     });
                 });
 
-                renderRadarChart(counts);
-                renderCommentsList(data);
+                window.renderRadarChart(counts);
+                window.renderCommentsList(data);
             }).catch(function(error) {
                 console.error("Error loading result:", error);
                 alert("結果読み込みエラーニャ: " + error.message);
             });
-        }
+        };
 
-        function copyShareUrl() {
+        window.copyShareUrl = function() {
             var shareUrl = window.location.href.split('#')[0];
             navigator.clipboard.writeText(shareUrl).then(function() {
                 alert("診断URLをコピーしたニャ！お友達にシェアしてね📋✨");
             });
-        }
+        };
 
-        function renderRadarChart(counts) {
+        window.renderRadarChart = function(counts) {
             var ctx = document.getElementById('radarChart').getContext('2d');
             if (radarChartInstance) {
                 radarChartInstance.destroy();
@@ -347,9 +373,9 @@
                     plugins: { legend: { display: false } }
                 }
             });
-        }
+        };
 
-        function renderCommentsList(data) {
+        window.renderCommentsList = function(data) {
             var listContainer = document.getElementById("comments-list");
             listContainer.innerHTML = "";
 
@@ -371,20 +397,20 @@
                 `;
                 listContainer.innerHTML += html;
             });
-        }
+        };
 
         window.onload = function() {
             var urlParams = new URLSearchParams(window.location.search);
             currentTarget = urlParams.get("target");
 
             if (!currentTarget) {
-                showView("home");
-                renderTargetList();
+                window.showView("home");
+                window.renderTargetList();
             } else {
                 if (window.location.hash === "#result") {
-                    showResultView(currentTarget);
+                    window.showResultView(currentTarget);
                 } else {
-                    showAnswerView(currentTarget);
+                    window.showAnswerView(currentTarget);
                 }
             }
         };
