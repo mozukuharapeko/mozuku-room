@@ -3,229 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>もずべや</title>
-    <style>
-        body {
-            background-image: 
-                linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), 
-                url('./bg.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            color: #333;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            padding: 30px 15px;
-            max-width: 500px;
-            margin: 0 auto;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        .menu-container {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .menu-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 16px 20px;
-            border-radius: 14px;
-            text-decoration: none;
-            color: #2c3e50;
-            font-weight: bold;
-            font-size: 1rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            border-left: 5px solid #3498db;
-            transition: all 0.25s ease;
-        }
-
-        .menu-card:hover {
-            transform: translateY(-3px) scale(1.01);
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
-        }
-
-        .card-purple {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
-            color: #ffffff;
-            border-left: none;
-        }
-
-        .card-purple:hover {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 1), rgba(118, 75, 162, 1));
-        }
-
-        .card-orange {
-            border-left-color: #e67e22;
-        }
-
-        .card-blue {
-            border-left-color: #3498db;
-        }
-
-        .icon-text {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .arrow {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-            transition: transform 0.2s;
-        }
-
-        .menu-card:hover .arrow {
-            transform: translateX(4px);
-            color: #2c3e50;
-        }
-
-        .card-purple .arrow {
-            color: #ffffff;
-        }
-
-        .badge-soon {
-            background-color: #f39c12;
-            color: #ffffff;
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-weight: normal;
-        }
-
-        /* スクリプトグループ */
-        .script-group {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 14px;
-            padding: 18px;
-            border-left: 5px solid #2ecc71;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            margin-top: 5px;
-        }
-
-        .script-title {
-            font-size: 1.05rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .script-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .script-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(248, 249, 250, 0.8);
-            padding: 12px 15px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: #34495e;
-            font-size: 0.95rem;
-            transition: all 0.2s;
-        }
-
-        .script-item:hover {
-            background: #ffffff;
-            transform: translateX(3px);
-        }
-
-        .script-item .arrow {
-            color: #a0aec0;
-            font-size: 0.9rem;
-        }
-    </style>
+    <title>他己診断ジェネレーター</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
-    <div class="menu-container">
+    <!-- ヘッダー -->
+    <header class="bg-indigo-600 text-white shadow-md py-4 px-6 flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-wider cursor-pointer" onclick="location.href='tako.html'">🐙 他己診断メーカー</h1>
+        <span id="header-subtitle" class="text-xs bg-indigo-500 px-3 py-1 rounded-full">ベータ版</span>
+    </header>
 
-        <!-- 🐙 他己診断メーカー (リンク先を ./tako.html に修正) -->
-        <a href="./tako.html" class="menu-card card-purple">
-            <span class="icon-text">🐙 他己診断メーカー</span>
-            <span class="arrow">&gt;</span>
-        </a>
-
-        <!-- ⚪ 乳首クリッカー（予定） -->
-        <a href="#" class="menu-card card-orange" onclick="alert('まだ制作中！自分の押してなさい！'); return false;">
-            <span class="icon-text">⚪ 乳首クリッカー（予定）</span>
-            <span class="badge-soon">Coming Soon</span>
-        </a>
-
-        <!-- 💬 デュラララチャット -->
-        <a href="https://drrrkari.com/" target="_blank" class="menu-card card-blue">
-            <span class="icon-text">💬 デュラララチャット</span>
-            <span class="arrow">&gt;</span>
-        </a>
-
-        <!-- ⚙️ デュラララカスタマイズの使い方 -->
-        <a href="./drrr-settings.html" class="menu-card card-blue">
-            <span class="icon-text">⚙️ デュラララカスタマイズの使い方</span>
-            <span class="arrow">&gt;</span>
-        </a>
-
-        <!-- 💞 もずれんらくちょう 💕 -->
-        <a href="https://mozukuharapeko.github.io/bbs/" target="_blank" rel="noopener noreferrer" class="menu-card card-blue">
-            <span class="icon-text">💞もずれんらくちょう💕</span>
-            <span class="arrow">&gt;</span>
-        </a>
-
-        <!-- 🛠️ デュラララスクリプト -->
-        <div class="script-group">
-            <div class="script-title">🛠️ デュラララスクリプト</div>
-            <div class="script-list">
-                <a href="./gariana-sniper.html" class="script-item">
-                    <span>🎯 ガリ穴スナイパー</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="./greeting.html" class="script-item">
-                    <span>👏 挨拶らくちん機能</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#" class="script-item" onclick="showFakeScriptAlert(); return false;">
-                    <span>🛡️ 強制退室(キック機能)無効スクリプト</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#" class="script-item" onclick="showFakeScriptAlert(); return false;">
-                    <span>👑 ホスト(部屋主)強制退室スクリプト</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#" class="script-item" onclick="showFakeScriptAlert(); return false;">
-                    <span>🌐 相手のIPアドレス暴露スクリプト</span>
-                    <span class="arrow">&gt;</span>
-                </a>
+    <!-- メインコンテンツ -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-2xl">
+        
+        <!-- ビュー1: ホーム（診断メーカー作成画面） -->
+        <div id="view-home" class="space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 text-center space-y-4">
+                <h2 class="text-2xl font-extrabold text-slate-900">あなたの他己診断ページを作ろう！</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    自分の名前を入力して専用URLを発行しよう。<br>
+                    友達や周りの人にシェアして、本当の自分（の目撃証言）を集めよう！
+                </p>
+                <div class="pt-4 space-y-3">
+                    <input type="text" id="input-target-name" placeholder="例：海蘊（あなたの名前）" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center text-lg">
+                    <button onclick="createTargetPage()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg shadow-indigo-100 cursor-pointer">
+                        診断ページを作成する ✨
+                    </button>
+                </div>
             </div>
         </div>
 
-    </div>
+        <!-- ビュー2: 回答画面（友達が答える画面） -->
+        <div id="view-answer" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                <span class="text-xs font-semibold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">他己診断セッション</span>
+                <h2 id="answer-title" class="text-2xl font-bold mt-2 text-slate-900">〇〇さんについての診断</h2>
+                <p class="text-xs text-slate-500 mt-1">直感でサクサク答えてね！</p>
+            </div>
 
+            <div id="question-container" class="space-y-4">
+                <!-- 動的に15問が生成されます -->
+            </div>
+
+            <div class="pt-2">
+                <button onclick="submitAnswers()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-100 cursor-pointer">
+                    回答を送信してみんなの結果を見る！ 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- ビュー3: 結果・集計画面 -->
+        <div id="view-result" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center space-y-2">
+                <span class="text-xs font-semibold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">集計レポート</span>
+                <h2 id="result-title" class="text-2xl font-bold text-slate-900">〇〇さんの他己診断結果</h2>
+                <p id="response-count" class="text-sm text-slate-500">回答数: 0件</p>
+            </div>
+
+            <!-- シェアボックス -->
+            <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="text-xs text-indigo-900 break-all w-full sm:w-auto flex-grow" id="share-url-text">URL</div>
+                <button onclick="copyShareUrl()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition whitespace-nowrap cursor-pointer">
+                    URLをコピーする 📋
+                </button>
+            </div>
+
+            <!-- グラフエリア -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="font-bold text-slate-800 text-sm">📊 ステータスバランス</h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- みんなのコメント / 回答詳細 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="font-bold text-slate-800 text-sm">💬 みんなの目撃証言＆回答ログ</h3>
+                <div id="comments-list" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+                    <!-- 動的に挿入 -->
+                </div>
+            </div>
+
+            <div class="text-center pt-2">
+                <button onclick="location.href='tako.html'" class="text-xs text-slate-500 hover:text-indigo-600 underline cursor-pointer">
+                    自分用の新しい診断ページを作る 🔄
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="text-center py-6 text-xs text-slate-400">
+        &copy; 2026 他己診断メーカー
+    </footer>
+
+    <!-- ロジック部分 -->
     <script>
-        function showFakeScriptAlert() {
-            const messages = [
-                "たかし！騙されちゃった？",
-                "いい歳していつまでも粘着しないの！早く寝なさい！",
-                "貴方は長い人生で何を学んだのかな？何も学ばずにただ生きてきただけなのかな？客観的に自分を見つめなおして下さい。"
-            ];
-            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-            alert(randomMsg);
-        }
-    </script>
+        const questions = [
+            { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
+            { id: 2, text: "大金を手に入れたら一番最初にやらかしそうなことは？", options: ["秒で堅実に貯金する", "全額使ってロマン投資で消滅", "SNSでマウント取って炎上する", "周りに配り歩いて自滅する"] },
+            { id: 3, text: "この人を動物に例えるならどれに近い？", options: ["気まぐれに甘えてくる猫", "すべてを見通す仙人", "トラブルメーカー風のラスボス", "実体のない概念"] },
+            { id: 4, text: "機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
+            { id: 5, text: "ピンチのときにこの人がとりそうな行動は？", options: ["表立って冷静に解決を主導する", "裏から手を回して華麗に回避する", "なぜか笑い話に変えてしまう", "しれっとその場から消えている"] },
+            { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と「合理性」", "「優しさ」とぬいぐるみ", "「野望」と「眠気」"] },
+            { id: 7, text: "褒められたときのこの人の実際のリアクションは？", options: ["満面の笑みで素直に喜ぶ", "全力で照れて話題をそらす", "「でしょ？」とドヤ顔をキメる", "心の中で疑ってかかる"] },
+            { id: 8, text: "休日の過ごし方、どれが一番しっくりくる？", options: ["完全引きこもりインドアの極み", "気まぐれにフラッと一人旅", "お誘いがあればフッ軽で出没", "予定は未定の気まぐれ野郎"] },
+            { id: 9, text: "この人の「隠しきれない本質」を一言で言うなら？", options: ["実はめちゃくちゃ情に厚い", "徹底的にマイペースな自由人", "知的好奇心がバグってる変人", "圧倒的フラットメンタル"] },
+            { id: 10, text: "もしスーパーパワーが手に入るとしたら、この人が欲しがりそうなのは？", options: ["時間を止める能力", "人の心を読める能力", "どこでも寝られる能力", "お金を生み出す能力"] },
+            { id: 11, text: "初対面の人に対するこの人の態度の基本スタンスは？", options: ["丁寧だけど心の距離は2メートル", "最初から全開でマイペース", "相手の出方を静かに観察する", "愛想よく合わせて後で疲れる"] },
+            { id: 12, text: "この人と議論になったとき、最終的にどうなる？", options: ["論理でボコボコにされる", "圧倒的包容力で丸め込まれる", "いつの間にか違う話に脱線する", "お互い譲らず平行線"] },
+            { id: 13, text: "SNSの裏アカウントがあったら、どんな投稿をしてそう？", options: ["日常のシュールな愚痴やツッコミ", "哲学的なお気持ち表明", "全く更新されず放置", "推し活の狂気的な叫び"] },
+            { id: 14, text: "この人の「最大の魅力（チャームポイント）」はどこだと思う？", options: ["ブレない独自の価値観", "どんなものも許容する器の広さ", "ふとした瞬間のユーモア", "圧倒的な自然体"] },
+            { id: 15, text: "ズバリ、この人の総合的な「やばさ（面白さ）」のレベルは？", options: ["Lv.10：普通にしっかり者", "Lv.50：時々斜め上を行く変わり者", "Lv.100：底が知れないミステリアス", "Lv.MAX：観測不能の天然記念物"] }
+        ];
 
-</body>
-</html>
+        let currentTarget = "";
+        let radarChartInstance = null;
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentTarget = urlParams.get("target");
+
+            if (!currentTarget) {
+                showView("home");
+            } else {
+                if (window.location.hash === "#result") {
+                    showResultView(currentTarget);
+                } else {
+                    showAnswerView(currentTarget);
+                }
+            }
+        };
+
+        function showView(viewName) {
+            document.getElementById("view-home").classList.add("hidden");
+            document.getElementById("view-answer").classList.add("hidden");
+            document.getElementById("view-result").classList.add("hidden");
+            document.getElementById("view-" + viewName).classList.remove("hidden");
+        }
+
+        function createTargetPage() {
+            const nameInput = document.getElementById("input-target-name").value.trim();
+            if (!nameInput) {
+                alert("お名前を入力してほしいニャ！");
+                return;
+            }
+            window.location.href = `tako.html?target=${encodeURIComponent(nameInput)}`;
+        }
+
+        function showAnswerView(name) {
+            showView("answer");
+            document.getElementById("answer-title").innerText = `${name} さんについての他己診断`;
+            
+            const container = document.getElementById("question-container");
+            container.innerHTML = "";
+
+            questions.forEach((q, index) => {
+                let html = `
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                        <p class="font-bold text-slate-800 text-sm">Q${index + 1}. ${q.text}</p>
+                        <div class="space-y-2">
+                `;
+                q.options.forEach((opt, optIndex) => {
+                    html += `
+                        <label class="flex items-center space-x-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
+                            <input type="radio" name="q_${q.id}" value="${optIndex}" class="text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                            <span class="text-sm text-slate-700">${opt}</span>
+                        </label>
+                    `;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        function submitAnswers() {
+            let answers = {};
+            for (let i = 1; i <= questions.length; i++) {
+                const selected = document.querySelector(`input[name="q_${i}"]:checked`);
+                if (!selected) {
+                    alert(`Q${i} まだ回答していない項目があるニャ！`);
+                    return;
+                }
+                answers[i] = parseInt(selected.value);
+            }
+
+            let storageKey = `tako_data_${currentTarget}`;
+            let existingData = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            existingData.push({
+                date: new Date().toISOString(),
+                answers: answers
+            });
+            localStorage.setItem(storageKey, JSON.stringify(existingData));
+
+            window.location.href = `tako.html?target=${encodeURIComponent(currentTarget)}#result`;
+            location.reload();
+        }
+
+        function showResultView(name) {
+            showView("result");
+            document.getElementById("result-title").innerText = `${name} さんの他己診断結果`;
+            
+            let storageKey = `tako_data_${name}`;
+            let data = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            
+            document.getElementById("response-count").innerText = `総回答数: ${data.length} 件`;
+            
+            let shareUrl = window.location.href.split('#')[0];
+            document.getElementById("share-url-text").innerText = shareUrl;
+
+            let counts = [0, 0, 0, 0, 0];
+            data.forEach(item => {
+                Object.values(item.answers).forEach(val => {
