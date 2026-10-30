@@ -35,6 +35,17 @@
                     </button>
                 </div>
             </div>
+
+            <!-- 作成済み診断ページ一覧 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center justify-between">
+                    <span>📋 作成済みの診断一覧</span>
+                    <span class="text-xs text-slate-400 font-normal">タップで回答・結果へ</span>
+                </h3>
+                <div id="target-list-container" class="space-y-3">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+            </div>
         </div>
 
         <!-- ビュー2: 回答画面（友達が答える画面） -->
@@ -90,7 +101,7 @@
 
             <div class="text-center pt-2">
                 <button onclick="location.href='tako.html'" class="text-xs text-slate-500 hover:text-indigo-600 underline cursor-pointer">
-                    自分用の新しい診断ページを作る 🔄
+                    ホーム（トップページ）に戻る 🏠
                 </button>
             </div>
         </div>
@@ -108,7 +119,7 @@
             { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
             { id: 2, text: "大金を手に入れたら一番最初にやらかしそうなことは？", options: ["秒で堅実に貯金する", "全額使ってロマン投資で消滅", "SNSでマウント取って炎上する", "周りに配り歩いて自滅する"] },
             { id: 3, text: "この人を動物に例えるならどれに近い？", options: ["気まぐれに甘えてくる猫", "すべてを見通す仙人", "トラブルメーカー風のラスボス", "実体のない概念"] },
-            { id: 4, text: "機機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
+            { id: 4, text: "機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
             { id: 5, text: "ピンチのときにこの人がとりそうな行動は？", options: ["表立って冷静に解決を主導する", "裏から手を回して華麗に回避する", "なぜか笑い話に変えてしまう", "しれっとその場から消えている"] },
             { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と「合理性」", "「優しさ」と「諦め」", "「野望」と「眠気」"] },
             { id: 7, text: "褒められたときのこの人の実際のリアクションは？", options: ["満面の笑みで素直に喜ぶ", "全力で照れて話題をそらす", "「でしょ？」とドヤ顔をキメる", "心の中で疑ってかかる"] },
@@ -131,6 +142,7 @@
 
             if (!currentTarget) {
                 showView("home");
+                renderTargetList();
             } else {
                 if (window.location.hash === "#result") {
                     showResultView(currentTarget);
@@ -147,13 +159,73 @@
             document.getElementById("view-" + viewName).classList.remove("hidden");
         }
 
+        function getTargetList() {
+            let list = JSON.parse(localStorage.getItem("tako_target_list") || "[]");
+            // 互換性のため既存のtako_data_キーも自動検出
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key && key.startsWith("tako_data_")) {
+                    let name = key.replace("tako_data_", "");
+                    if (name && !list.includes(name)) {
+                        list.push(name);
+                    }
+                }
+            }
+            localStorage.setItem("tako_target_list", JSON.stringify(list));
+            return list;
+        }
+
+        function saveTargetName(name) {
+            let list = getTargetList();
+            if (!list.includes(name)) {
+                list.push(name);
+                localStorage.setItem("tako_target_list", JSON.stringify(list));
+            }
+        }
+
         function createTargetPage() {
             const nameInput = document.getElementById("input-target-name").value.trim();
             if (!nameInput) {
                 alert("お名前を入力してほしいニャ！");
                 return;
             }
+            saveTargetName(nameInput);
             window.location.href = `tako.html?target=${encodeURIComponent(nameInput)}`;
+        }
+
+        function renderTargetList() {
+            const container = document.getElementById("target-list-container");
+            const list = getTargetList();
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">まだ作成された診断ページはありません</p>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            list.forEach(name => {
+                let storageKey = `tako_data_${name}`;
+                let data = JSON.parse(localStorage.getItem(storageKey) || "[]");
+                let count = data.length;
+
+                let html = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100 gap-3">
+                        <div>
+                            <span class="font-bold text-slate-800 text-base">${name} さん</span>
+                            <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-2">回答 ${count} 件</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="location.href='tako.html?target=${encodeURIComponent(name)}'" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                                ✏️ 診断する
+                            </button>
+                            <button onclick="location.href='tako.html?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                                📊 結果を見る
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
         }
 
         function showAnswerView(name) {
@@ -193,6 +265,7 @@
                 answers[i] = parseInt(selected.value);
             }
 
+            saveTargetName(currentTarget);
             let storageKey = `tako_data_${currentTarget}`;
             let existingData = JSON.parse(localStorage.getItem(storageKey) || "[]");
             existingData.push({
