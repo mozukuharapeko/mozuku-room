@@ -108,7 +108,7 @@
             { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
             { id: 2, text: "大金を手に入れたら一番最初にやらかしそうなことは？", options: ["秒で堅実に貯金する", "全額使ってロマン投資で消滅", "SNSでマウント取って炎上する", "周りに配り歩いて自滅する"] },
             { id: 3, text: "この人を動物に例えるならどれに近い？", options: ["気まぐれに甘えてくる猫", "すべてを見通す仙人", "トラブルメーカー風のラスボス", "実体のない概念"] },
-            { id: 4, text: "機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
+            { id: 4, text: "機機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
             { id: 5, text: "ピンチのときにこの人がとりそうな行動は？", options: ["表立って冷静に解決を主導する", "裏から手を回して華麗に回避する", "なぜか笑い話に変えてしまう", "しれっとその場から消えている"] },
             { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と「合理性」", "「優しさ」と「諦め」", "「野望」と「眠気」"] },
             { id: 7, text: "褒められたときのこの人の実際のリアクションは？", options: ["満面の笑みで素直に喜ぶ", "全力で照れて話題をそらす", "「でしょ？」とドヤ顔をキメる", "心の中で疑ってかかる"] },
@@ -231,4 +231,66 @@
         function copyShareUrl() {
             let shareUrl = window.location.href.split('#')[0];
             navigator.clipboard.writeText(shareUrl).then(() => {
-                alert("診断URLをコピーしたニャ
+                alert("診断URLをコピーしたニャ！お友達にシェアしてね📋✨");
+            });
+        }
+
+        function renderRadarChart(counts) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['サバイバル・実用', '野望・エネルギー', 'ミステリアス・個性', '自然体・フラット'],
+                    datasets: [{
+                        label: '周りから見た特性バランス',
+                        data: counts,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderCommentsList(data) {
+            const listContainer = document.getElementById("comments-list");
+            listContainer.innerHTML = "";
+
+            if (data.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">まだ回答がありません。URLをシェアしてみよう！</p>`;
+                return;
+            }
+
+            data.slice().reverse().forEach((item, idx) => {
+                let dateStr = new Date(item.date).toLocaleString();
+                let html = `
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs space-y-1">
+                        <div class="flex justify-between text-slate-400">
+                            <span>回答 #${data.length - idx}</span>
+                            <span>${dateStr}</span>
+                        </div>
+                        <p class="text-slate-600 font-medium">15問の回答が送信されました（全問コンプリート✨）</p>
+                    </div>
+                `;
+                listContainer.innerHTML += html;
+            });
+        }
+    </script>
+</body>
+</html>
