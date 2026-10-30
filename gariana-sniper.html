@@ -2,26 +2,88 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ガリ穴スナイパー</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ガリ穴スナイパー - もずべや</title>
     <style>
         body {
             background-color: #1a1a1a;
             color: #ffffff;
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #e74c3c;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        .note {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 8px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .code-title {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        .copy-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #c0392b;
         }
         pre {
             background-color: #2d2d2d;
             padding: 15px;
-            border-radius: 5px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
             overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-top: 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>🎯 ガリ穴スナイパー（チャットスクリプト）</h1>
-    <p>Console実行、わからない人は諦めて</p>
-    <pre><code>// ==UserScript==
+
+    <h1>🎯 デュラララチャット ガリ穴スナイパー！</h1>
+    <p class="note">下のコードをTampermonkeyなどのユーザースクリプトに登録して使ってください！</p>
+
+    <div class="code-header">
+        <span class="code-title">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode()">コードをコピー 📋</button>
+    </div>
+    <pre><code id="script-code">// ==UserScript==
 // @name         デュラララチャット ガリ穴スナイパー！
 // @namespace    http://tampermonkey.net/
 // @version      9.2
@@ -131,5 +193,16 @@
         }
     }
 })();</code></pre>
+
+    <a href="./index.html" class="back-link">← もずべやトップに戻る</a>
+
+    <script>
+        function copyCode() {
+            const codeText = document.getElementById("script-code").innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert("ガリ穴スナイパーのコードをコピーしました！Tampermonkeyに貼り付けて使ってください📋🎯");
+            });
+        }
+    </script>
 </body>
 </html>
