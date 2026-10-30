@@ -31,55 +31,89 @@
             gap: 15px;
         }
         .menu-item {
-            display: block;
-            background-color: #ffffff;
+            background: #fff;
             padding: 18px 20px;
             border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             text-decoration: none;
             color: #2c3e50;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid #3498db;
         }
         .menu-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            background-color: #f8fbfe;
         }
-        /* 他己診断専用の目立つスペシャルボタン */
+        .menu-item span {
+            color: #bdc3c7;
+            font-size: 1.2rem;
+        }
+        /* 他己診断専用の目立つパープルボタン */
         .menu-item.featured {
             background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: #ffffff;
-            border: none;
+            border-left: 5px solid #818cf8;
         }
-        .menu-item .desc {
+        .menu-item.featured:hover {
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+        }
+        .menu-item.featured span {
+            color: #e0e7ff;
+        }
+        footer {
+            text-align: center;
             font-size: 0.8rem;
-            font-weight: normal;
-            margin-top: 4px;
-            opacity: 0.9;
+            color: #95a5a6;
+            margin-top: 40px;
         }
     </style>
 </head>
 <body>
 
-    <h1>もずべや</h1>
-    <p class="welcome-msg">ようこそ！コンテンツ一覧です✨</p>
+    <h1>🏠 もずべや</h1>
+    <div class="welcome-msg">リンク 🐾</div>
 
     <div class="menu-list">
-        <!-- 他己診断メーカー（一番目立つ位置！） -->
-        <a href="tako.html" class="menu-item featured">
-            <div>🐙 他己診断メーカー</div>
-            <div class="desc">自分専用のページを作成＆みんなからの目撃証言を集めよう！</div>
+        <!-- 0. 他己診断メーカー（新機能！一番目立つ位置） -->
+        <a href="./tako.html" class="menu-item featured">
+            🐙 他己診断メーカー <span>&gt;</span>
         </a>
 
-        <!-- 既存コンテンツ -->
-        <a href="gariana-sniper.html" class="menu-item">
-            <div>🎯 ガリアナスナイパー</div>
+        <!-- 1. デュラララチャットへのリンク -->
+        <a href="https://drrrkari.com/" class="menu-item" target="_blank">
+            💬 デュラララチャット <span>&gt;</span>
         </a>
 
-        <a href="greeting.html" class="menu-item">
-            <div>💬 あいさつ</div>
+        <!-- 2. 今作った避難所掲示板へのリンク -->
+        <a href="https://mozukuharapeko.github.io/bbs/" class="menu-item" target="_blank">
+            🛡️ 避難所掲示板 <span>&gt;</span>
+        </a>
+
+        <!-- 3. 拡張機能のデュラララカスタマイズの使い方へのリンク -->
+        <a href="https://drrrsetting.wixsite.com/drrr-setting" class="menu-item" target="_blank">
+            ⚙️ デュラララカスタマイズの使い方 <span>&gt;</span>
+        </a>
+
+        <!-- 4. ガリ穴スナイパーへのリンク -->
+        <a href="./gariana-sniper.html" class="menu-item" target="_blank">
+            🎯 ガリ穴スナイパー <span>&gt;</span>
+        </a>
+
+        <!-- 5. 挨拶らくちん機能へのリンク -->
+        <a href="./greeting.html" class="menu-item" target="_blank">
+            👋 挨拶らくちん機能 <span>&gt;</span>
         </a>
     </div>
+
+    <footer>
+        &copy; 2026 もずべや
+    </footer>
 
 </body>
 </html>
