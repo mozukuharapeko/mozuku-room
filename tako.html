@@ -15,10 +15,10 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
-    <!-- ヘッダー（ここの文字が変わるまで待ってね！） -->
+    <!-- ヘッダー -->
     <header class="bg-indigo-600 text-white shadow-md py-4 px-6 flex justify-between items-center">
-        <h1 class="text-xl font-bold tracking-wider cursor-pointer" onclick="goToHome()">🐙 他己診断メーカー (最新版)</h1>
-        <span id="header-subtitle" class="text-xs bg-indigo-500 px-3 py-1 rounded-full">ベータ版</span>
+        <h1 class="text-xl font-bold tracking-wider cursor-pointer" onclick="goToHome()">🐙 他己診断メーカー</h1>
+        <span id="header-subtitle" class="text-xs bg-indigo-500 px-3 py-1 rounded-full">キュート管理版</span>
     </header>
 
     <!-- メインコンテンツ -->
@@ -27,15 +27,15 @@
         <!-- ビュー1: ホーム（診断メーカー作成画面） -->
         <div id="view-home" class="space-y-6">
             <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 text-center space-y-4">
-                <h2 class="text-2xl font-extrabold text-slate-900">あなたの他己診断ページを作ろう！</h2>
+                <h2 class="text-2xl font-extrabold text-slate-900">あなたの他己診断ページを作ろっ！</h2>
                 <p class="text-sm text-slate-600 leading-relaxed">
-                    自分の名前を入力して専用URLを発行しよう。<br>
-                    友達や周りの人にシェアして、本当の自分（の目撃証言）を集めよう！
+                    大切なお名前を入力して専用URLを発行してね。<br>
+                    お友達にシェアして、みんなからのリアルな目撃証言を集めちゃおっ！
                 </p>
                 <div class="pt-4 space-y-3">
-                    <input type="text" id="input-target-name" placeholder="例：太郎（あなたの名前）" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center text-lg">
+                    <input type="text" id="input-target-name" placeholder="例：海蘊（あなたのお名前）" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center text-lg">
                     <button onclick="createTargetPage()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg shadow-indigo-100 cursor-pointer">
-                        診断ページを作成する 🚀
+                        診断ページを作るのっ！ 🚀
                     </button>
                 </div>
             </div>
@@ -43,11 +43,11 @@
             <!-- 作成済み診断ページ一覧 -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center justify-between">
-                    <span>📋 作成済みの診断一覧</span>
-                    <span class="text-xs text-slate-400 font-normal">タップで回答・結果へ</span>
+                    <span>📋 作成済みの診断一覧だよ</span>
+                    <span class="text-xs text-slate-400 font-normal">タップして覗いてみてね</span>
                 </h3>
                 <div id="target-list-container" class="space-y-3">
-                    <p class="text-xs text-slate-400 text-center py-4">読み込み中...</p>
+                    <p class="text-xs text-slate-400 text-center py-4">今いそがしく準備中なの…待っててねっ💦</p>
                 </div>
             </div>
         </div>
@@ -57,17 +57,17 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
                 <span class="text-xs font-semibold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">他己診断セッション</span>
                 <h2 id="answer-title" class="text-2xl font-bold mt-2 text-slate-900">〇〇さんについての診断</h2>
-                <p class="text-xs text-slate-500 mt-1">直感でサクサク答えてね！</p>
+                <p class="text-xs text-slate-500 mt-1">直感でサクサク答えていってねー！</p>
             </div>
 
             <div id="question-container" class="space-y-4"></div>
 
             <div class="pt-2 space-y-3">
                 <button id="btn-submit" onclick="submitAnswers()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-100 cursor-pointer">
-                    回答を送信してみんなの結果を見る！ 🚀
+                    回答を送信してみんなの結果を見るのっ！ 🚀
                 </button>
                 <button onclick="goToHome()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition cursor-pointer">
-                    🏠 トップに戻る
+                    🏠 トップに戻るよ
                 </button>
             </div>
         </div>
@@ -83,25 +83,25 @@
             <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="text-xs text-indigo-900 break-all w-full sm:w-auto flex-grow" id="share-url-text">URL</div>
                 <button onclick="copyShareUrl()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition whitespace-nowrap cursor-pointer">
-                    URLをコピーする 📋
+                    URLをコピーするっ📋
                 </button>
             </div>
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 class="font-bold text-slate-800 text-sm">📊 ステータスバランス</h3>
+                <h3 class="font-bold text-slate-800 text-sm">📊 ステータスバランスだよ</h3>
                 <div class="relative h-64 w-full">
                     <canvas id="radarChart"></canvas>
                 </div>
             </div>
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                <h3 class="font-bold text-slate-800 text-sm">💬 みんなの目撃証言＆回答ログ</h3>
+                <h3 class="font-bold text-slate-800 text-sm">💬 みんなからの目撃証言＆ログ</h3>
                 <div id="comments-list" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
             </div>
 
             <div class="pt-2">
                 <button onclick="goToHome()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-md cursor-pointer flex items-center justify-center gap-2">
-                    🏠 トップページ（ホーム）に戻る
+                    🏠 トップページ（ホーム）に戻るよ
                 </button>
             </div>
         </div>
@@ -114,40 +114,37 @@
 
     <!-- スクリプト -->
     <script>
-        console.log("スクリプトの読み込みをスタート！");
+        const ADMIN_PASSWORD = "mozuku";
 
-        // 1. Firebaseの安全な初期化
-        var db = null;
-        try {
-            var firebaseConfig = {
-                apiKey: "AIzaSyAXcW4KhtikAUOlTn--58r_998yl27x_QQ",
-                authDomain: "takoshindan.firebaseapp.com",
-                projectId: "takoshindan",
-                storageBucket: "takoshindan.firebasestorage.app",
-                messagingSenderId: "420410722790",
-                appId: "1:420410722790:web:ccf1e564b7d192b5e8ee27",
-                measurementId: "G-LQF2S7KLWX"
-            };
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            db = firebase.firestore();
-            console.log("Firebase接続OK！");
-        } catch (e) {
-            console.error("Firebaseの準備中にエラーが発生:", e);
-        }
+        const NG_WORDS = [
+            "ちんこ", "まんこ", "うんこ", "うんち", "セックス", "ホモ", "レズ", "レイプ", "死ね", "殺す", "キモい", "バカ", "アホ",
+            "fuck", "shit", "bitch", "cunt", "sex", "dick", "pussy"
+        ];
+
+        var firebaseConfig = {
+            apiKey: "AIzaSyAXcW4KhtikAUOlTn--58r_998yl27x_QQ",
+            authDomain: "takoshindan.firebaseapp.com",
+            projectId: "takoshindan",
+            storageBucket: "takoshindan.firebasestorage.app",
+            messagingSenderId: "420410722790",
+            appId: "1:420410722790:web:ccf1e564b7d192b5e8ee27",
+            measurementId: "G-LQF2S7KLWX"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
 
         var currentTarget = "";
         var radarChartInstance = null;
 
         var questions = [
-            { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
+            { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
             { id: 2, text: "大金を手に入れたら一番最初にやらかしそうなことは？", options: ["秒で堅実に貯金する", "全額使ってロマン投資で消滅", "SNSでマウント取って炎上する", "周りに配り歩いて自滅する"] },
             { id: 3, text: "この人を動物に例えるならどれに近い？", options: ["気まぐれに甘えてくる猫", "すべてを見通す仙人", "トラブルメーカー風のラスボス", "実体のない概念"] },
             { id: 4, text: "機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
             { id: 5, text: "ピンチのときにこの人がとりそうな行動は？", options: ["表立って冷静に解決を主導する", "裏から手を回して華麗に回避する", "なぜか笑い話に変えてしまう", "しれっとその場から消えている"] },
-            { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と「合理性」", "「優しさ」と「諦め」", "「野望」と「眠気」"] },
-            { id: 7, text: "褒められたときのこの人の実際のリアクションは？", options: ["満面の笑みで素直に喜ぶ", "全力で照れて話題をそらす", "「でしょ？」とドヤ顔をキメる", "心の中で疑ってかかる"] },
+            { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と・「合理性」", "「優しさ」と「諦め」", "「野望」と「眠気」"] },
+            { id: 7, text: "褒められたときのこの人の実際のリアクションは？", options: ["満面の笑みで素直に喜ぶ", "全力で照れて話題をそらす", "でしょ？とドヤ顔をキメる", "心の中で疑ってかかる"] },
             { id: 8, text: "休日の過ごし方、どれが一番しっくりくる？", options: ["完全引きこもりインドアの極み", "気まぐれにフラッと一人旅", "お誘いがあればフッ軽で出没", "予定は未定の気まぐれ野郎"] },
             { id: 9, text: "この人の「隠しきれない本質」を一言で言うなら？", options: ["実はめちゃくちゃ情に厚い", "徹底的にマイペースな自由人", "知的好奇心がバグってる変人", "圧倒的フラットメンタル"] },
             { id: 10, text: "もしスーパーパワーが手に入るとしたら、この人が欲しがりそうなのは？", options: ["時間を止める能力", "人の心を読める能力", "どこでも寝られる能力", "お金を生み出す能力"] },
@@ -158,7 +155,6 @@
             { id: 15, text: "ズバリ、この人の総合的な（やばさ・面白さ）のレベルは？", options: ["Lv.10：普通にしっかり者", "Lv.50：時々斜め上を行く変わり者", "Lv.100：底が知れないミステリアス", "Lv.MAX：観測不能の天然記念物"] }
         ];
 
-        // 全ての関数を window にくっつけて、どこからでも確実に呼べるようにするニャ！
         window.goToHome = function() {
             window.location.href = "https://mozukuharapeko.github.io/mozuku-room/";
         };
@@ -171,15 +167,18 @@
         };
 
         window.createTargetPage = function() {
-            console.log("createTargetPage が呼ばれたよ！");
             var nameInput = document.getElementById("input-target-name").value.trim();
             if (!nameInput) {
-                alert("お名前を入力してね！");
+                alert("ねぇ、お名前を入力してくれないと作れないよーっ？🥺💦");
                 return;
             }
-            if (!db) {
-                alert("Firebaseがまだ読み込めていない。少し待つかリロードしてね！");
-                return;
+
+            var lowerName = nameInput.toLowerCase();
+            for (var i = 0; i < NG_WORDS.length; i++) {
+                if (lowerName.includes(NG_WORDS[i])) {
+                    alert("そんな不適切な名前はダメなのっ！ちゃんとしたお名前で遊んでね？❌");
+                    return;
+                }
             }
 
             db.collection("tako_diagnoses").doc(nameInput).set({
@@ -189,20 +188,38 @@
                 window.location.href = "?target=" + encodeURIComponent(nameInput);
             }).catch(function(error) {
                 console.error("Error creating target:", error);
-                alert("作成エラー: " + error.message);
+                alert("あれれ、作成できちゃったエラーかな…？: " + error.message);
+            });
+        };
+
+        window.deleteTargetPage = function(name) {
+            var inputPass = prompt("ここは管理者さん専用のお部屋だよっ！パスワードを教えてね？🔑");
+            if (inputPass === null) return;
+
+            if (inputPass !== ADMIN_PASSWORD) {
+                alert("パスワードが違うよっ！勝手に消しちゃダメなんだからねっ❌");
+                return;
+            }
+
+            if (!confirm(`「${name}」さんのページ、本当にキレイさっぱり消しちゃってもいいの…？🥺`)) {
+                return;
+            }
+
+            db.collection("tako_diagnoses").doc(name).delete().then(function() {
+                alert("ぽんっ！キレイに消去完了したよっ🗑️✨");
+                window.location.reload();
+            }).catch(function(error) {
+                console.error("Error deleting:", error);
+                alert("むー、上手く消せなかったみたい…: " + error.message);
             });
         };
 
         window.renderTargetList = function() {
             var container = document.getElementById("target-list-container");
-            if (!db) {
-                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">データベースに接続できない💦</p>';
-                return;
-            }
 
             db.collection("tako_diagnoses").get().then(function(snapshot) {
                 if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">まだ作成された診断ページはありません</p>';
+                    container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">まだ誰も作ってないみたい…一番乗りしちゃおっ？✨</p>';
                     return;
                 }
 
@@ -219,12 +236,15 @@
                                 <span class="font-bold text-slate-800 text-base">${name} さん</span>
                                 <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-2">回答 ${count} 件</span>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <button onclick="window.location.href='?target=${encodeURIComponent(name)}'" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
                                     ✏️ 診断する
                                 </button>
                                 <button onclick="window.location.href='?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
-                                    📊 結果を見る
+                                    📊 結果
+                                </button>
+                                <button onclick="deleteTargetPage('${name}')" class="text-xs bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-2.5 rounded-lg transition cursor-pointer" title="管理者用削除">
+                                    🗑️ 削除
                                 </button>
                             </div>
                         </div>
@@ -233,7 +253,7 @@
                 });
             }).catch(function(error) {
                 console.error("Error fetching list:", error);
-                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">読み込みエラーが発生</p>';
+                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">あれれ、読み込みに失敗しちゃったみたい…💦</p>';
             });
         };
 
@@ -268,20 +288,15 @@
             for (var i = 1; i <= questions.length; i++) {
                 var selected = document.querySelector('input[name="q_' + i + '"]:checked');
                 if (!selected) {
-                    alert("Q" + i + " まだ回答していない項目があるよ！");
+                    alert(`むーっ！Q${i} まだ答えてないところがあるよっ、全部選んでね？🥺`);
                     return;
                 }
                 answers[i] = parseInt(selected.value);
             }
 
-            if (!db) {
-                alert("Firebase接続エラー。");
-                return;
-            }
-
             var btn = document.getElementById("btn-submit");
             btn.disabled = true;
-            btn.innerText = "送信中... ⏳";
+            btn.innerText = "一生懸命送信中なの…待ってねっ…！ ⏳";
 
             var docRef = db.collection("tako_diagnoses").doc(currentTarget);
             var newResponse = {
@@ -294,12 +309,11 @@
                 responses: firebase.firestore.FieldValue.arrayUnion(newResponse)
             }, { merge: true }).then(function() {
                 window.location.href = "?target=" + encodeURIComponent(currentTarget) + "#result";
-                window.location.reload();
             }).catch(function(error) {
                 console.error("Error submitting answers:", error);
-                alert("送信エラー: " + error.message);
+                alert("えーん、送信エラーなう…: " + error.message);
                 btn.disabled = false;
-                btn.innerText = "回答を送信してみんなの結果を見る！ 🚀";
+                btn.innerText = "回答を送信してみんなの結果を見るのっ！ 🚀";
             });
         };
 
@@ -309,8 +323,6 @@
             
             var shareUrl = window.location.href.split('#')[0];
             document.getElementById("share-url-text").innerText = shareUrl;
-
-            if (!db) return;
 
             db.collection("tako_diagnoses").doc(name).get().then(function(docSnap) {
                 var data = [];
@@ -327,22 +339,22 @@
                     });
                 });
 
-                window.renderRadarChart(counts);
-                window.renderCommentsList(data);
+                renderRadarChart(counts);
+                renderCommentsList(data);
             }).catch(function(error) {
                 console.error("Error loading result:", error);
-                alert("結果読み込みエラーニャ: " + error.message);
+                alert("結果の読み込みに失敗しちゃった…: " + error.message);
             });
         };
 
         window.copyShareUrl = function() {
             var shareUrl = window.location.href.split('#')[0];
             navigator.clipboard.writeText(shareUrl).then(function() {
-                alert("診断URLをコピーしたニャ！お友達にシェアしてね📋✨");
+                alert("やったね！診断URLをコピーしたから、お友達に自慢しちゃおっ📋✨");
             });
         };
 
-        window.renderRadarChart = function(counts) {
+        function renderRadarChart(counts) {
             var ctx = document.getElementById('radarChart').getContext('2d');
             if (radarChartInstance) {
                 radarChartInstance.destroy();
@@ -373,14 +385,14 @@
                     plugins: { legend: { display: false } }
                 }
             });
-        };
+        }
 
-        window.renderCommentsList = function(data) {
+        function renderCommentsList(data) {
             var listContainer = document.getElementById("comments-list");
             listContainer.innerHTML = "";
 
             if (data.length === 0) {
-                listContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">まだ回答がありません。URLをシェアしてみよう！</p>';
+                listContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">まだ誰も回答してくれてないみたい…URLをペタッて貼ってみてね！</p>';
                 return;
             }
 
@@ -392,12 +404,12 @@
                             <span>回答 #${data.length - idx}</span>
                             <span>${dateStr}</span>
                         </div>
-                        <p class="text-slate-600 font-medium">15問の回答が送信されました（全問コンプリート✨）</p>
+                        <p class="text-slate-600 font-medium">15問ぜーんぶ回答してくれたよ（コンプリートおめでとう✨）</p>
                     </div>
                 `;
                 listContainer.innerHTML += html;
             });
-        };
+        }
 
         window.onload = function() {
             var urlParams = new URLSearchParams(window.location.search);
