@@ -47,7 +47,7 @@
                     <span class="text-xs text-slate-400 font-normal">タップで回答・結果へ</span>
                 </h3>
                 <div id="target-list-container" class="space-y-3">
-                    <p class="text-xs text-slate-400 text-center py-4">読み込み中だニャ...</p>
+                    <p class="text-xs text-slate-400 text-center py-4">読み込み中...</p>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
 
     <!-- スクリプト -->
     <script>
-        console.log("スクリプトの読み込みをスタートしたニャ！");
+        console.log("スクリプトの読み込みをスタート！");
 
         // 1. Firebaseの安全な初期化
         var db = null;
@@ -132,9 +132,9 @@
                 firebase.initializeApp(firebaseConfig);
             }
             db = firebase.firestore();
-            console.log("Firebase接続OKニャ！");
+            console.log("Firebase接続OK！");
         } catch (e) {
-            console.error("Firebaseの準備中にエラーが起きたニャ:", e);
+            console.error("Firebaseの準備中にエラーが発生:", e);
         }
 
         var currentTarget = "";
@@ -171,14 +171,14 @@
         };
 
         window.createTargetPage = function() {
-            console.log("createTargetPage が呼ばれたニャ！");
+            console.log("createTargetPage が呼ばれたよ！");
             var nameInput = document.getElementById("input-target-name").value.trim();
             if (!nameInput) {
-                alert("お名前を入力してほしいニャ！");
+                alert("お名前を入力してね！");
                 return;
             }
             if (!db) {
-                alert("Firebaseがまだ読み込めていないニャ。少し待つかリロードしてね！");
+                alert("Firebaseがまだ読み込めていない。少し待つかリロードしてね！");
                 return;
             }
 
@@ -189,14 +189,14 @@
                 window.location.href = "?target=" + encodeURIComponent(nameInput);
             }).catch(function(error) {
                 console.error("Error creating target:", error);
-                alert("作成エラーニャ: " + error.message);
+                alert("作成エラー: " + error.message);
             });
         };
 
         window.renderTargetList = function() {
             var container = document.getElementById("target-list-container");
             if (!db) {
-                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">データベースに接続できないニャ💦</p>';
+                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">データベースに接続できない💦</p>';
                 return;
             }
 
@@ -233,7 +233,7 @@
                 });
             }).catch(function(error) {
                 console.error("Error fetching list:", error);
-                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">読み込みエラーが発生したニャ</p>';
+                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">読み込みエラーが発生</p>';
             });
         };
 
@@ -268,20 +268,20 @@
             for (var i = 1; i <= questions.length; i++) {
                 var selected = document.querySelector('input[name="q_' + i + '"]:checked');
                 if (!selected) {
-                    alert("Q" + i + " まだ回答していない項目があるニャ！");
+                    alert("Q" + i + " まだ回答していない項目があるよ！");
                     return;
                 }
                 answers[i] = parseInt(selected.value);
             }
 
             if (!db) {
-                alert("Firebase接続エラーニャ。");
+                alert("Firebase接続エラー。");
                 return;
             }
 
             var btn = document.getElementById("btn-submit");
             btn.disabled = true;
-            btn.innerText = "送信中だニャ... ⏳";
+            btn.innerText = "送信中... ⏳";
 
             var docRef = db.collection("tako_diagnoses").doc(currentTarget);
             var newResponse = {
@@ -297,7 +297,7 @@
                 window.location.reload();
             }).catch(function(error) {
                 console.error("Error submitting answers:", error);
-                alert("送信エラーニャ: " + error.message);
+                alert("送信エラー: " + error.message);
                 btn.disabled = false;
                 btn.innerText = "回答を送信してみんなの結果を見る！ 🚀";
             });
