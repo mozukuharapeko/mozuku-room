@@ -6,189 +6,194 @@
     <title>もずべや</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f7f9fc;
+            background-color: #f4f7f6;
             color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 20px 15px;
             max-width: 500px;
             margin: 0 auto;
-            padding: 30px 20px;
         }
-        h1 {
-            font-size: 1.8rem;
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .welcome-msg {
-            text-align: center;
-            font-size: 0.95rem;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-        }
-        .menu-list {
+
+        .menu-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
-        .menu-item {
-            background: #fff;
-            padding: 18px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            text-decoration: none;
-            color: #2c3e50;
-            font-weight: bold;
-            font-size: 1.05rem;
+
+        .menu-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: #ffffff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.04);
             border-left: 5px solid #3498db;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .menu-item:hover {
+
+        .menu-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-            background-color: #f8fbfe;
         }
-        .menu-item span {
-            color: #bdc3c7;
-            font-size: 1.2rem;
-        }
-        /* 他己診断専用の目立つパープルボタン */
-        .menu-item.featured {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
+
+        .card-purple {
+            background: linear-gradient(135deg, #5b52e0, #413bc7);
             color: #ffffff;
-            border-left: 5px solid #818cf8;
+            border-left: none;
         }
-        .menu-item.featured:hover {
-            background: linear-gradient(135deg, #4f46e5, #4338ca);
+
+        .card-orange {
+            border-left-color: #e67e22;
         }
-        .menu-item.featured span {
-            color: #e0e7ff;
+
+        .card-blue {
+            border-left-color: #3498db;
         }
-        /* 予定・準備中アイテム用 */
-        .menu-item.upcoming {
-            border-left: 5px solid #e67e22;
-            opacity: 0.9;
-            cursor: pointer;
+
+        .card-green {
+            border-left-color: #2ecc71;
         }
-        .menu-item.upcoming:hover {
-            background-color: #fff8f0;
+
+        .icon-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .menu-item .badge-coming {
-            font-size: 0.75rem;
+
+        .arrow {
+            color: #bdc3c7;
+            font-size: 1.1rem;
+        }
+
+        .card-purple .arrow {
+            color: #ffffff;
+        }
+
+        .badge-soon {
             background-color: #f39c12;
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
             font-weight: normal;
         }
-        /* デュラララスクリプトまとめ枠 */
-        .menu-group {
-            background: #fff;
-            padding: 18px 20px;
+
+        /* スクリプトグループ */
+        .script-group {
+            background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 15px;
             border-left: 5px solid #2ecc71;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+            margin-top: 5px;
         }
-        .menu-group-title {
-            font-weight: bold;
+
+        .script-title {
             font-size: 1.05rem;
+            font-weight: bold;
             color: #2c3e50;
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .sub-menu-list {
+
+        .script-list {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        .sub-menu-item {
+
+        .script-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #f8fbfe;
-            padding: 12px 14px;
+            background: #f8f9fa;
+            padding: 12px 15px;
             border-radius: 8px;
             text-decoration: none;
             color: #34495e;
             font-size: 0.95rem;
-            font-weight: 500;
             transition: background 0.2s;
-            cursor: pointer;
         }
-        .sub-menu-item:hover {
-            background: #eaf2f8;
+
+        .script-item:hover {
+            background: #edf2f7;
         }
-        .sub-menu-item span {
-            color: #bdc3c7;
-            font-size: 1rem;
-        }
-        footer {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #95a5a6;
-            margin-top: 40px;
+
+        .script-item .arrow {
+            color: #a0aec0;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
 
-    <h1>🏠 もずべや</h1>
-    <div class="welcome-msg">リンク 🐾</div>
+    <div class="menu-container">
 
-    <div class="menu-list">
-        <!-- 0. 他己診断メーカー -->
-        <a href="./tako.html" class="menu-item featured">
-            🐙 他己診断メーカー <span>&gt;</span>
+        <!-- 🐙 他己診断メーカー -->
+        <a href="./tako-diagnosis.html" class="menu-card card-purple">
+            <span class="icon-text">🐙 他己診断メーカー</span>
+            <span class="arrow">&gt;</span>
         </a>
 
-        <!-- 0.5. 乳首クリッカー（予定） -->
-        <div class="menu-item upcoming" onclick="alert('まだできてないよ！自分の押してなさい！')">
-            🔘 乳首クリッカー（予定） <span class="badge-coming">Coming Soon</span>
-        </div>
-
-        <!-- 1. デュラララチャットへのリンク -->
-        <a href="https://drrrkari.com/" class="menu-item" target="_blank">
-            💬 デュラララチャット <span>&gt;</span>
+        <!-- ⚪ 乳首クリッカー（予定） -->
+        <a href="#" class="menu-card card-orange" onclick="alert('存在しねーよ！'); return false;">
+            <span class="icon-text">⚪ 乳首クリッカー（予定）</span>
+            <span class="badge-soon">Coming Soon</span>
         </a>
 
-        <!-- 2. 避難所掲示板へのリンク -->
-        <a href="https://mozukuharapeko.github.io/bbs/" class="menu-item" target="_blank">
-            🛡️ 避難所掲示板 <span>&gt;</span>
+        <!-- 💬 デュラララチャット -->
+        <a href="https://drrrkari.com/" target="_blank" class="menu-card card-blue">
+            <span class="icon-text">💬 デュラララチャット</span>
+            <span class="arrow">&gt;</span>
         </a>
 
-        <!-- 3. 拡張機能のデュラララカスタマイズの使い方へのリンク -->
-        <a href="https://drrrsetting.wixsite.com/drrr-setting" class="menu-item" target="_blank">
-            ⚙️ デュラララカスタマイズの使い方 <span>&gt;</span>
+        <!-- ⚙️ デュラララカスタマイズの使い方（上に移動） -->
+        <a href="./drrr-settings.html" class="menu-card card-blue">
+            <span class="icon-text">⚙️ デュラララカスタマイズの使い方</span>
+            <span class="arrow">&gt;</span>
         </a>
 
-        <!-- 4. デュラララスクリプト -->
-        <div class="menu-group">
-            <div class="menu-group-title">🛠️ デュラララスクリプト</div>
-            <div class="sub-menu-list">
-                <a href="./gariana-sniper.html" class="sub-menu-item" target="_blank">
-                    🎯 ガリ穴スナイパー <span>&gt;</span>
+        <!-- 🛡️ 避難所掲示板（下に移動） -->
+        <a href="./bbs/index.html" class="menu-card card-blue">
+            <span class="icon-text">🛡️ 避難所掲示板</span>
+            <span class="arrow">&gt;</span>
+        </a>
+
+        <!-- 🛠️ デュラララスクリプト -->
+        <div class="script-group">
+            <div class="script-title">🛠️ デュラララスクリプト</div>
+            <div class="script-list">
+                <a href="./gariana-sniper.html" class="script-item">
+                    <span>🎯 ガリ穴スナイパー</span>
+                    <span class="arrow">&gt;</span>
                 </a>
-                <a href="./greeting.html" class="sub-menu-item" target="_blank">
-                    👋 挨拶らくちん機能 <span>&gt;</span>
+                <a href="./greeting.html" class="script-item">
+                    <span>👏 挨拶らくちん機能</span>
+                    <span class="arrow">&gt;</span>
                 </a>
-                <!-- ポップアップ付きトラップスクリプト群（見た目は完全同化！） -->
-                <div class="sub-menu-item" onclick="alert('そんなもんない！')">
-                    🛡️ 強制退室(キック機能)無効スクリプト <span>&gt;</span>
-                </div>
-                <div class="sub-menu-item" onclick="alert('そんなもんない！')">
-                    👑 ホスト(部屋主)強制退室スクリプト <span>&gt;</span>
-                </div>
-                <div class="sub-menu-item" onclick="alert('そんなもんない！')">
-                    👁️ 強制IP露出スクリプト <span>&gt;</span>
-                </div>
+                <a href="#" class="script-item" onclick="alert('存在しねーよ！'); return false;">
+                    <span>🛡️ 強制退室(キック機能)無効スクリプト</span>
+                    <span class="arrow">&gt;</span>
+                </a>
+                <a href="#" class="script-item" onclick="alert('存在しねーよ！'); return false;">
+                    <span>👑 ホスト(部屋主)強制退室スクリプト</span>
+                    <span class="arrow">&gt;</span>
+                </a>
+                <a href="#" class="script-item" onclick="alert('存在しねーよ！'); return false;">
+                    <span>🌐 相手のIPアドレス暴露スクリプト</span>
+                    <span class="arrow">&gt;</span>
+                </a>
             </div>
         </div>
-    </div>
 
-    <footer>
-        &copy; 2026 もずべや
-    </footer>
+    </div>
 
 </body>
 </html>
