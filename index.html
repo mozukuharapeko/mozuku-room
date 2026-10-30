@@ -114,6 +114,7 @@
             font-size: 0.95rem;
             font-weight: 500;
             transition: background 0.2s;
+            cursor: pointer;
         }
         .sub-menu-item:hover {
             background: #eaf2f8;
@@ -121,24 +122,6 @@
         .sub-menu-item span {
             color: #bdc3c7;
             font-size: 1rem;
-        }
-        /* ネタ用サブメニューアイテム */
-        .sub-menu-item.disabled {
-            background: #f1f5f9;
-            color: #64748b;
-            cursor: pointer;
-            opacity: 0.9;
-        }
-        .sub-menu-item.disabled:hover {
-            background: #e2e8f0;
-        }
-        .badge-disabled {
-            font-size: 0.7rem;
-            background-color: #cbd5e1;
-            color: #475569;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: normal;
         }
         footer {
             text-align: center;
@@ -160,7 +143,7 @@
         </a>
 
         <!-- 0.5. 乳首クリッカー（予定） -->
-        <div class="menu-item upcoming" onclick="alert('そんなもんない！')">
+        <div class="menu-item upcoming" onclick="alert('まだできてないよ！自分の押してなさい！')">
             🔘 乳首クリッカー（予定） <span class="badge-coming">Coming Soon</span>
         </div>
 
@@ -189,15 +172,15 @@
                 <a href="./greeting.html" class="sub-menu-item" target="_blank">
                     👋 挨拶らくちん機能 <span>&gt;</span>
                 </a>
-                <!-- ポップアップ付きトラップスクリプト群 -->
-                <div class="sub-menu-item disabled" onclick="alert('そんなもんない！')">
-                    🛡️ 強制退室(キック機能)無効スクリプト <span class="badge-disabled">利用不可</span>
+                <!-- ポップアップ付きトラップスクリプト群（見た目は完全同化！） -->
+                <div class="sub-menu-item" onclick="alert('そんなもんない！')">
+                    🛡️ 強制退室(キック機能)無効スクリプト <span>&gt;</span>
                 </div>
-                <div class="sub-menu-item disabled" onclick="alert('そんなもんない！')">
-                    👑 ホスト(部屋主)強制退室スクリプト <span class="badge-disabled">利用不可</span>
+                <div class="sub-menu-item" onclick="alert('そんなもんない！')">
+                    👑 ホスト(部屋主)強制退室スクリプト <span>&gt;</span>
                 </div>
-                <div class="sub-menu-item disabled" onclick="alert('そんなもんない！')">
-                    👁️ 強制IP露出スクリプト <span class="badge-disabled">利用不可</span>
+                <div class="sub-menu-item" onclick="alert('そんなもんない！')">
+                    👁️ 強制IP露出スクリプト <span>&gt;</span>
                 </div>
             </div>
         </div>
