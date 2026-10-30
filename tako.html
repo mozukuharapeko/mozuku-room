@@ -30,7 +30,7 @@
                 <h2 class="text-2xl font-extrabold text-slate-900">あなたの他己診断ページを作ろっ！</h2>
                 <p class="text-sm text-slate-600 leading-relaxed">
                     大切なお名前を入力して専用URLを発行してね。<br>
-                    お友達にシェアして、みんなからのリアルな目撃証言を集めちゃおっ！
+                    お友達にシェアして、みんなからのリアルな目撃証言を集めちゃうおっ！
                 </p>
                 <div class="pt-4 space-y-3">
                     <input type="text" id="input-target-name" placeholder="例：海蘊（あなたのお名前）" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-center text-lg">
@@ -143,7 +143,7 @@
             { id: 3, text: "この人を動物に例えるならどれに近い？", options: ["気まぐれに甘えてくる猫", "すべてを見通す仙人", "トラブルメーカー風のラスボス", "実体のない概念"] },
             { id: 4, text: "機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
             { id: 5, text: "ピンチのときにこの人がとりそうな行動は？", options: ["表立って冷静に解決を主導する", "裏から手を回して華麗に回避する", "なぜか笑い話に変えてしまう", "しれっとその場から消えている"] },
-            { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と・「合理性」", "「優しさ」と「諦め」", "「野望」と「眠気」"] },
+            { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と「合理性」", "「優しさ」と「諦め」", "「野望」と「眠気」"] },
             { id: 7, text: "褒められたときのこの人の実際のリアクションは？", options: ["満面の笑みで素直に喜ぶ", "全力で照れて話題をそらす", "でしょ？とドヤ顔をキメる", "心の中で疑ってかかる"] },
             { id: 8, text: "休日の過ごし方、どれが一番しっくりくる？", options: ["完全引きこもりインドアの極み", "気まぐれにフラッと一人旅", "お誘いがあればフッ軽で出没", "予定は未定の気まぐれ野郎"] },
             { id: 9, text: "この人の「隠しきれない本質」を一言で言うなら？", options: ["実はめちゃくちゃ情に厚い", "徹底的にマイペースな自由人", "知的好奇心がバグってる変人", "圧倒的フラットメンタル"] },
@@ -183,12 +183,11 @@
 
             db.collection("tako_diagnoses").doc(nameInput).set({
                 name: nameInput,
-                createdAt: new Date().toISOString()
             }, { merge: true }).then(function() {
                 window.location.href = "?target=" + encodeURIComponent(nameInput);
             }).catch(function(error) {
                 console.error("Error creating target:", error);
-                alert("あれれ、作成できちゃったエラーかな…？: " + error.message);
+                alert("あれれ、作成エラーかな…？: " + error.message);
             });
         };
 
@@ -308,7 +307,9 @@
                 name: currentTarget,
                 responses: firebase.firestore.FieldValue.arrayUnion(newResponse)
             }, { merge: true }).then(function() {
-                window.location.href = "?target=" + encodeURIComponent(currentTarget) + "#result";
+                // 送信完了したらハッシュをつけて結果画面へジャンプ！
+                window.location.hash = "result";
+                window.location.reload();
             }).catch(function(error) {
                 console.error("Error submitting answers:", error);
                 alert("えーん、送信エラーなう…: " + error.message);
