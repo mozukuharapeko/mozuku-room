@@ -2,53 +2,103 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>挨拶らくちん機能</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>挨拶らくちん機能 - もずべや</title>
     <style>
         body {
             background-color: #1a1a1a;
             color: #ffffff;
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             padding: 20px;
             max-width: 800px;
             margin: 0 auto;
         }
         h1 {
             color: #3498db;
-        }
-        pre {
-            background-color: #2d2d2d;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
         }
         .note {
             color: #bdc3c7;
             font-size: 0.9rem;
             margin-bottom: 15px;
         }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 8px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .code-title {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        .copy-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+        pre {
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-top: 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+
     <h1>👋 挨拶らくちん機能（チャットスクリプト）</h1>
-    <p class="note">下のコードをTampermonkeyなどにコピーして使うニャ！</p>
-    <pre><code>// ==UserScript==
+    <p class="note">下のコードをTampermonkeyなどのユーザースクリプトに登録して使ってください！</p>
+
+    <div class="code-header">
+        <span class="code-title">JavaScript</span>
+        <button class="copy-btn" onclick="copyCode()">コードをコピー 📋</button>
+    </div>
+    <pre><code id="script-code">// ==UserScript==
 // @name         DRRR自動挨拶ボット
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  新しい人の入室を検知して自動で挨拶を挿入するニャ
+// @description  新しい人の入室を検知して自動で挨拶を挿入します
 // @match        https://drrrkari.com/room/*
 // @grant        none
 // ==/UserScript==
 
 (function(){
     if(window.drrrBotRunning){
-        console.log('すでにDRRR自動挨拶ボットは起動中だニャ！');
+        console.log('すでにDRRR自動挨拶ボットは起動中です！');
         return;
     }
     window.drrrBotRunning = true;
-    console.log('【ブックマーク完璧版】DRRR強制挿入ボットを起動したニャ！✨');
+    console.log('【ブックマーク完璧版】DRRR強制挿入ボットを起動しました！✨');
 
     let lastProcessedName = "";
     let isBusy = false;
@@ -86,7 +136,7 @@
 
                 inputField.dispatchEvent(new Event('input', {bubbles: true}));
                 inputField.dispatchEvent(new Event('change', {bubbles: true}));
-                console.log('新しい人にだけ挨拶を1回挿入したニャ！🎉');
+                console.log('新しい人にだけ挨拶を1回挿入しました！🎉');
 
                 setTimeout(() => {
                     isBusy = false;
@@ -95,5 +145,16 @@
         }
     }, 1000);
 })();</code></pre>
+
+    <a href="./index.html" class="back-link">← もずべやトップに戻る</a>
+
+    <script>
+        function copyCode() {
+            const codeText = document.getElementById("script-code").innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert("スクリプトをコピーしました！Tampermonkeyに貼り付けて使ってください📋✨");
+            });
+        }
+    </script>
 </body>
 </html>
