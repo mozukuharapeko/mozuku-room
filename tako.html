@@ -6,7 +6,7 @@
     <title>他己診断ジェネレーター</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Chart.js for visualization -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Firebase SDK (v10 compat) -->
@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <!-- ビュー2: 回答画面（友達が答える画面） -->
+        <!-- ビュー2: 回答画面 -->
         <div id="view-answer" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
                 <span class="text-xs font-semibold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">他己診断セッション</span>
@@ -60,9 +60,7 @@
                 <p class="text-xs text-slate-500 mt-1">直感でサクサク答えてね！</p>
             </div>
 
-            <div id="question-container" class="space-y-4">
-                <!-- 動的に15問生成 -->
-            </div>
+            <div id="question-container" class="space-y-4"></div>
 
             <div class="pt-2 space-y-3">
                 <button id="btn-submit" onclick="submitAnswers()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-100 cursor-pointer">
@@ -82,7 +80,6 @@
                 <p id="response-count" class="text-sm text-slate-500">回答数: 0件</p>
             </div>
 
-            <!-- シェアボックス -->
             <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="text-xs text-indigo-900 break-all w-full sm:w-auto flex-grow" id="share-url-text">URL</div>
                 <button onclick="copyShareUrl()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition whitespace-nowrap cursor-pointer">
@@ -90,7 +87,6 @@
                 </button>
             </div>
 
-            <!-- グラフエリア -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
                 <h3 class="font-bold text-slate-800 text-sm">📊 ステータスバランス</h3>
                 <div class="relative h-64 w-full">
@@ -98,5 +94,300 @@
                 </div>
             </div>
 
-            <!-- みんなのコメント / 回答詳細 -->
-            <div class="bg-white
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <h3 class="font-bold text-slate-800 text-sm">💬 みんなの目撃証言＆回答ログ</h3>
+                <div id="comments-list" class="space-y-3 max-h-80 overflow-y-auto pr-2"></div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="goToHome()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+                    🏠 トップページ（ホーム）に戻る
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-6 text-xs text-slate-400">
+        &copy; 2026 他己診断メーカー
+    </footer>
+
+    <!-- スクリプト -->
+    <script>
+        // 1. Firebase設定
+        var firebaseConfig = {
+            apiKey: "AIzaSyAXcW4KhtikAUOlTn--58r_998yl27x_QQ",
+            authDomain: "takoshindan.firebaseapp.com",
+            projectId: "takoshindan",
+            storageBucket: "takoshindan.firebasestorage.app",
+            messagingSenderId: "420410722790",
+            appId: "1:420410722790:web:ccf1e564b7d192b5e8ee27",
+            measurementId: "G-LQF2S7KLWX"
+        };
+
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+
+        var currentTarget = "";
+        var radarChartInstance = null;
+
+        var questions = [
+            { id: 1, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
+            { id: 2, text: "大金を手に入れたら一番最初にやらかしそうなことは？", options: ["秒で堅実に貯金する", "全額使ってロマン投資で消滅", "SNSでマウント取って炎上する", "周りに配り歩いて自滅する"] },
+            { id: 3, text: "この人を動物に例えるならどれに近い？", options: ["気まぐれに甘えてくる猫", "すべてを見通す仙人", "トラブルメーカー風のラスボス", "実体のない概念"] },
+            { id: 4, text: "機嫌が悪いときの分かりやすいサインは？", options: ["「り」の1文字だけになる", "切れ味抜群の正論パンチ", "遠い目をして透明化する", "隠す気がそもそもない"] },
+            { id: 5, text: "ピンチのときにこの人がとりそうな行動は？", options: ["表立って冷静に解決を主導する", "裏から手を回して華麗に回避する", "なぜか笑い話に変えてしまう", "しれっとその場から消えている"] },
+            { id: 6, text: "この人の脳内メーカーの割合で一番多そうなのは？", options: ["「謎」と「好奇心」", "「めんどくさい」と「合理性」", "「優しさ」と「諦め」", "「野望」と「眠気」"] },
+            { id: 7, text: "褒められたときのこの人の実際のリアクションは？", options: ["満面の笑みで素直に喜ぶ", "全力で照れて話題をそらす", "「でしょ？」とドヤ顔をキメる", "心の中で疑ってかかる"] },
+            { id: 8, text: "休日の過ごし方、どれが一番しっくりくる？", options: ["完全引きこもりインドアの極み", "気まぐれにフラッと一人旅", "お誘いがあればフッ軽で出没", "予定は未定の気まぐれ野郎"] },
+            { id: 9, text: "この人の「隠しきれない本質」を一言で言うなら？", options: ["実はめちゃくちゃ情に厚い", "徹底的にマイペースな自由人", "知的好奇心がバグってる変人", "圧倒的フラットメンタル"] },
+            { id: 10, text: "もしスーパーパワーが手に入るとしたら、この人が欲しがりそうなのは？", options: ["時間を止める能力", "人の心を読める能力", "どこでも寝られる能力", "お金を生み出す能力"] },
+            { id: 11, text: "初対面の人に対するこの人の態度の基本スタンスは？", options: ["丁寧だけど心の距離は2メートル", "最初から全開でマイペース", "相手の出方を静かに観察する", "愛想よく合わせて後で疲れる"] },
+            { id: 12, text: "この人と議論になったとき、最終的にどうなる？", options: ["論理でボコボコにされる", "圧倒的包容力で丸め込まれる", "いつの間にか違う話に脱線する", "お互い譲らず平行線"] },
+            { id: 13, text: "SNSの裏アカウントがあったら、どんな投稿をしてそう？", options: ["日常のシュールな愚痴やツッコミ", "哲学的なお気持ち表明", "全く更新されず放置", "推し活の狂気的な叫び"] },
+            { id: 14, text: "この人の「最大の魅力（チャームポイント）」はどこだと思う？", options: ["ブレない独自の価値観", "どんなものも許容する器の広さ", "ふとした瞬間のユーモア", "圧倒的な自然体"] },
+            { id: 15, text: "ズバリ、この人の総合的な（やばさ・面白さ）のレベルは？", options: ["Lv.10：普通にしっかり者", "Lv.50：時々斜め上を行く変わり者", "Lv.100：底が知れないミステリアス", "Lv.MAX：観測不能の天然記念物"] }
+        ];
+
+        function goToHome() {
+            window.location.href = "https://mozukuharapeko.github.io/mozuku-room/";
+        }
+
+        function showView(viewName) {
+            document.getElementById("view-home").classList.add("hidden");
+            document.getElementById("view-answer").classList.add("hidden");
+            document.getElementById("view-result").classList.add("hidden");
+            document.getElementById("view-" + viewName).classList.remove("hidden");
+        }
+
+        function createTargetPage() {
+            var nameInput = document.getElementById("input-target-name").value.trim();
+            if (!nameInput) {
+                alert("お名前を入力してほしいニャ！");
+                return;
+            }
+
+            db.collection("tako_diagnoses").doc(nameInput).set({
+                name: nameInput,
+                createdAt: new Date().toISOString()
+            }, { merge: true }).then(function() {
+                window.location.href = "?target=" + encodeURIComponent(nameInput);
+            }).catch(function(error) {
+                console.error("Error creating target:", error);
+                alert("作成エラーニャ: " + error.message);
+            });
+        }
+
+        function renderTargetList() {
+            var container = document.getElementById("target-list-container");
+
+            db.collection("tako_diagnoses").get().then(function(snapshot) {
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">まだ作成された診断ページはありません</p>';
+                    return;
+                }
+
+                container.innerHTML = "";
+                snapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    var name = data.name || doc.id;
+                    var responses = data.responses || [];
+                    var count = responses.length;
+
+                    var html = `
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100 gap-3">
+                            <div>
+                                <span class="font-bold text-slate-800 text-base">${name} さん</span>
+                                <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-2">回答 ${count} 件</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="location.href='?target=${encodeURIComponent(name)}'" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                                    ✏️ 診断する
+                                </button>
+                                <button onclick="location.href='?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
+                                    📊 結果を見る
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                });
+            }).catch(function(error) {
+                console.error("Error fetching list:", error);
+                container.innerHTML = '<p class="text-xs text-red-400 text-center py-4">読み込みエラーが発生したニャ</p>';
+            });
+        }
+
+        function showAnswerView(name) {
+            showView("answer");
+            document.getElementById("answer-title").innerText = name + " さんについての他己診断";
+            
+            var container = document.getElementById("question-container");
+            container.innerHTML = "";
+
+            questions.forEach(function(q, index) {
+                var html = `
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                        <p class="font-bold text-slate-800 text-sm">Q${index + 1}. ${q.text}</p>
+                        <div class="space-y-2">
+                `;
+                q.options.forEach(function(opt, optIndex) {
+                    html += `
+                        <label class="flex items-center space-x-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
+                            <input type="radio" name="q_${q.id}" value="${optIndex}" class="text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                            <span class="text-sm text-slate-700">${opt}</span>
+                        </label>
+                    `;
+                });
+                html += '</div></div>';
+                container.innerHTML += html;
+            });
+        }
+
+        function submitAnswers() {
+            var answers = {};
+            for (var i = 1; i <= questions.length; i++) {
+                var selected = document.querySelector('input[name="q_' + i + '"]:checked');
+                if (!selected) {
+                    alert("Q" + i + " まだ回答していない項目があるニャ！");
+                    return;
+                }
+                answers[i] = parseInt(selected.value);
+            }
+
+            var btn = document.getElementById("btn-submit");
+            btn.disabled = true;
+            btn.innerText = "送信中だニャ... ⏳";
+
+            var docRef = db.collection("tako_diagnoses").doc(currentTarget);
+            var newResponse = {
+                date: new Date().toISOString(),
+                answers: answers
+            };
+
+            docRef.set({
+                name: currentTarget,
+                responses: firebase.firestore.FieldValue.arrayUnion(newResponse)
+            }, { merge: true }).then(function() {
+                window.location.href = "?target=" + encodeURIComponent(currentTarget) + "#result";
+            }).catch(function(error) {
+                console.error("Error submitting answers:", error);
+                alert("送信エラーニャ: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "回答を送信してみんなの結果を見る！ 🚀";
+            });
+        }
+
+        function showResultView(name) {
+            showView("result");
+            document.getElementById("result-title").innerText = name + " さんの他己診断結果";
+            
+            var shareUrl = window.location.href.split('#')[0];
+            document.getElementById("share-url-text").innerText = shareUrl;
+
+            db.collection("tako_diagnoses").doc(name).get().then(function(docSnap) {
+                var data = [];
+                if (docSnap.exists) {
+                    data = docSnap.data().responses || [];
+                }
+
+                document.getElementById("response-count").innerText = "総回答数: " + data.length + " 件";
+
+                var counts = [0, 0, 0, 0];
+                data.forEach(function(item) {
+                    Object.values(item.answers).forEach(function(val) {
+                        counts[val % 4]++;
+                    });
+                });
+
+                renderRadarChart(counts);
+                renderCommentsList(data);
+            }).catch(function(error) {
+                console.error("Error loading result:", error);
+                alert("結果読み込みエラーニャ: " + error.message);
+            });
+        }
+
+        function copyShareUrl() {
+            var shareUrl = window.location.href.split('#')[0];
+            navigator.clipboard.writeText(shareUrl).then(function() {
+                alert("診断URLをコピーしたニャ！お友達にシェアしてね📋✨");
+            });
+        }
+
+        function renderRadarChart(counts) {
+            var ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['サバイバル・実用', '野望・エネルギー', 'ミステリアス・個性', '自然体・フラット'],
+                    datasets: [{
+                        label: '周りから見た特性バランス',
+                        data: counts,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderCommentsList(data) {
+            var listContainer = document.getElementById("comments-list");
+            listContainer.innerHTML = "";
+
+            if (data.length === 0) {
+                listContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">まだ回答がありません。URLをシェアしてみよう！</p>';
+                return;
+            }
+
+            data.slice().reverse().forEach(function(item, idx) {
+                var dateStr = new Date(item.date).toLocaleString();
+                var html = `
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs space-y-1">
+                        <div class="flex justify-between text-slate-400">
+                            <span>回答 #${data.length - idx}</span>
+                            <span>${dateStr}</span>
+                        </div>
+                        <p class="text-slate-600 font-medium">15問の回答が送信されました（全問コンプリート✨）</p>
+                    </div>
+                `;
+                listContainer.innerHTML += html;
+            });
+        }
+
+        window.onload = function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            currentTarget = urlParams.get("target");
+
+            if (!currentTarget) {
+                showView("home");
+                renderTargetList();
+            } else {
+                if (window.location.hash === "#result") {
+                    showResultView(currentTarget);
+                } else {
+                    showAnswerView(currentTarget);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
