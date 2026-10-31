@@ -160,6 +160,10 @@
       font-weight: bold;
     }
 
+    .category-item.custom-link a {
+      color: #81c784; /* イジりやすいように少し色を変えてます */
+    }
+
     /* 中央トピックス */
     .news-list {
       list-style: none;
@@ -181,6 +185,9 @@
       border-radius: 2px;
       margin-right: 6px;
     }
+
+    .news-tag.academic { background: #1a3a5f; color: #90caf9; }
+    .news-tag.tech { background: #2e4c2f; color: #a5d6a7; }
 
     /* 右側ショートカット */
     .shortcut-btn {
@@ -234,8 +241,9 @@
   <!-- メイン3カラム -->
   <div class="main-grid">
     
-    <!-- 左：コンテンツメニュー -->
+    <!-- 左：コンテンツメニュー ＆ カスタムリンク集 -->
     <div class="left-col">
+      <!-- メインコンテンツ -->
       <div class="panel">
         <div class="panel-header ichimatsu-pattern">🐾 もずべやコンテンツ</div>
         <ul class="category-list">
@@ -244,20 +252,312 @@
           <li class="category-item highlight"><a href="https://mozukuharapeko.github.io/bbs/">📢 もずれんらくちょう (BBS)</a></li>
           <li class="category-item highlight"><a href="gariana-sniper.html">💬 ガリアナスナイパー</a></li>
           <li class="category-item highlight"><a href="greeting.html">💬 挨拶スクリプト</a></li>
-          <li class="category-item"><a href="#" onclick="alert('準備中のページです')">ニュース・速報</a></li>
-          <li class="category-item"><a href="#" onclick="alert('準備中のページです')">IT・テクノロジー</a></li>
-          <li class="category-item"><a href="#" onclick="alert('準備中のページです')">もずー知恵袋</a></li>
-          <li class="category-item"><a href="#" onclick="alert('準備中のページです')">今日の運勢</a></li>
+        </ul>
+      </div>
+
+      <!-- カスタム用 リンク集（10個） -->
+      <div class="panel">
+        <div class="panel-header ichimatsu-pattern">🔗 おすすめリンク集</div>
+        <ul class="category-list">
+          <!-- ▼ ここから下をお好きなURL・名称に書き換えてね！ ▼ -->
+          <li class="category-item custom-link"><a href="ここにURLを入れる1">ここにリンク先の名前を入れる1</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる2">ここにリンク先の名前を入れる2</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる3">ここにリンク先の名前を入れる3</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる4">ここにリンク先の名前を入れる4</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる5">ここにリンク先の名前を入れる5</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる6">ここにリンク先の名前を入れる6</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる7">ここにリンク先の名前を入れる7</a></li>
+          <li class="category-item custom-link"><a href="おじょうさまっ、お待たせ！✨
+
+コンテンツのスカスカ感を一気に解消して**「なんか高度な情報ポータルサイトっぽい雰囲気」**を出すために、難しそうな論文・IT・学術系の見出しネタ（ダミー記事）を中央トピックスにたっぷり仕込みました！
+
+さらに、左メニューにはおじょうさまが後から自由にURLと名前を書き換えられる**「お気に入りリンク集（10枠）」**をわかりやすく追加したよっ！👇
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>もずーじゃぱん (MOZU JAPAN)</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --border-color: #333333;
+      --text-main: #e0e0e0;
+      --text-muted: #888888;
+      --mozubeya-accent: #ff9800;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 10px;
+    }
+
+    /* 市松模様パターン背景 */
+    .ichimatsu-pattern {
+      background-color: #1a1a1a;
+      background-image: 
+        linear-gradient(45deg, #111 25%, transparent 25%), 
+        linear-gradient(-45deg, #111 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #111 75%), 
+        linear-gradient(-45deg, transparent 75%, #111 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+    }
+
+    a {
+      color: #90caf9;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+      color: #e3f2fd;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* ヘッダー */
+    header {
+      border: 1px solid var(--border-color);
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 3px solid #555;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .logo span {
+      color: #aaaaaa;
+      font-size: 15px;
+    }
+
+    .sub-text {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* 検索バー */
+    .search-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: #0d0d0d;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .search-btn {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 6px 16px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* メイン3カラムレイアウト */
+    .main-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .left-col { flex: 1 1 200px; }
+    .center-col { flex: 2 1 400px; }
+    .right-col { flex: 1 1 200px; }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      margin-bottom: 10px;
+    }
+
+    .panel-header {
+      padding: 6px 10px;
+      font-weight: bold;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border-color);
+      color: #ffffff;
+    }
+
+    .panel-body {
+      padding: 8px 10px;
+    }
+
+    /* 左側メニュー */
+    .category-list {
+      list-style: none;
+    }
+
+    .category-item {
+      border-bottom: 1px dashed #2a2a2a;
+    }
+
+    .category-item a {
+      display: block;
+      padding: 6px 8px;
+      color: var(--text-main);
+    }
+
+    .category-item.highlight a {
+      color: var(--mozubeya-accent);
+      font-weight: bold;
+    }
+
+    .category-item.custom-link a {
+      color: #81c784; /* イジりやすい緑系 */
+    }
+
+    /* 中央トピックス */
+    .news-list {
+      list-style: none;
+    }
+
+    .news-item {
+      padding: 6px 0;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .news-tag {
+      background: #333;
+      color: #aaa;
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 2px;
+      margin-right: 6px;
+    }
+
+    .news-tag.academic { background: #1a3a5f; color: #90caf9; }
+    .news-tag.tech { background: #2e4c2f; color: #a5d6a7; }
+
+    /* 右側ショートカット */
+    .shortcut-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 6px;
+      background: #282828;
+      color: #fff;
+      border: 1px solid #444;
+      text-align: center;
+      font-size: 12px;
+      border-radius: 3px;
+      text-decoration: none;
+    }
+    .shortcut-btn.primary {
+      background: #3a2b10;
+      border-color: var(--mozubeya-accent);
+      color: var(--mozubeya-accent);
+      font-weight: bold;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      margin-top: 15px;
+      padding: 12px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- ヘッダー -->
+  <header class="ichimatsu-pattern">
+    <div>
+      <div class="logo">MOZU! <span>JAPAN</span></div>
+      <div class="sub-text">もずーじゃぱん ポータル</div>
+    </div>
+    <div class="sub-text">2026年10月31日 | ポータル公開中</div>
+  </header>
+
+  <!-- 検索バー -->
+  <div class="search-box">
+    <input type="text" class="search-input" id="searchInput" placeholder="もずーじゃぱん内を検索...">
+    <button class="search-btn" onclick="alert('検索機能は準備中です')">検索</button>
+  </div>
+
+  <!-- メイン3カラム -->
+  <div class="main-grid">
+    
+    <!-- 左：コンテンツメニュー ＆ カスタムリンク集 -->
+    <div class="left-col">
+      <!-- 本命コンテンツ -->
+      <div class="panel">
+        <div class="panel-header ichimatsu-pattern">🐾 もずべやコンテンツ</div>
+        <ul class="category-list">
+          <li class="category-item highlight"><a href="chikubi.html">🎮 乳首クリッカー</a></li>
+          <li class="category-item highlight"><a href="tako.html">📋 他己診断</a></li>
+          <li class="category-item highlight"><a href="[https://mozukuharapeko.github.io/bbs/](https://mozukuharapeko.github.io/bbs/)">📢 もずれんらくちょう (BBS)</a></li>
+          <li class="category-item highlight"><a href="gariana-sniper.html">💬 ガリアナスナイパー</a></li>
+          <li class="category-item highlight"><a href="greeting.html">💬 挨拶スクリプト</a></li>
+        </ul>
+      </div>
+
+      <!-- カスタム用 リンク集（10個） -->
+      <div class="panel">
+        <div class="panel-header ichimatsu-pattern">🔗 おすすめリンク集</div>
+        <ul class="category-list">
+          <!-- ▼ ここから下をお好きなURL・名称に書き換えてね！ ▼ -->
+          <li class="category-item custom-link"><a href="ここにURLを入れる1">ここにリンク先の名前を入れる1</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる2">ここにリンク先の名前を入れる2</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる3">ここにリンク先の名前を入れる3</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる4">ここにリンク先の名前を入れる4</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる5">ここにリンク先の名前を入れる5</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる6">ここにリンク先の名前を入れる6</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる7">ここにリンク先の名前を入れる7</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる8">ここにリンク先の名前を入れる8</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる9">ここにリンク先の名前を入れる9</a></li>
+          <li class="category-item custom-link"><a href="ここにURLを入れる10">ここにリンク先の名前を入れる10</a></li>
+          <!-- ▲ ここまで ▲ -->
         </ul>
       </div>
     </div>
 
-    <!-- 中：トピックス -->
+    <!-- 中：トピックス（本物 ＋ 頭よさそうなダミー記事） -->
     <div class="center-col">
       <div class="panel">
-        <div class="panel-header ichimatsu-pattern">主要トピックス</div>
+        <div class="panel-header ichimatsu-pattern">主要トピックス・学術ニュース</div>
         <div class="panel-body">
           <ul class="news-list">
+            <!-- リアルコンテンツ -->
             <li class="news-item">
               <div><span class="news-tag">GAME</span><a href="chikubi.html">乳首クリッカー（ガリ穴フィーバー＆賢者タイム搭載）</a></div>
               <span class="sub-text">公開中</span>
@@ -267,7 +567,7 @@
               <span class="sub-text">公開中</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag">BBS</span><a href="https://mozukuharapeko.github.io/bbs/">もずべや公式 もずれんらくちょう (BBS)</a></div>
+              <div><span class="news-tag">BBS</span><a href="[https://mozukuharapeko.github.io/bbs/](https://mozukuharapeko.github.io/bbs/)">もずべや公式 もずれんらくちょう (BBS)</a></div>
               <span class="sub-text">公開中</span>
             </li>
             <li class="news-item">
@@ -277,6 +577,28 @@
             <li class="news-item">
               <div><span class="news-tag">SCRIPT</span><a href="greeting.html">挨拶スクリプト</a></div>
               <span class="sub-text">公開中</span>
+            </li>
+            
+            <!-- 頭よさそうなダミー記事群 -->
+            <li class="news-item">
+              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です')">次世代分散型アルゴリズムにおけるビザンチン将軍問題の再検証</a></div>
+              <span class="sub-text">学会誌</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です')">量子コンピューティング耐性暗号（PQC）の移行ロードマップ</a></div>
+              <span class="sub-text">特集</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag academic">思考</span><a href="#" onclick="alert('賢そうなダミー論考です')">認知科学的アプローチによるユーザーインターフェース最適化モデル</a></div>
+              <span class="sub-text">論考</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です')">最終的整合性を考慮した分散データベースにおけるCAP定理の限界</a></div>
+              <span class="sub-text">解説</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です')">マイクロエコノミクスにおけるプラットフォーム経済のインセンティブ設計</a></div>
+              <span class="sub-text">分析</span>
             </li>
             <li class="news-item">
               <div><span class="news-tag">DEV</span><a href="#" onclick="alert('海蘊ツールは現在準備中です')">【次回作】海蘊ツール（DRRR! 備考同期機能）</a></div>
@@ -294,7 +616,7 @@
         <div class="panel-body">
           <a href="chikubi.html" class="shortcut-btn primary">🎮 乳首クリッカー</a>
           <a href="tako.html" class="shortcut-btn">📋 他己診断</a>
-          <a href="https://mozukuharapeko.github.io/bbs/" class="shortcut-btn">📢 もずれんらくちょう (BBS)</a>
+          <a href="[https://mozukuharapeko.github.io/bbs/](https://mozukuharapeko.github.io/bbs/)" class="shortcut-btn">📢 もずれんらくちょう</a>
           <a href="gariana-sniper.html" class="shortcut-btn">💬 スナイパー</a>
           <a href="greeting.html" class="shortcut-btn">💬 挨拶スクリプト</a>
         </div>
