@@ -78,7 +78,13 @@
         }
 
         .card-orange {
-            border-left-color: #e67e22;
+            background: linear-gradient(135deg, rgba(230, 126, 34, 0.9), rgba(241, 196, 15, 0.9));
+            color: #ffffff;
+            border-left: none;
+        }
+
+        .card-orange:hover {
+            background: linear-gradient(135deg, rgba(230, 126, 34, 1), rgba(241, 196, 15, 1));
         }
 
         .card-blue {
@@ -102,17 +108,8 @@
             color: #2c3e50;
         }
 
-        .card-purple .arrow {
+        .card-purple .arrow, .card-orange .arrow {
             color: #ffffff;
-        }
-
-        .badge-soon {
-            background-color: #f39c12;
-            color: #ffffff;
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-weight: normal;
         }
 
         /* スクリプトグループ */
@@ -194,10 +191,10 @@
             <span class="arrow">&gt;</span>
         </a>
 
-        <!-- ⚪ 乳首クリッカー（予定） -->
-        <a href="#" class="menu-card card-orange" onclick="alert('まだ制作中！自分の押してなさい！'); return false;">
-            <span class="icon-text">⚪ 乳首クリッカー（予定）</span>
-            <span class="badge-soon">Coming Soon</span>
+        <!-- ⚪ 乳首クリッカー（本実装） -->
+        <a href="./chikubi.html" class="menu-card card-orange">
+            <span class="icon-text">⚪ 乳首クリッカー</span>
+            <span class="arrow">&gt;</span>
         </a>
 
         <!-- 💬 デュラララチャット -->
