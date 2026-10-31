@@ -14,6 +14,7 @@
       --accent-color: #cccccc;
       --hover-color: #2a2a2a;
       --mozubeya-accent: #ff9800;
+      --sns-accent: #2196f3;
     }
 
     * {
@@ -30,7 +31,7 @@
       line-height: 1.5;
     }
 
-    /* 市松模様パターン背景クラス */
+    /* 市松模様パターン背景 */
     .ichimatsu-pattern {
       background-color: #1a1a1a;
       background-image: 
@@ -125,10 +126,10 @@
       background: #444;
     }
 
-    /* メインコンテンツレイアウト (3レイヤー/レイアウト) */
+    /* メイン 3カラムレイアウト */
     .main-grid {
       display: grid;
-      grid-template-columns: 200px 1fr 220px;
+      grid-template-columns: 210px 1fr 220px;
       gap: 10px;
     }
 
@@ -179,13 +180,17 @@
       text-decoration: none;
     }
 
-    /* もずべや専用 stealth アイテム */
-    .category-item.mozubeya-blend a {
+    /* 本命コンテンツハイライト */
+    .category-item.highlight-link a {
       color: var(--mozubeya-accent);
       font-weight: bold;
     }
-    .category-item.mozubeya-blend a:hover {
+    .category-item.highlight-link a:hover {
       background-color: #2a1f0d;
+    }
+
+    .category-item.sns-link a {
+      color: #64b5f6;
     }
 
     /* 中央トピックス */
@@ -211,15 +216,25 @@
     }
 
     .news-list {
-      list-style: square inside;
-      padding: 6px 0;
+      list-style: none;
+      padding: 4px 0;
     }
 
     .news-item {
-      padding: 4px 6px;
+      padding: 6px 8px;
       border-bottom: 1px solid #1a1a1a;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+    }
+
+    .news-tag {
+      background: #333;
+      color: #aaa;
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 2px;
+      margin-right: 6px;
     }
 
     .news-item span.time {
@@ -227,10 +242,33 @@
       font-size: 11px;
     }
 
-    /* 右側サイドバー */
-    .weather-box {
+    /* 右側ショートカット */
+    .shortcut-btn {
+      display: block;
+      width: 100%;
+      padding: 7px;
+      margin-bottom: 6px;
+      background: #282828;
+      color: #fff;
+      border: 1px solid #444;
+      text-align: center;
       font-size: 12px;
-      line-height: 1.6;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .shortcut-btn:hover {
+      background: #383838;
+      text-decoration: none;
+      color: #fff;
+    }
+    .shortcut-btn.primary {
+      background: #3a2b10;
+      border-color: var(--mozubeya-accent);
+      color: var(--mozubeya-accent);
+      font-weight: bold;
+    }
+    .shortcut-btn.primary:hover {
+      background: #4d3a16;
     }
 
     footer {
@@ -240,40 +278,6 @@
       text-align: center;
       font-size: 11px;
       color: var(--text-muted);
-    }
-
-    /* モーダル */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-    }
-
-    .modal-content {
-      background: #1e1e1e;
-      border: 1px solid #555;
-      padding: 20px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-    }
-
-    .modal-header {
-      font-weight: bold;
-      font-size: 14px;
-      margin-bottom: 10px;
-      color: var(--mozubeya-accent);
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .close-btn {
-      cursor: pointer;
-      color: #aaa;
     }
   </style>
 </head>
@@ -286,142 +290,9 @@
       <div class="logo">MOZU! <span>JAPAN</span></div>
       <div class="sub-text">もずーじゃぱん ポータル</div>
     </div>
-    <div class="sub-text">2026年10月31日(土) | 天気: 晴れ</div>
+    <div class="sub-text">2026年10月31日 | ポータル開設中</div>
   </header>
 
   <!-- 検索バー -->
   <div class="search-box">
-    <input type="text" class="search-input" id="searchInput" placeholder="ウェブまたはもずべや内を検索...">
-    <button class="search-btn" onclick="handleSearch()">検索</button>
-  </div>
-
-  <!-- メイン3カラムレイアウト -->
-  <div class="main-grid">
-    
-    <!-- 左側：カテゴリ一覧 -->
-    <div class="left-col">
-      <div class="panel">
-        <div class="panel-header ichimatsu-pattern">
-          <span>サービス一覧</span>
-        </div>
-        <ul class="category-list">
-          <li class="category-item"><a href="#" onclick="alert('ニュース機能は未実装です')">ニュース・速報</a></li>
-          <li class="category-item"><a href="#" onclick="alert('スポーツ機能は未実装です')">スポーツ・実況</a></li>
-          <li class="category-item"><a href="#" onclick="alert('掲示板機能は未実装です')">掲示板・コミュニティ</a></li>
-          
-          <!-- しれっと紛れ込む「もずべや」 -->
-          <li class="category-item mozubeya-blend">
-            <a href="#" onclick="openMozubeyaModal()">🐾 もずべや (本館)</a>
-          </li>
-
-          <li class="category-item"><a href="#" onclick="alert('IT・テクノロジーは準備中です')">IT・テクノロジー</a></li>
-          <li class="category-item"><a href="#" onclick="alert('ゲーム・アプリは準備中です')">ゲーム・裏技</a></li>
-          <li class="category-item"><a href="#" onclick="alert('音楽・動画は準備中です')">音楽・エンタメ</a></li>
-          <li class="category-item"><a href="#" onclick="alert('ショッピングは準備中です')">もずーショッピング</a></li>
-          <li class="category-item"><a href="#" onclick="alert('知恵袋は準備中です')">もずー知恵袋</a></li>
-          <li class="category-item"><a href="#" onclick="alert('占い・おみくじは準備中です')">今日の運勢</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 中央：トピックス・ニュース -->
-    <div class="center-col">
-      <div class="panel">
-        <div class="tab-nav">
-          <div class="tab-item active">主要トピックス</div>
-          <div class="tab-item" onclick="alert('開発中タブです')">もず部屋ニュース</div>
-          <div class="tab-item" onclick="alert('開発中タブです')">海蘊ツール速報</div>
-        </div>
-        <div class="panel-body">
-          <ul class="news-list">
-            <li class="news-item">
-              <a href="#" onclick="openMozubeyaModal()">【必読】乳首クリッカーのガリママ祭りが大盛況の噂</a>
-              <span class="time">12:30</span>
-            </li>
-            <li class="news-item">
-              <a href="#" onclick="alert('DRRRcustomize連携メモ共有ツール（海蘊ツール）を絶賛開発中！')">海蘊ツール（DRRR備考同期）開発会議が順調に進行中</a>
-              <span class="time">11:15</span>
-            </li>
-            <li class="news-item">
-              <a href="#" onclick="alert('もずーじゃぱんのシックな市松模様テーマが採用されました。')">もずーじゃぱんがグレー＆市松模様でリニューアル開店</a>
-              <span class="time">09:40</span>
-            </li>
-            <li class="news-item">
-              <a href="#" onclick="alert('Mises BrowserおよびGitHub連携に関する情報交換を実施。')">Mises Browserでの快適拡張運用テクニックまとめ</a>
-              <span class="time">08:05</span>
-            </li>
-            <li class="news-item">
-              <a href="#" onclick="alert('賢者タイム魔法発動でショップ全品90%OFF？')">魔法使いなのちゃんによる特大ディスカウントの全貌</a>
-              <span class="time">06:50</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- 右側：天気・ツール launcher -->
-    <div class="right-col">
-      <div class="panel">
-        <div class="panel-header ichimatsu-pattern">
-          <span>クイックツール</span>
-        </div>
-        <div class="panel-body weather-box">
-          <p><strong>現在地:</strong> 関東エリア</p>
-          <p><strong>天気:</strong> 晴れ ☀️ (22℃)</p>
-          <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
-          <p><strong>もずべやショートカット:</strong></p>
-          <button style="margin-top:5px; width:100%; padding:5px; background:#333; color:#fff; border:1px solid #555; cursor:pointer;" onclick="openMozubeyaModal()">🐾 もずべやを開く</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- フッター -->
-  <footer class="ichimatsu-pattern">
-    <p>Copyright (C) Mozu-Japan & Mozubeya. All Rights Reserved.</p>
-    <p style="margin-top: 4px; color: #666;">本サイトは個人ポータルサイト「もずーじゃぱん」です。</p>
-  </footer>
-</div>
-
-<!-- もずべや案内用モーダル -->
-<div class="modal-overlay" id="mozubeyaModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <span>🐾 もずべや (Mozubeya) へようこそ</span>
-      <span class="close-btn" onclick="closeMozubeyaModal()">✕</span>
-    </div>
-    <p style="margin-bottom:12px; font-size:12px; color:#ccc;">
-      ポータルメニューの「もずべや」が見つかりました！<br>
-      ここは仲間専用のコンテンツ＆実験用ポータルです。
-    </p>
-    <div style="background:#111; padding:10px; border:1px solid #333; font-size:12px; margin-bottom:15px;">
-      ・乳首クリッカー (Chikubi Clicker)<br>
-      ・海蘊ツール (DRRR! 備考同期機能)<br>
-      ・各種プライベートプロジェクト
-    </div>
-    <button style="width:100%; padding:8px; background:var(--mozubeya-accent); border:none; color:#000; font-weight:bold; cursor:pointer;" onclick="closeMozubeyaModal()">閉じる</button>
-  </div>
-</div>
-
-<script>
-  function handleSearch() {
-    const query = document.getElementById('searchInput').value;
-    if (query) {
-      alert('「' + query + '」で検索を試みましたが、もずーじゃぱんは平和です。');
-    } else {
-      alert('検索キーワードを入力してください。');
-    }
-  }
-
-  function openMozubeyaModal() {
-    document.getElementById('mozubeyaModal').style.display = 'flex';
-  }
-
-  function closeMozubeyaModal() {
-    document.getElementById('mozubeyaModal').style.display = 'none';
-  }
-</script>
-
-</body>
-</html>
+    <input type="
