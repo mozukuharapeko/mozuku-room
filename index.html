@@ -189,25 +189,19 @@
     .news-tag.academic { background: #1a3a5f; color: #90caf9; }
     .news-tag.tech { background: #2e4c2f; color: #a5d6a7; }
 
-    /* 右側ショートカット */
-    .shortcut-btn {
-      display: block;
+    /* ダミーログイン用スタイル */
+    .dummy-input {
       width: 100%;
-      padding: 8px;
-      margin-bottom: 6px;
-      background: #282828;
-      color: #fff;
+      background: #0d0d0d;
       border: 1px solid #444;
-      text-align: center;
+      color: #fff;
+      padding: 6px 8px;
       font-size: 12px;
       border-radius: 3px;
-      text-decoration: none;
     }
-    .shortcut-btn.primary {
-      background: #3a2b10;
-      border-color: var(--mozubeya-accent);
-      color: var(--mozubeya-accent);
-      font-weight: bold;
+    .dummy-input:focus {
+      outline: none;
+      border-color: #666;
     }
 
     footer {
@@ -259,7 +253,6 @@
       <div class="panel">
         <div class="panel-header ichimatsu-pattern">🔗 リンク</div>
         <ul class="category-list">
-          <!-- ▼ ここから下をお好きなURL・名称に書き換えてね！ ▼ -->
           <li class="category-item custom-link"><a href="https://drrrkari.com/lounge/">デュラララチャット(仮)</a></li>
           <li class="category-item custom-link"><a href="https://drrrsetting.wixsite.com/drrr-setting">DrrrCustomize Manual</a></li>
           <li class="category-item custom-link"><a href="https://chatpad.jp/">ChatPad</a></li>
@@ -270,7 +263,6 @@
           <li class="category-item custom-link"><a href="https://www.youtube.com/channel/UCfOz2I8b2IhpIpGB0I1UgMA">YouTube</a></li>
           <li class="category-item custom-link"><a href="https://www.tiktok.com/@harapeko029sana4989">TikTok</a></li>
           <li class="category-item custom-link"><a href="https://suno.com/@mozuku4989?page=songs">Suno</a></li>
-          <!-- ▲ ここまで ▲ -->
         </ul>
       </div>
     </div>
@@ -333,16 +325,33 @@
       </div>
     </div>
 
-    <!-- 右：ショートカット -->
+    <!-- 右：ダミーログイン ＆ 管理者ログイン（Yahoo!風） -->
     <div class="right-col">
+      <!-- ユーザーログイン（Yahoo!風ダミー） -->
       <div class="panel">
-        <div class="panel-header ichimatsu-pattern">クイックアクセス</div>
+        <div class="panel-header ichimatsu-pattern">🔑 ログイン</div>
         <div class="panel-body">
-          <a href="chikubi.html" class="shortcut-btn primary">🎮 乳首クリッカー</a>
-          <a href="tako.html" class="shortcut-btn">📋 他己診断</a>
-          <a href="https://mozukuharapeko.github.io/bbs/" class="shortcut-btn">📢 もずれんらくちょう</a>
-          <a href="gariana-sniper.html" class="shortcut-btn">💬 スナイパー</a>
-          <a href="greeting.html" class="shortcut-btn">💬 挨拶スクリプト</a>
+          <form onsubmit="return false;" style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 11px; color: var(--text-muted);">MOZUU! ID またはメールアドレス</label>
+            <input type="text" class="dummy-input" placeholder="ID / メールアドレス">
+            <button type="button" onclick="return false;" style="background: #ff0033; color: #fff; border: none; padding: 8px; font-weight: bold; border-radius: 3px; cursor: pointer; font-size: 12px; margin-top: 4px;">ログイン</button>
+            <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 4px;">
+              <a href="#" onclick="return false;" style="color: var(--text-muted);">IDをお忘れの方</a>
+              <a href="#" onclick="return false;" style="color: var(--text-muted);">新規取得</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- 管理者用ログイン（ダミー） -->
+      <div class="panel">
+        <div class="panel-header ichimatsu-pattern">⚙️ 管理者ログイン</div>
+        <div class="panel-body">
+          <form onsubmit="return false;" style="display: flex; flex-direction: column; gap: 8px;">
+            <input type="text" class="dummy-input" placeholder="管理者ID">
+            <input type="password" class="dummy-input" placeholder="パスワード">
+            <button type="button" onclick="return false;" style="background: #282828; color: var(--mozubeya-accent); border: 1px solid var(--mozubeya-accent); padding: 6px; font-weight: bold; border-radius: 3px; cursor: pointer; font-size: 11px; margin-top: 2px;">管理者Auth</button>
+          </form>
         </div>
       </div>
     </div>
