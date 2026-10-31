@@ -230,18 +230,6 @@
                     <span>👏 挨拶らくちんスクリプト</span>
                     <span class="arrow">&gt;</span>
                 </a>
-                <a href="#" class="script-item" onclick="showFakeScriptAlert(); return false;">
-                    <span>🛡️ 強制退室(キック機能)無効スクリプト</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#" class="script-item" onclick="showFakeScriptAlert(); return false;">
-                    <span>👑 ホスト(部屋主)強制退室スクリプト</span>
-                    <span class="arrow">&gt;</span>
-                </a>
-                <a href="#" class="script-item" onclick="showFakeScriptAlert(); return false;">
-                    <span>🌐 相手のIPアドレス暴露スクリプト</span>
-                    <span class="arrow">&gt;</span>
-                </a>
             </div>
         </div>
 
@@ -265,28 +253,6 @@
         </div>
 
     </div>
-
-    <script>
-        function showFakeScriptAlert() {
-            const messages = [
-                "騙されちゃった？",
-                "いい歳していつまでも粘着しないの！早く寝なさい！",
-                "貴方は長い人生で何を学んだのかな？何も学ばずにただ生きてきただけなのかな？客観的に自分を見つめなおして下さい。",
-                "エラー：あなたのモラルが不足しているため実行できませんでした。",
-                "警告：その執着心を音楽制作やSunoに向ければ、今頃名曲が1曲できています。",
-                "ただいまメンテナンス中：あなたの心のゆとりを探していますが見つかりません。",
-                "おめでとうございます！本日の『一番暇だった大賞』にノミネートされました。"
-            ];
-            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-            
-            // クリップボードにもこっそりコピーしちゃう！
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(randomMsg).catch(err => console.log(err));
-            }
-
-            alert(randomMsg);
-        }
-    </script>
 
 </body>
 </html>
