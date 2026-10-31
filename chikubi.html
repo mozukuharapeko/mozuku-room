@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚪ 乳首クリッカー Deluxe ⚪</title>
+    <title>⚪ 乳首クリッカー Deluxe + 祭り ⚪</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -12,17 +12,29 @@
             50% { box-shadow: 0 0 50px #8b5cf6, inset 0 0 50px #8b5cf6; }
             100% { box-shadow: 0 0 20px #ec4899, inset 0 0 20px #ec4899; }
         }
+        @keyframes cut-in {
+            0% { transform: translateX(-150%) scale(0.8); opacity: 0; }
+            20% { transform: translateX(0) scale(1.1); opacity: 1; }
+            80% { transform: translateX(0) scale(1); opacity: 1; }
+            100% { transform: translateX(150%) scale(0.8); opacity: 0; }
+        }
         .fever-mode {
             animation: fever-glow 1s infinite;
         }
+        .cutin-anim {
+            animation: cut-in 3s ease-in-out forwards;
+        }
     </style>
 </head>
-<body id="body-bg" class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none transition-colors duration-300">
+<body id="body-bg" class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none transition-colors duration-300 relative overflow-x-hidden">
+
+    <!-- カットイン演出レイヤー -->
+    <div id="cutin-container" class="fixed inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden"></div>
 
     <!-- ヘッダー -->
     <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 flex justify-between items-center shadow-md">
         <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
-            <span>⚪</span> 乳首クリッカー <span class="text-xs bg-pink-600 px-2 py-0.5 rounded-full">Deluxe + ガリ穴</span>
+            <span>⚪</span> 乳首クリッカー <span class="text-xs bg-pink-600 px-2 py-0.5 rounded-full">Deluxe 祭り</span>
         </h1>
         <div class="flex gap-2">
             <button onclick="resetGame()" class="text-xs bg-rose-700 hover:bg-rose-600 text-white font-bold py-2 px-3 rounded-xl transition cursor-pointer">
@@ -45,15 +57,15 @@
                 <h2 class="text-4xl font-black text-white tracking-tight"><span id="score">0</span> <span class="text-lg text-slate-400">CP</span></h2>
                 <p class="text-xs text-slate-400">毎秒獲得: <span id="cps">0</span> CP/s</p>
                 
-                <!-- ガリ穴フィーバーゲージ -->
+                <!-- ゲージ -->
                 <div class="w-full bg-slate-700 rounded-full h-3 mt-3 overflow-hidden p-0.5 border border-slate-600">
                     <div id="fever-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
                 </div>
-                <p class="text-xs font-bold text-pink-300 mt-1" id="fever-status">🔥 ガリ穴ゲージ: 0 / 50</p>
+                <p class="text-xs font-bold text-pink-300 mt-1" id="fever-status">🔥 ゲージ: 0 / 50</p>
             </div>
 
             <!-- クリック対象（カエルさん） -->
-            <div id="click-target-btn" class="relative group cursor-pointer py-2">
+            <div onclick="clickTarget(event)" class="relative group cursor-pointer py-2">
                 <div class="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-3xl blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
                 <div class="relative bg-slate-900 p-3 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden max-w-xs mx-auto transform active:scale-95 transition duration-100">
                     <img id="click-target-img" src="./chikubi.png" alt="乳首カエル" class="w-full rounded-xl object-cover pointer-events-none" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60';">
@@ -152,7 +164,7 @@
             powerLevel: 0,
             powerCost: 15,
             feverCount: 0,
-            isFever: false,
+            feverType: null, // 'mama' (10倍) または 'nana' (10分の1買い物)
             autos: [
                 { count: 0, cps: 1, cost: 50, costMult: 1.15 },
                 { count: 0, cps: 5, cost: 300, costMult: 1.15 },
@@ -179,47 +191,69 @@
 
         function resetGame() {
             if (confirm("セーブデータをリセットして最初からやり直すよ？いいかな？")) {
-                localStorage.removeItem("chikubi_game_save_v4");
+                localStorage.removeItem("chikubi_game_save_v6");
                 location.reload();
             }
         }
 
-        // 確実に動くようにイベントリスナーでクリックを登録
-        document.addEventListener("DOMContentLoaded", () => {
-            const targetBtn = document.getElementById("click-target-btn");
-            if (targetBtn) {
-                targetBtn.addEventListener("click", (event) => {
-                    let addValue = game.clickPower * (game.isFever ? 5 : 1);
-                    game.score += addValue;
-                    game.totalClicks++;
-
-                    if (!game.isFever) {
-                        game.feverCount++;
-                        if (game.feverCount >= maxFeverCount) {
-                            triggerFever();
-                        }
-                    }
-                    
-                    showFloatingText(event.clientX, event.clientY, `+${addValue}` + (game.isFever ? ' 🔥' : ''));
-                    updateDisplay();
-                });
+        function clickTarget(event) {
+            let multiplier = 1;
+            if (game.feverType === 'mama') {
+                multiplier = 10; // ガリママフィスティバルで10倍！
             }
-            updateDisplay();
-        });
+            let addValue = game.clickPower * multiplier;
+            game.score += addValue;
+            game.totalClicks++;
 
-        function triggerFever() {
-            game.isFever = true;
-            game.feverCount = maxFeverCount;
-            document.getElementById("main-card").classList.add("fever-mode");
-            document.getElementById("action-hint").innerText = "🔥 【ガリ穴フィーバー中】獲得ポイント5倍！！ 🔥";
+            if (!game.feverType) {
+                game.feverCount++;
+                if (game.feverCount >= maxFeverCount) {
+                    triggerRandomFever();
+                }
+            }
             
+            showFloatingText(event.clientX, event.clientY, `+${addValue}` + (game.feverType ? ' 🔥' : ''));
+            updateDisplay();
+        }
+
+        function triggerRandomFever() {
+            // 50%の確率で「ガリママフィスティバル」か「魔法使いなの 賢者タイム」がランダム発動！
+            const isMama = Math.random() < 0.5;
+            game.feverType = isMama ? 'mama' : 'nana';
+            game.feverCount = maxFeverCount;
+
+            document.getElementById("main-card").classList.add("fever-mode");
+
+            if (game.feverType === 'mama') {
+                document.getElementById("action-hint").innerText = "👵✨ 【ガリママフィスティバル】獲得ポイント10倍！！ ✨👵";
+                showCutIn('./garimama.png', 'ガリママフィスティバル発動！！');
+            } else {
+                document.getElementById("action-hint").innerText = "🪄✨ 【魔法使いなの：賢者タイム】お買い物が10分の1に！ ✨🪄";
+                showCutIn('./mahoushoujo.png', '賢者タイム：お買い物破格化！');
+            }
+            
+            // 10秒後にフィーバー終了
             setTimeout(() => {
-                game.isFever = false;
+                game.feverType = null;
                 game.feverCount = 0;
                 document.getElementById("main-card").classList.remove("fever-mode");
                 document.getElementById("action-hint").innerText = "カエルさんをクリックしてポイントを稼ごう！";
                 updateDisplay();
             }, 10000);
+        }
+
+        function showCutIn(imgSrc, titleText) {
+            const container = document.getElementById("cutin-container");
+            const cutin = document.createElement('div');
+            cutin.className = 'cutin-anim flex flex-col items-center bg-slate-900/90 border-4 border-pink-500 p-6 rounded-3xl shadow-2xl';
+            cutin.innerHTML = `
+                <img src="${imgSrc}" class="w-48 h-48 object-cover rounded-2xl shadow-lg border-2 border-purple-400 mb-3" onerror="this.style.display='none'">
+                <p class="text-2xl font-black text-pink-300 drop-shadow-md tracking-wider">${titleText}</p>
+            `;
+            container.appendChild(cutin);
+            setTimeout(() => {
+                cutin.remove();
+            }, 3000);
         }
 
         function showFloatingText(x, y, text) {
@@ -241,8 +275,12 @@
         }
 
         function buyUpgrade() {
-            if (game.score >= game.powerCost) {
-                game.score -= game.powerCost;
+            // 賢者タイム（nana）中ならコストが10分の1に！
+            let cost = game.feverType === 'nana' ? Math.floor(game.powerCost / 10) : game.powerCost;
+            if (cost < 1) cost = 1;
+
+            if (game.score >= cost) {
+                game.score -= cost;
                 game.clickPower += 1;
                 game.powerLevel++;
                 game.powerCost = Math.floor(game.powerCost * 1.5);
@@ -254,8 +292,11 @@
 
         function buyAuto(index) {
             let auto = game.autos[index];
-            if (game.score >= auto.cost) {
-                game.score -= auto.cost;
+            let cost = game.feverType === 'nana' ? Math.floor(auto.cost / 10) : auto.cost;
+            if (cost < 1) cost = 1;
+
+            if (game.score >= cost) {
+                game.score -= cost;
                 auto.count++;
                 auto.cost = Math.floor(auto.cost * auto.costMult);
                 updateDisplay();
@@ -286,20 +327,26 @@
             document.getElementById("score").innerText = Math.floor(game.score);
             document.getElementById("cps").innerText = getCps();
             
+            // 賢者タイム中ならコスト表示も10分の1（端数切り捨て、最低1）にして分かりやすく！
+            let powerDisplayCost = game.feverType === 'nana' ? Math.max(1, Math.floor(game.powerCost / 10)) : game.powerCost;
             document.getElementById("lvl-power").innerText = game.powerLevel;
-            document.getElementById("cost-power").innerText = game.powerCost + " CP";
+            document.getElementById("cost-power").innerText = powerDisplayCost + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
 
             let percent = (game.feverCount / maxFeverCount) * 100;
             document.getElementById("fever-bar").style.width = percent + "%";
-            if (game.isFever) {
-                document.getElementById("fever-status").innerText = "🔥 ガリ穴フィーバー発動中！！ 🔥";
+            
+            if (game.feverType === 'mama') {
+                document.getElementById("fever-status").innerText = "👵🔥 ガリママフィスティバル発動中(10倍)！！ 🔥👵";
+            } else if (game.feverType === 'nana') {
+                document.getElementById("fever-status").innerText = "🪄🔥 魔法使いなの 賢者タイム発動中(1/10)！！ 🔥🪄";
             } else {
-                document.getElementById("fever-status").innerText = `🔥 ガリ穴ゲージ: ${game.feverCount} / ${maxFeverCount}`;
+                document.getElementById("fever-status").innerText = `🔥 ゲージ: ${game.feverCount} / ${maxFeverCount}`;
             }
 
             for (let i = 0; i < game.autos.length; i++) {
                 document.getElementById(`auto-count-${i}`).innerText = game.autos[i].count;
-                document.getElementById(`auto-cost-${i}`).innerText = game.autos[i].cost + " CP";
+                let autoDisplayCost = game.feverType === 'nana' ? Math.max(1, Math.floor(game.autos[i].cost / 10)) : game.autos[i].cost;
+                document.getElementById(`auto-cost-${i}`).innerText = autoDisplayCost + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
             }
 
             updateTitle();
@@ -314,19 +361,19 @@
         }, 100);
 
         window.onload = function() {
-            let saved = localStorage.getItem("chikubi_game_save_v4");
+            let saved = localStorage.getItem("chikubi_game_save_v6");
             if (saved) {
                 try {
                     let loaded = JSON.parse(saved);
                     game = Object.assign(game, loaded);
-                    game.isFever = false;
+                    game.feverType = null;
                 } catch(e) {}
             }
             updateDisplay();
         };
 
         setInterval(() => {
-            localStorage.setItem("chikubi_game_save_v4", JSON.stringify(game));
+            localStorage.setItem("chikubi_game_save_v6", JSON.stringify(game));
         }, 5000);
     </script>
 </body>
