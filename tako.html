@@ -445,19 +445,21 @@
 
                 document.getElementById("response-count").innerText = "総回答数: " + data.length + " 件";
 
-                var counts = [0, 0, 0, 0];
+var counts = [0, 0, 0, 0];
                 data.forEach(function(item) {
                     var ansObj = item.answers;
                     if (Array.isArray(ansObj)) {
                         ansObj.forEach(function(ans) {
-                            if (ans && typeof ans.type === 'number') {
-                                counts[ans.type]++;
+                            // 【修正】type じゃなくて choice を数えるよっ！✨
+                            if (ans && typeof ans.choice === 'number') { 
+                                counts[ans.choice]++;
                             }
                         });
                     } else {
                         Object.values(ansObj).forEach(function(ans) {
-                            if (ans && typeof ans.type === 'number') {
-                                counts[ans.type]++;
+                            // 【修正】ここも choice に変更するのだっ！✨
+                            if (ans && typeof ans.choice === 'number') { 
+                                counts[ans.choice]++;
                             }
                         });
                     }
