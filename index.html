@@ -226,12 +226,11 @@
     <div class="sub-text">2026年10月31日 | ポータル公開中</div>
   </header>
 
-  <!-- 検索バー -->
-  <div class="search-box">
-    <input type="text" class="search-input" id="searchInput" placeholder="もずーじゃぱん内を検索...">
-    <button class="search-btn" onclick="alert('検索機能はダミーです')">検索</button>
-  </div>
-
+  <!-- Google検索バー（新しいタブで検索結果が開きます） -->
+<form action="https://www.google.com/search" method="get" target="_blank" class="search-box">
+  <input type="text" name="q" class="search-input" id="searchInput" placeholder="Googleで検索...">
+  <button type="submit" class="search-btn">検索</button>
+</form>
   <!-- メイン3カラム -->
   <div class="main-grid">
     
