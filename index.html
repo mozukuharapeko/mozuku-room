@@ -11,10 +11,7 @@
       --border-color: #333333;
       --text-main: #e0e0e0;
       --text-muted: #888888;
-      --accent-color: #cccccc;
-      --hover-color: #2a2a2a;
       --mozubeya-accent: #ff9800;
-      --sns-accent: #2196f3;
     }
 
     * {
@@ -29,6 +26,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       font-size: 13px;
       line-height: 1.5;
+      padding: 10px;
     }
 
     /* 市松模様パターン背景 */
@@ -55,10 +53,9 @@
     .container {
       max-width: 1000px;
       margin: 0 auto;
-      padding: 10px;
     }
 
-    /* ヘッダーエリア */
+    /* ヘッダー */
     header {
       border: 1px solid var(--border-color);
       margin-bottom: 10px;
@@ -69,23 +66,15 @@
       border-top: 3px solid #555;
     }
 
-    .logo-area {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-
     .logo {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 900;
-      letter-spacing: -1px;
       color: #ffffff;
-      text-shadow: 1px 1px 2px #000;
     }
 
     .logo span {
       color: #aaaaaa;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .sub-text {
@@ -93,15 +82,14 @@
       color: var(--text-muted);
     }
 
-    /* 検索バーエリア */
+    /* 検索バー */
     .search-box {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      padding: 12px;
-      margin-bottom: 12px;
+      padding: 10px;
+      margin-bottom: 10px;
       display: flex;
       gap: 8px;
-      align-items: center;
     }
 
     .search-input {
@@ -122,22 +110,17 @@
       font-size: 12px;
       font-weight: bold;
     }
-    .search-btn:hover {
-      background: #444;
-    }
 
-    /* メイン 3カラムレイアウト */
+    /* メイン3カラムレイアウト */
     .main-grid {
-      display: grid;
-      grid-template-columns: 210px 1fr 220px;
+      display: flex;
+      flex-wrap: wrap;
       gap: 10px;
     }
 
-    @media (max-width: 768px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .left-col { flex: 1 1 200px; }
+    .center-col { flex: 2 1 400px; }
+    .right-col { flex: 1 1 200px; }
 
     .panel {
       background: var(--card-bg);
@@ -151,15 +134,13 @@
       font-size: 12px;
       border-bottom: 1px solid var(--border-color);
       color: #ffffff;
-      display: flex;
-      justify-content: space-between;
     }
 
     .panel-body {
       padding: 8px 10px;
     }
 
-    /* 左側カテゴリメニュー */
+    /* 左側メニュー */
     .category-list {
       list-style: none;
     }
@@ -172,57 +153,21 @@
       display: block;
       padding: 6px 8px;
       color: var(--text-main);
-      font-size: 12px;
     }
 
-    .category-item a:hover {
-      background-color: var(--hover-color);
-      text-decoration: none;
-    }
-
-    /* 本命コンテンツハイライト */
-    .category-item.highlight-link a {
+    .category-item.highlight a {
       color: var(--mozubeya-accent);
       font-weight: bold;
     }
-    .category-item.highlight-link a:hover {
-      background-color: #2a1f0d;
-    }
-
-    .category-item.sns-link a {
-      color: #64b5f6;
-    }
 
     /* 中央トピックス */
-    .tab-nav {
-      display: flex;
-      border-bottom: 1px solid var(--border-color);
-      background: #141414;
-    }
-
-    .tab-item {
-      padding: 6px 12px;
-      cursor: pointer;
-      border-right: 1px solid var(--border-color);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .tab-item.active {
-      background: var(--card-bg);
-      color: #fff;
-      font-weight: bold;
-      border-bottom: 1px solid var(--card-bg);
-    }
-
     .news-list {
       list-style: none;
-      padding: 4px 0;
     }
 
     .news-item {
-      padding: 6px 8px;
-      border-bottom: 1px solid #1a1a1a;
+      padding: 6px 0;
+      border-bottom: 1px solid #222;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -237,16 +182,11 @@
       margin-right: 6px;
     }
 
-    .news-item span.time {
-      color: var(--text-muted);
-      font-size: 11px;
-    }
-
     /* 右側ショートカット */
     .shortcut-btn {
       display: block;
       width: 100%;
-      padding: 7px;
+      padding: 8px;
       margin-bottom: 6px;
       background: #282828;
       color: #fff;
@@ -254,12 +194,7 @@
       text-align: center;
       font-size: 12px;
       border-radius: 3px;
-      cursor: pointer;
-    }
-    .shortcut-btn:hover {
-      background: #383838;
       text-decoration: none;
-      color: #fff;
     }
     .shortcut-btn.primary {
       background: #3a2b10;
@@ -267,14 +202,11 @@
       color: var(--mozubeya-accent);
       font-weight: bold;
     }
-    .shortcut-btn.primary:hover {
-      background: #4d3a16;
-    }
 
     footer {
       border-top: 1px solid var(--border-color);
-      margin-top: 20px;
-      padding: 15px;
+      margin-top: 15px;
+      padding: 12px;
       text-align: center;
       font-size: 11px;
       color: var(--text-muted);
@@ -286,7 +218,7 @@
 <div class="container">
   <!-- ヘッダー -->
   <header class="ichimatsu-pattern">
-    <div class="logo-area">
+    <div>
       <div class="logo">MOZU! <span>JAPAN</span></div>
       <div class="sub-text">もずーじゃぱん ポータル</div>
     </div>
@@ -295,4 +227,80 @@
 
   <!-- 検索バー -->
   <div class="search-box">
-    <input type="
+    <input type="text" class="search-input" id="searchInput" placeholder="もずーじゃぱん内を検索...">
+    <button class="search-btn" onclick="alert('もずーじゃぱんは今日も平和です')">検索</button>
+  </div>
+
+  <!-- メイン3カラム -->
+  <div class="main-grid">
+    
+    <!-- 左：コンテンツメニュー -->
+    <div class="left-col">
+      <div class="panel">
+        <div class="panel-header ichimatsu-pattern">🐾 もずべやコンテンツ</div>
+        <ul class="category-list">
+          <li class="category-item highlight"><a href="chikubi.html">🎮 乳首クリッカー</a></li>
+          <li class="category-item highlight"><a href="takodiagnosis.html">📋 他己診断ツール</a></li>
+          <li class="category-item highlight"><a href="chat_script1.html">💬 チャットスクリプト #1</a></li>
+          <li class="category-item highlight"><a href="chat_script2.html">💬 チャットスクリプト #2</a></li>
+          <li class="category-item"><a href="https://twitter.com/" target="_blank">🌐 My SNS (X)</a></li>
+          <li class="category-item"><a href="#" onclick="alert('パロディです')">ニュース・速報</a></li>
+          <li class="category-item"><a href="#" onclick="alert('パロディです')">IT・テクノロジー</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 中：トピックス -->
+    <div class="center-col">
+      <div class="panel">
+        <div class="panel-header ichimatsu-pattern">主要トピックス</div>
+        <div class="panel-body">
+          <ul class="news-list">
+            <li class="news-item">
+              <div><span class="news-tag">GAME</span><a href="chikubi.html">乳首クリッカー（ガリ穴フィーバー搭載）</a></div>
+              <span class="sub-text">直行</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag">TOOL</span><a href="takodiagnosis.html">他己診断ページ</a></div>
+              <span class="sub-text">直行</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag">SCRIPT</span><a href="chat_script1.html">チャットスクリプト Part 1</a></div>
+              <span class="sub-text">直行</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag">SCRIPT</span><a href="chat_script2.html">チャットスクリプト Part 2</a></div>
+              <span class="sub-text">直行</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag">SNS</span><a href="https://twitter.com/" target="_blank">おじょうさまの公式SNS</a></div>
+              <span class="sub-text">外部</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：ショートカット -->
+    <div class="right-col">
+      <div class="panel">
+        <div class="panel-header ichimatsu-pattern">クイックアクセス</div>
+        <div class="panel-body">
+          <a href="chikubi.html" class="shortcut-btn primary">🎮 乳首クリッカー</a>
+          <a href="takodiagnosis.html" class="shortcut-btn">📋 他己診断</a>
+          <a href="chat_script1.html" class="shortcut-btn">💬 スクリプト 1</a>
+          <a href="chat_script2.html" class="shortcut-btn">💬 スクリプト 2</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- フッター -->
+  <footer class="ichimatsu-pattern">
+    <p>Copyright (C) Mozu-Japan & Mozubeya. All Rights Reserved.</p>
+  </footer>
+</div>
+
+</body>
+</html>
