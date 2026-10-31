@@ -3,16 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚪ 乳首クリッカー ⚪</title>
+    <title>⚪ 乳首クリッカー Deluxe ⚪</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @keyframes fever-glow {
+            0% { box-shadow: 0 0 20px #ec4899, inset 0 0 20px #ec4899; }
+            50% { box-shadow: 0 0 50px #8b5cf6, inset 0 0 50px #8b5cf6; }
+            100% { box-shadow: 0 0 20px #ec4899, inset 0 0 20px #ec4899; }
+        }
+        .fever-mode {
+            animation: fever-glow 1s infinite;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none">
+<body id="body-bg" class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none transition-colors duration-300">
 
     <!-- ヘッダー -->
     <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 flex justify-between items-center shadow-md">
         <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
-            <span>⚪</span> 乳首クリッカー <span class="text-xs bg-pink-600 px-2 py-0.5 rounded-full">Deluxe</span>
+            <span>⚪</span> 乳首クリッカー <span class="text-xs bg-pink-600 px-2 py-0.5 rounded-full">Deluxe + ガリ穴</span>
         </h1>
         <button onclick="goToHome()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-2 px-4 rounded-xl transition cursor-pointer">
             🏠 もずべやに戻る
@@ -23,16 +33,22 @@
     <main class="flex-grow container mx-auto px-4 py-6 max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         
         <!-- 左側：クリックエリア＆スコア -->
-        <div class="md:col-span-6 bg-slate-800/80 backdrop-blur border border-slate-700 p-6 rounded-2xl shadow-xl text-center space-y-6 flex flex-col items-center justify-center">
+        <div id="main-card" class="md:col-span-6 bg-slate-800/80 backdrop-blur border border-slate-700 p-6 rounded-2xl shadow-xl text-center space-y-6 flex flex-col items-center justify-center transition-all">
             
-            <div class="space-y-1">
+            <div class="space-y-1 w-full">
                 <p class="text-xs text-pink-400 font-bold uppercase tracking-widest" id="player-title">称号：ただの通りすがりの変態</p>
                 <h2 class="text-4xl font-black text-white tracking-tight"><span id="score">0</span> <span class="text-lg text-slate-400">CP</span></h2>
                 <p class="text-xs text-slate-400">毎秒獲得: <span id="cps">0</span> CP/s</p>
+                
+                <!-- ガリ穴フィーバーゲージ -->
+                <div class="w-full bg-slate-700 rounded-full h-3 mt-3 overflow-hidden p-0.5 border border-slate-600">
+                    <div id="fever-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
+                </div>
+                <p class="text-xs font-bold text-pink-300 mt-1" id="fever-status">🔥 ガリ穴ゲージ: 0 / 50</p>
             </div>
 
-            <!-- クリック対象（カエルさん・png指定） -->
-            <div class="relative group cursor-pointer py-4" onclick="clickTarget(event)">
+            <!-- クリック対象（カエルさん） -->
+            <div class="relative group cursor-pointer py-2" onclick="clickTarget(event)">
                 <div class="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-3xl blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
                 <div class="relative bg-slate-900 p-3 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden max-w-xs mx-auto transform active:scale-95 transition duration-100">
                     <img id="click-target-img" src="./chikubi.png" alt="乳首カエル" class="w-full rounded-xl object-cover pointer-events-none" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60';">
@@ -42,7 +58,7 @@
                 </div>
             </div>
 
-            <p class="text-xs text-slate-400">カエルさんをクリックしてポイント（CP）を稼ごう！</p>
+            <p class="text-xs text-slate-400" id="action-hint">カエルさんをクリックしてポイントを稼ごう！</p>
         </div>
 
         <!-- 右側：ショップ（アップグレード） -->
@@ -54,7 +70,7 @@
                     <span>👆</span> タップ強化（指先の鍛錬）
                 </h3>
                 <div class="space-y-2">
-                    <button onclick="buyUpgrade('power', 1, 15)" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
+                    <button onclick="buyUpgrade()" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
                         <div>
                             <p class="font-bold text-sm text-pink-300">爪の先ほどの優しさ <span class="text-xs font-normal text-slate-400">(Lv.<span id="lvl-power">0</span>)</span></p>
                             <p class="text-xs text-slate-400">タップ時の威力 +1</p>
@@ -71,47 +87,42 @@
                 </h3>
                 <div class="space-y-2.5 max-h-80 overflow-y-auto pr-1" id="auto-shop-container">
                     
-                    <!-- Lv.1 -->
                     <button onclick="buyAuto(0)" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
                         <div>
                             <p class="font-bold text-sm text-indigo-300">温かい吐息 <span class="text-xs font-normal text-slate-400">(所持: <span id="auto-count-0">0</span>)</span></p>
-                            <p class="text-xs text-slate-400">秒間 +1 CP / 説明: じんわり温める初歩の愛</p>
+                            <p class="text-xs text-slate-400">秒間 +1 CP</p>
                         </div>
                         <span class="font-bold text-emerald-400 text-sm" id="auto-cost-0">50 CP</span>
                     </button>
 
-                    <!-- Lv.2 -->
                     <button onclick="buyAuto(1)" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
                         <div>
                             <p class="font-bold text-sm text-indigo-300">自動揉みマシーン 2号機 <span class="text-xs font-normal text-slate-400">(所持: <span id="auto-count-1">0</span>)</span></p>
-                            <p class="text-xs text-slate-400">秒間 +5 CP / 説明: なぜか2号機から始まる謎の機械</p>
+                            <p class="text-xs text-slate-400">秒間 +5 CP</p>
                         </div>
                         <span class="font-bold text-emerald-400 text-sm" id="auto-cost-1">300 CP</span>
                     </button>
 
-                    <!-- Lv.3 -->
                     <button onclick="buyAuto(2)" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
                         <div>
                             <p class="font-bold text-sm text-indigo-300">真夜中のセクハラ幽霊 <span class="text-xs font-normal text-slate-400">(所持: <span id="auto-count-2">0</span>)</span></p>
-                            <p class="text-xs text-slate-400">秒間 +25 CP / 説明: 幽霊が成仏代わりにポチポチ</p>
+                            <p class="text-xs text-slate-400">秒間 +25 CP</p>
                         </div>
                         <span class="font-bold text-emerald-400 text-sm" id="auto-cost-2">1400 CP</span>
                     </button>
 
-                    <!-- Lv.4 -->
                     <button onclick="buyAuto(3)" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
                         <div>
                             <p class="font-bold text-sm text-indigo-300">全自動ぷにぷにファクトリー <span class="text-xs font-normal text-slate-400">(所持: <span id="auto-count-3">0</span>)</span></p>
-                            <p class="text-xs text-slate-400">秒間 +100 CP / 説明: 工場ラインでひたすら量産</p>
+                            <p class="text-xs text-slate-400">秒間 +100 CP</p>
                         </div>
                         <span class="font-bold text-emerald-400 text-sm" id="auto-cost-3">7000 CP</span>
                     </button>
 
-                    <!-- Lv.5 -->
                     <button onclick="buyAuto(4)" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
                         <div>
                             <p class="font-bold text-sm text-indigo-300">宇宙規模の愛撫エネルギー <span class="text-xs font-normal text-slate-400">(所持: <span id="auto-count-4">0</span>)</span></p>
-                            <p class="text-xs text-slate-400">秒間 +500 CP / 説明: 銀河系を巻き込んだ神聖な波動</p>
+                            <p class="text-xs text-slate-400">秒間 +500 CP</p>
                         </div>
                         <span class="font-bold text-emerald-400 text-sm" id="auto-cost-4">35000 CP</span>
                     </button>
@@ -135,6 +146,8 @@
             clickPower: 1,
             powerLevel: 0,
             powerCost: 15,
+            feverCount: 0,
+            isFever: false,
             autos: [
                 { count: 0, cps: 1, cost: 50, costMult: 1.15 },
                 { count: 0, cps: 5, cost: 300, costMult: 1.15 },
@@ -143,6 +156,8 @@
                 { count: 0, cps: 500, cost: 35000, costMult: 1.20 }
             ]
         };
+
+        const maxFeverCount = 50; // 50回クリックでフィーバー発動！
 
         const titles = [
             { threshold: 0, name: "ただの通りすがりの変態" },
@@ -158,110 +173,5 @@
         }
 
         function clickTarget(event) {
-            game.score += game.clickPower;
-            game.totalClicks++;
-            
-            showFloatingText(event.clientX, event.clientY, `+${game.clickPower}`);
-            updateDisplay();
-        }
-
-        function showFloatingText(x, y, text) {
-            const el = document.createElement('div');
-            el.innerText = text;
-            el.className = 'absolute text-pink-400 font-bold text-lg pointer-events-none transition-all duration-500 z-50';
-            el.style.left = (x || window.innerWidth / 2) + 'px';
-            el.style.top = (y || window.innerHeight / 2) + 'px';
-            document.body.appendChild(el);
-
-            setTimeout(() => {
-                el.style.transform = 'translateY(-40px) scale(1.2)';
-                el.style.opacity = '0';
-            }, 20);
-
-            setTimeout(() => {
-                el.remove();
-            }, 500);
-        }
-
-        function buyUpgrade(type, powerInc, baseCost) {
-            if (game.score >= game.powerCost) {
-                game.score -= game.powerCost;
-                game.clickPower += powerInc;
-                game.powerLevel++;
-                game.powerCost = Math.floor(game.powerCost * 1.5);
-                updateDisplay();
-            } else {
-                alert("ポイントが足りないよっ！もっとカエルさんをクリックしてね！🥺");
-            }
-        }
-
-        function buyAuto(index) {
-            let auto = game.autos[index];
-            if (game.score >= auto.cost) {
-                game.score -= auto.cost;
-                auto.count++;
-                auto.cost = Math.floor(auto.cost * auto.costMult);
-                updateDisplay();
-            } else {
-                alert("ポイントが足りないよーっ！💦");
-            }
-        }
-
-        function getCps() {
-            let totalCps = 0;
-            for (let i = 0; i < game.autos.length; i++) {
-                totalCps += game.autos[i].count * game.autos[i].cps;
-            }
-            return totalCps;
-        }
-
-        function updateTitle() {
-            let currentTitle = titles[0].name;
-            for (let i = 0; i < titles.length; i++) {
-                if (game.totalClicks >= titles[i].threshold) {
-                    currentTitle = titles[i].name;
-                }
-            }
-            document.getElementById("player-title").innerText = "称号：" + currentTitle;
-        }
-
-        function updateDisplay() {
-            document.getElementById("score").innerText = Math.floor(game.score);
-            document.getElementById("cps").innerText = getCps();
-            
-            document.getElementById("lvl-power").innerText = game.powerLevel;
-            document.getElementById("cost-power").innerText = game.powerCost + " CP";
-
-            for (let i = 0; i < game.autos.length; i++) {
-                document.getElementById(`auto-count-${i}`).innerText = game.autos[i].count;
-                document.getElementById(`auto-cost-${i}`).innerText = game.autos[i].cost + " CP";
-            }
-
-            updateTitle();
-        }
-
-        setInterval(() => {
-            let cps = getCps();
-            if (cps > 0) {
-                game.score += cps / 10;
-                updateDisplay();
-            }
-        }, 100);
-
-        window.onload = function() {
-            let saved = localStorage.getItem("chikubi_game_save");
-            if (saved) {
-                try {
-                    let loaded = JSON.parse(saved);
-                    game = Object.assign(game, loaded);
-                } catch(e) {}
-            }
-            updateDisplay();
-        };
-
-        setInterval(() => {
-            localStorage.setItem("chikubi_game_save", JSON.stringify(game));
-        }, 5000);
-    </script>
-</body>
-</html>
+            let addValue = game.clickPower * (game.isFever ? 5 : 1);
+            game.score
