@@ -23,7 +23,7 @@
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 13px;
       line-height: 1.5;
       padding: 10px;
@@ -160,6 +160,10 @@
       font-weight: bold;
     }
 
+    .category-item.dead a {
+      color: #666;
+    }
+
     /* 中央トピックス */
     .news-list {
       list-style: none;
@@ -222,7 +226,7 @@
       <div class="logo">MOZU! <span>JAPAN</span></div>
       <div class="sub-text">もずーじゃぱん ポータル</div>
     </div>
-    <div class="sub-text">2026年10月31日 | ポータル開設中</div>
+    <div class="sub-text">2026年10月31日 | ポータル開店中</div>
   </header>
 
   <!-- 検索バー -->
@@ -240,12 +244,12 @@
         <div class="panel-header ichimatsu-pattern">🐾 もずべやコンテンツ</div>
         <ul class="category-list">
           <li class="category-item highlight"><a href="chikubi.html">🎮 乳首クリッカー</a></li>
-          <li class="category-item highlight"><a href="takodiagnosis.html">📋 他己診断ツール</a></li>
-          <li class="category-item highlight"><a href="chat_script1.html">💬 チャットスクリプト #1</a></li>
-          <li class="category-item highlight"><a href="chat_script2.html">💬 チャットスクリプト #2</a></li>
-          <li class="category-item"><a href="https://twitter.com/" target="_blank">🌐 My SNS (X)</a></li>
-          <li class="category-item"><a href="#" onclick="alert('パロディです')">ニュース・速報</a></li>
-          <li class="category-item"><a href="#" onclick="alert('パロディです')">IT・テクノロジー</a></li>
+          <li class="category-item dead"><a href="#" onclick="alert('404：該当ファイルは消滅しました')">📋 他己診断 (404)</a></li>
+          <li class="category-item dead"><a href="#" onclick="alert('404：該当ファイルは消滅しました')">💬 スクリプト #1 (404)</a></li>
+          <li class="category-item dead"><a href="#" onclick="alert('404：該当ファイルは消滅しました')">💬 スクリプト #2 (404)</a></li>
+          <li class="category-item"><a href="#" onclick="alert('ハリボテです')">ニュース・速報</a></li>
+          <li class="category-item"><a href="#" onclick="alert('ハリボテです')">IT・テクノロジー</a></li>
+          <li class="category-item"><a href="#" onclick="alert('ハリボテです')">もずー知恵袋</a></li>
         </ul>
       </div>
     </div>
@@ -257,24 +261,20 @@
         <div class="panel-body">
           <ul class="news-list">
             <li class="news-item">
-              <div><span class="news-tag">GAME</span><a href="chikubi.html">乳首クリッカー（ガリ穴フィーバー搭載）</a></div>
-              <span class="sub-text">直行</span>
+              <div><span class="news-tag">GAME</span><a href="chikubi.html">【唯一動く】乳首クリッカー（ガリ穴フィーバー搭載）</a></div>
+              <span class="sub-text">稼働中</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag">TOOL</span><a href="takodiagnosis.html">他己診断ページ</a></div>
-              <span class="sub-text">直行</span>
+              <div><span class="news-tag">PORTAL</span><a href="#" onclick="alert('もずーじゃぱんへようこそ！')">もずーじゃぱん市松模様版リニューアル</a></div>
+              <span class="sub-text">NEW</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag">SCRIPT</span><a href="chat_script1.html">チャットスクリプト Part 1</a></div>
-              <span class="sub-text">直行</span>
+              <div><span class="news-tag">DEV</span><a href="#" onclick="alert('海蘊ツールは現在準備中です')">【次回作】海蘊ツール（DRRR! 備考同期）</a></div>
+              <span class="sub-text">予定</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag">SCRIPT</span><a href="chat_script2.html">チャットスクリプト Part 2</a></div>
-              <span class="sub-text">直行</span>
-            </li>
-            <li class="news-item">
-              <div><span class="news-tag">SNS</span><a href="https://twitter.com/" target="_blank">おじょうさまの公式SNS</a></div>
-              <span class="sub-text">外部</span>
+              <div><span class="news-tag">NOTICE</span><a href="#" onclick="alert('過去コンテンツは綺麗さっぱり整理されました')">一部リンクの404化およびX削除について</a></div>
+              <span class="sub-text">告知</span>
             </li>
           </ul>
         </div>
@@ -287,9 +287,7 @@
         <div class="panel-header ichimatsu-pattern">クイックアクセス</div>
         <div class="panel-body">
           <a href="chikubi.html" class="shortcut-btn primary">🎮 乳首クリッカー</a>
-          <a href="takodiagnosis.html" class="shortcut-btn">📋 他己診断</a>
-          <a href="chat_script1.html" class="shortcut-btn">💬 スクリプト 1</a>
-          <a href="chat_script2.html" class="shortcut-btn">💬 スクリプト 2</a>
+          <a href="#" class="shortcut-btn" onclick="alert('海蘊ツールは現在開発準備中です！')">🌊 海蘊ツール (準備中)</a>
         </div>
       </div>
     </div>
