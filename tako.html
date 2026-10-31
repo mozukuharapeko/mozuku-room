@@ -145,6 +145,15 @@
         var currentTarget = "";
         var radarChartInstance = null;
 
+        // XSS対策：HTMLエスケープ処理関数
+        function escapeHTML(str) {
+            if (!str) return "";
+            return str.replace(/[&<>'"]/g, function(match) {
+                const escape = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+                return escape[match];
+            });
+        }
+
         // 100問の質問プール
         var questionPool = [
             { id: 1, type: 0, text: "無人島にこの人と2人きりになったらどうなる？", options: ["自分が引っ張って生還する", "こっそり寄生してちゃっかり生き残る", "島民と仲良くなってリゾート化する", "3日目くらいで音信不通になる"] },
@@ -255,7 +264,8 @@
         var activeQuestions = [];
 
         window.goToHome = function() {
-            window.location.href = "https://mozukuharapeko.github.io/mozuku-room/";
+            // パスに依存せず、現在のURLのルート（?や#を取り除いた元の場所）に戻るように修正
+            window.location.href = window.location.pathname;
         };
 
         window.showView = function(viewName) {
@@ -269,6 +279,12 @@
             var nameInput = document.getElementById("input-target-name").value.trim();
             if (!nameInput) {
                 alert("ねぇ、お名前を入力してくれないと作れないよーっ？🥺💦");
+                return;
+            }
+
+            // DBエラーやXSSの原因になる特殊記号をブロック
+            if (/[/\\<>"'&]/.test(nameInput)) {
+                alert("お名前に記号（ / \\ < > \" ' & ）は使えないよっ！文字だけで入力してね？🥺");
                 return;
             }
 
@@ -325,13 +341,14 @@
                 snapshot.forEach(function(doc) {
                     var data = doc.data();
                     var name = data.name || doc.id;
+                    var safeName = escapeHTML(name); // HTMLエスケープ処理
                     var responses = data.responses || [];
                     var count = responses.length;
 
                     var html = `
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100 gap-3">
                             <div>
-                                <span class="font-bold text-slate-800 text-base">${name} さん</span>
+                                <span class="font-bold text-slate-800 text-base">${safeName} さん</span>
                                 <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full ml-2">回答 ${count} 件</span>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
@@ -341,7 +358,7 @@
                                 <button onclick="window.location.href='?target=${encodeURIComponent(name)}#result'" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-lg transition cursor-pointer">
                                     📊 結果
                                 </button>
-                                <button onclick="deleteTargetPage('${name}')" class="text-xs bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-2.5 rounded-lg transition cursor-pointer" title="管理者用削除">
+                                <button onclick="deleteTargetPage('${safeName}')" class="text-xs bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-2.5 rounded-lg transition cursor-pointer" title="管理者用削除">
                                     🗑️ 削除
                                 </button>
                             </div>
@@ -366,7 +383,7 @@
 
         window.showAnswerView = function(name) {
             window.showView("answer");
-            document.getElementById("answer-title").innerText = name + " さんについての他己診断";
+            document.getElementById("answer-title").innerText = escapeHTML(name) + " さんについての他己診断";
             
             activeQuestions = getRandomQuestions(questionPool, 20);
 
@@ -432,7 +449,7 @@
 
         window.showResultView = function(name) {
             window.showView("result");
-            document.getElementById("result-title").innerText = name + " さんの他己診断結果";
+            document.getElementById("result-title").innerText = escapeHTML(name) + " さんの他己診断結果";
             
             var shareUrl = window.location.href.split('#')[0];
             document.getElementById("share-url-text").innerText = shareUrl;
@@ -445,19 +462,17 @@
 
                 document.getElementById("response-count").innerText = "総回答数: " + data.length + " 件";
 
-var counts = [0, 0, 0, 0];
+                var counts = [0, 0, 0, 0];
                 data.forEach(function(item) {
                     var ansObj = item.answers;
                     if (Array.isArray(ansObj)) {
                         ansObj.forEach(function(ans) {
-                            // 【修正】type じゃなくて choice を数えるよっ！✨
                             if (ans && typeof ans.choice === 'number') { 
                                 counts[ans.choice]++;
                             }
                         });
                     } else {
                         Object.values(ansObj).forEach(function(ans) {
-                            // 【修正】ここも choice に変更するのだっ！✨
                             if (ans && typeof ans.choice === 'number') { 
                                 counts[ans.choice]++;
                             }
@@ -466,7 +481,7 @@ var counts = [0, 0, 0, 0];
                 });
 
                 renderRadarChart(counts);
-                renderAnalysisAndSummary(name, counts, data.length);
+                renderAnalysisAndSummary(escapeHTML(name), counts, data.length);
                 renderCommentsList(data);
             }).catch(function(error) {
                 console.error("Error loading result:", error);
@@ -514,7 +529,6 @@ var counts = [0, 0, 0, 0];
             });
         }
 
-        // 4つの簡易分析＆甘口総評 ＋ AI海蘊の血液型当て判定
         function renderAnalysisAndSummary(name, counts, totalResponses) {
             var container = document.getElementById("analysis-container");
             
@@ -523,7 +537,6 @@ var counts = [0, 0, 0, 0];
                 return;
             }
 
-            // 最も数値が高い軸を判定して血液型ネタのコメントを生成
             var maxIndex = 0;
             var maxVal = counts[0];
             for (let i = 1; i < counts.length; i++) {
@@ -629,4 +642,3 @@ var counts = [0, 0, 0, 0];
     </script>
 </body>
 </html>
-```<ElicitationsGroup></ElicitationsGroup>
