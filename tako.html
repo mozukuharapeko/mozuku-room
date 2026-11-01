@@ -537,6 +537,10 @@
                 return;
             }
 
+            // 全回答数を計算（割合を出すため）
+            var totalAnswers = counts.reduce((a, b) => a + b, 0);
+
+            // 一番高いステータス（maxIndex）を特定
             var maxIndex = 0;
             var maxVal = counts[0];
             for (let i = 1; i < counts.length; i++) {
@@ -546,43 +550,83 @@
                 }
             }
 
-            var bloodTypeComment = "";
+            // 割合を計算
+            var rate0 = counts[0] / totalAnswers;
+            var rate1 = counts[1] / totalAnswers;
+            var rate2 = counts[2] / totalAnswers;
+            var rate3 = counts[3] / totalAnswers;
+
+            // --- 動的テキスト生成 ---
+            
+            // 1. サバイバル・実用
+            var text0 = "";
+            if (rate0 >= 0.35) text0 = "圧倒的なサバイバル力！どんな過酷な環境でも自分のペースを崩さず、息をするようにピンチを切り抜ける究極の生存者です✨";
+            else if (rate0 >= 0.20) text0 = "自分のペースをしっかり守りながら、どんなピンチもちゃっかりサバイブしていく職人肌タイプ…✨ 機転の良さはピカ一です！";
+            else text0 = "サバイバル力よりロマン優先！？でも困った時は不思議と誰かが助けてくれる、放っておけない愛され力があります🌿";
+
+            // 2. 野望・エネルギー
+            var text1 = "";
+            if (rate1 >= 0.35) text1 = "あふれ出るパッション！一度火がついたら誰にも止められない、世界を巻き込む主人公のような爆発力を持っています🔥";
+            else if (rate1 >= 0.20) text1 = "ふとした瞬間にすごい爆発力を発揮したり、面白いことに全力を注げる情熱家さん🔥 ワクワクする未来に向かって突き進みます！";
+            else text1 = "無理に熱くならず、自分のエネルギーを上手にコントロールできる省エネの達人。ここぞという時のために力を温存しています💤";
+
+            // 3. ミステリアス・個性
+            var text2 = "";
+            if (rate2 >= 0.35) text2 = "観測不能のミステリアスオーラ！誰も真似できない独特すぎる世界観に、周りは完全に魅了（あるいは困惑）されています🔮";
+            else if (rate2 >= 0.20) text2 = "独自のこだわりや「譲れない世界観」が光っていて、まわりをいい意味でドキッとさせる魅力の持ち主🔮 深みがあって目が離せません！";
+            else text2 = "変に飾らない素直さが魅力！ミステリアスぶらない等身大の姿が、逆にまわりの人たちにものすごい安心感を与えているみたい✨";
+
+            // 4. 自然体・フラット
+            var text3 = "";
+            if (rate3 >= 0.35) text3 = "究極のマイナスイオン発生源！そこにいるだけで場が和み、あらゆる人の心のトゲトゲをなくす圧倒的な自然体マスターです☕";
+            else if (rate3 >= 0.20) text3 = "無理に気負わず、まわりの空気をふんわり和ませてくれる圧倒的マイペースさ🌿 一緒にいるとなんだかホッとする癒やし的存在です♪";
+            else text3 = "フラットでいるよりも、常にアンテナを張って刺激や変化を楽しみたいタイプ！その鋭い感性が毎日のスパイスになっています✨";
+
+            // 💌 動的総評（一番高いステータスで分岐）
+            var summaryText = "";
             if (maxIndex === 0) {
-                bloodTypeComment = "「ふむふむ…この几帳面で実用・サバイバル力高めのデータ、そして周りの空気をしっかり読んでるバランス……！ズバリあなたの血液型は<strong>【A型】</strong>ですねっ！……えっ、違った？いや、絶対ウソだ！隠しても無駄ですっ！w」";
+                summaryText = `${name}さんは、地に足がついた抜群の安定感と、ちゃっかり世の中を渡り歩く賢さをあわせ持つスーパーサバイバー！いざという時一番頼りになるし、そのマイペースさにみんな密かに救われてるんだよっ💕`;
             } else if (maxIndex === 1) {
-                bloodTypeComment = "「この圧倒的なマイペースさと、野望・エネルギッシュさが暴走している尖ったレーダーチャート……隠そうとしても無駄ですよ、あなたの血液型はズバリ<strong>【B型】</strong>！間違いない、AI海蘊の勘は当たるのだっ！✨」";
+                summaryText = `${name}さんは、内なる情熱と行動力でまわりをグイグイ引っ張る太陽みたいな存在！そのあふれるエネルギーに巻き込まれるのが、実はみんな楽しくて仕方ないみたいだよっ🔥💕`;
             } else if (maxIndex === 2) {
-                bloodTypeComment = "「この底知れないミステリアスさと、二面性のある偏ったステータス……ふっふっふ、一般人には観測不能なこの複雑怪奇なグラフ、あなたの血液型はズバリ<strong>【AB型】</strong>でしょ！……え、違うの？じゃあ宇宙人だねっ！👽」";
+                summaryText = `${name}さんは、知れば知るほど新しい一面が見えてくる底なしの沼！独特のセンスと世界観に、気づけばみんな夢中になっちゃう。他には絶対にいない唯一無二の存在感が最高だよっ🔮💕`;
             } else {
-                bloodTypeComment = "「このおおらかで細かいことは気にしないフラット感、そしてどこか大物オーラが漂うバランス……！ふふーん、分かっちゃいました、あなたの血液型はズバリ<strong>【O型】</strong>ですねっ！どう、当たったでしょ〜？😎」";
+                summaryText = `${name}さんは、一緒にいるだけで心のトゲトゲが丸くなるような、究極の癒やしオーラの持ち主！どんな自分でも受け入れてくれそうなそのフラットな優しさに、みんなメロメロなんだからねっ☕💕`;
             }
+
+            // 🤖 血液型オマケ
+            var bloodTypeComment = "";
+            if (maxIndex === 0) bloodTypeComment = "「ふむふむ…この几帳面で実用・サバイバル力高めのデータ、そして周りの空気をしっかり読んでるバランス……！ズバリあなたの血液型は<strong>【A型】</strong>ですねっ！……えっ、違った？いや、絶対ウソだ！隠しても無駄ですっ！w」";
+            else if (maxIndex === 1) bloodTypeComment = "「この圧倒的なマイペースさと、野望・エネルギッシュさが暴走している尖ったレーダーチャート……隠そうとしても無駄ですよ、あなたの血液型はズバリ<strong>【B型】</strong>！間違いない、AI海蘊の勘は当たるのだっ！✨」";
+            else if (maxIndex === 2) bloodTypeComment = "「この底知れないミステリアスさと、二面性のある偏ったステータス……ふっふっふ、一般人には観測不能なこの複雑怪奇なグラフ、あなたの血液型はズバリ<strong>【AB型】</strong>でしょ！……え、違うの？じゃあ宇宙人だねっ！👽」";
+            else bloodTypeComment = "「このおおらかで細かいことは気にしないフラット感、そしてどこか大物オーラが漂うバランス……！ふふーん、分かっちゃいました、あなたの血液型はズバリ<strong>【O型】</strong>ですねっ！どう、当たったでしょ〜？😎」";
 
             var html = `
                 <div class="space-y-3">
                     <div class="p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-100 space-y-1">
                         <p class="font-bold text-indigo-900 text-xs uppercase tracking-wider">🌿 1. サバイバル・実用（自分のペースと生存力）</p>
-                        <p class="text-slate-700 text-xs leading-relaxed">自分のペースをしっかり守りながら、どんなピンチもちゃっかりサバイブしていく職人肌タイプ…✨ いざという時の機転の良さはピカ一です！</p>
+                        <p class="text-slate-700 text-xs leading-relaxed">${text0}</p>
                     </div>
 
                     <div class="p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-100 space-y-1">
                         <p class="font-bold text-emerald-900 text-xs uppercase tracking-wider">🔥 2. 野望・エネルギー（秘めた情熱と行動力）</p>
-                        <p class="text-slate-700 text-xs leading-relaxed">ふとした瞬間にすごい爆発力を発揮したり、面白いことに全力を注げる情熱家さん🔥 ワクワクする未来に向かって突き進むエネルギーに周りも引っ張られちゃう♪</p>
+                        <p class="text-slate-700 text-xs leading-relaxed">${text1}</p>
                     </div>
 
                     <div class="p-3.5 bg-purple-50/60 rounded-xl border border-purple-100 space-y-1">
                         <p class="font-bold text-purple-900 text-xs uppercase tracking-wider">🔮 3. ミステリアス・個性（独自のこだわりと世界観）</p>
-                        <p class="text-slate-700 text-xs leading-relaxed">独自のこだわりや「譲れない世界観」が光っていて、まわりをいい意味でドキッとさせる魅力の持ち主🔮 どこか底知れない深みがあって目が離せません…！</p>
+                        <p class="text-slate-700 text-xs leading-relaxed">${text2}</p>
                     </div>
 
                     <div class="p-3.5 bg-amber-50/60 rounded-xl border border-amber-100 space-y-1">
                         <p class="font-bold text-amber-900 text-xs uppercase tracking-wider">☕ 4. 自然体・フラット（周りを和ませるマイペース）</p>
-                        <p class="text-slate-700 text-xs leading-relaxed">無理に気負わず、まわりの空気をふんわり和ませてくれる圧倒的マイペースさ🌿 一緒にいるとなんだかホッとする、みんなの癒やし的存在です♪</p>
+                        <p class="text-slate-700 text-xs leading-relaxed">${text3}</p>
                     </div>
 
                     <div class="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl shadow-sm space-y-1.5 mt-4">
                         <p class="font-bold text-xs uppercase tracking-wider opacity-90">💌 ${name} さんへのあま〜い総評</p>
                         <p class="text-xs leading-relaxed font-medium">
-                            ${name}さんは、自分の世界を大切にしながらも、周りにはちゃっかり愛されちゃう不思議な魅力の持ち主！ちょっとこだわりが強いところも、マイペースなところも、ぜんぶひっくるめて最高にチャーミングなんだからねっ。まわりからの「大好き」と「目撃証言」がそれをちゃんと証明してるよ〜っ！💕
+                            ${summaryText}
                         </p>
                     </div>
 
@@ -599,7 +643,6 @@
             `;
             container.innerHTML = html;
         }
-
         function renderCommentsList(data) {
             var listContainer = document.getElementById("comments-list");
             listContainer.innerHTML = "";
