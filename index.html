@@ -9,16 +9,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --pink: #ffc9de;
-      --pink-deep: #ff7eb3;
-      --sky: #cfe8ff;
-      --mint: #d3f5e4;
-      --lemon: #fff3c4;
-      --lavender: #e5dcff;
-      --cream: #fffaf2;
-      --ink: #6a4560;
-      --ink-soft: #a98aa0;
-      --line: #ffd9e8;
+      --bg: #1f1f23;
+      --orange-soft: #ffd7b8;
+      --orange: #ffb27a;
+      --sky: #cfe3f5;
+      --mint: #cfeadb;
+      --lemon: #f7e9b8;
+      --lavender: #dcd3f3;
+      --cream: #2b2b31;
+      --panel2: #36363d;
+      --ink: #ece6e0;
+      --ink-soft: #a9a39e;
+      --line: #46464e;
+      --on-pastel: #3d2e24;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,23 +31,20 @@
       line-height: 1.6;
       color: var(--ink);
       padding: 14px;
-      background-color: #fff3f8;
-      background-image: radial-gradient(#ffd6e8 18%, transparent 19%), radial-gradient(#ffd6e8 18%, transparent 19%);
-      background-size: 28px 28px;
-      background-position: 0 0, 14px 14px;
+      background-color: var(--bg);
     }
-    a { color: #e0559a; text-decoration: none; }
+    a { color: #ffb98a; text-decoration: none; }
     a:hover { text-decoration: underline wavy; text-underline-offset: 3px; }
-    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--pink-deep); outline-offset: 2px; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
 
     .container { max-width: 1020px; margin: 0 auto; }
 
     /* ヘッダー：ギンガムチェック */
     header {
       position: relative;
-      border: 3px solid #fff;
+      border: 2px solid var(--line);
       border-radius: 28px;
-      box-shadow: 0 0 0 2px var(--pink), 0 6px 0 var(--pink);
+      box-shadow: 0 5px 0 #17171a;
       padding: 18px 24px;
       margin-bottom: 20px;
       display: flex;
@@ -52,29 +52,29 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 8px;
-      background-color: #fff;
+      background-color: var(--cream);
       background-image:
-        linear-gradient(90deg, rgba(255,182,213,.45) 50%, transparent 50%),
-        linear-gradient(rgba(255,182,213,.45) 50%, transparent 50%);
+        linear-gradient(90deg, rgba(255,190,140,.07) 50%, transparent 50%),
+        linear-gradient(rgba(255,190,140,.07) 50%, transparent 50%);
       background-size: 28px 28px;
     }
     .logo {
       font-size: 34px;
       font-weight: 900;
-      color: var(--pink-deep);
+      color: #ffbf93;
       letter-spacing: .04em;
-      text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 4px 0 #ffd0e4;
+      text-shadow: 0 3px 0 #5a3d2a;
     }
-    .logo span { color: #7ab8f5; font-size: 20px; }
+    .logo span { color: #8fbde6; font-size: 20px; }
     .sub-text { font-size: 12px; color: var(--ink-soft); }
-    header .sub-text { background: #fff; border-radius: 99px; padding: 3px 14px; color: var(--ink); }
+    header .sub-text { background: var(--panel2); border-radius: 99px; padding: 3px 14px; color: var(--ink); }
 
     /* 検索 */
     .search-box {
       display: flex;
       gap: 8px;
-      background: #fff;
-      border: 2px solid var(--pink);
+      background: var(--cream);
+      border: 2px solid var(--line);
       border-radius: 99px;
       padding: 6px 6px 6px 18px;
       margin-bottom: 20px;
@@ -90,16 +90,16 @@
     .search-input:focus { outline: none; }
     .search-btn {
       border: none;
-      background: var(--pink-deep);
-      color: #fff;
+      background: var(--orange);
+      color: var(--on-pastel);
       font: inherit;
       font-weight: 700;
       padding: 6px 22px;
       border-radius: 99px;
       cursor: pointer;
-      box-shadow: 0 3px 0 #e45c96;
+      box-shadow: 0 3px 0 #c4824f;
     }
-    .search-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #e45c96; }
+    .search-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #c4824f; }
 
     /* レイアウト */
     .main-grid { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
@@ -118,9 +118,9 @@
       padding: 8px 16px;
       font-weight: 700;
       font-size: 14px;
-      color: var(--ink);
-      background: var(--pink);
-      border-bottom: 2px dashed #fff;
+      color: var(--on-pastel);
+      background: var(--orange-soft);
+      border-bottom: 2px dashed rgba(0,0,0,.2);
     }
     .panel.sky .panel-header { background: var(--sky); }
     .panel.mint .panel-header { background: var(--mint); }
@@ -135,15 +135,15 @@
       padding: 7px 12px;
       margin-top: 6px;
       border-radius: 99px;
-      background: #fff;
+      background: var(--panel2);
       border: 2px solid var(--line);
       color: var(--ink);
       font-weight: 500;
     }
-    .category-item a:hover { background: var(--pink); text-decoration: none; }
-    .category-item.highlight a { font-weight: 700; border-color: var(--pink); }
-    .category-item.custom-link a { border-color: #cfe8ff; }
-    .category-item.custom-link a:hover { background: var(--sky); }
+    .category-item a:hover { background: var(--orange-soft); color: var(--on-pastel); text-decoration: none; }
+    .category-item.highlight a { font-weight: 700; border-color: #6b5545; }
+    .category-item.custom-link a { border-color: #4d5966; }
+    .category-item.custom-link a:hover { background: var(--sky); color: var(--on-pastel); }
     .category-item.empty-slot a { border-style: dashed; color: var(--ink-soft); }
 
     /* ニュース */
@@ -179,7 +179,7 @@
       width: 100%;
       font: inherit;
       color: var(--ink);
-      background: #fff;
+      background: #232327;
       border: 2px solid var(--line);
       border-radius: 14px;
       padding: 6px 12px;
@@ -194,8 +194,8 @@
       cursor: pointer;
       margin-top: 4px;
     }
-    .btn-login { background: var(--pink-deep); color: #fff; border: none; box-shadow: 0 3px 0 #e45c96; }
-    .btn-admin { background: #fff; color: #7a5fc4; border: 2px solid #c9b8ff; }
+    .btn-login { background: var(--orange); color: var(--on-pastel); border: none; box-shadow: 0 3px 0 #c4824f; }
+    .btn-admin { background: transparent; color: #cdbff5; border: 2px solid #6d6590; }
     .login-links { display: flex; justify-content: space-between; font-size: 11px; }
     .login-links a { color: var(--ink-soft); }
 
@@ -205,9 +205,9 @@
       text-align: center;
       font-size: 12px;
       color: var(--ink-soft);
-      background: #fff;
+      background: var(--cream);
       border-radius: 99px;
-      border: 2px dashed var(--pink);
+      border: 2px dashed var(--line);
     }
 
     @media (max-width: 560px) {
