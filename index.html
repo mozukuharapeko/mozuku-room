@@ -4,213 +4,215 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>もずーじゃぱん (MOZUU! JAPAN)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --border-color: #333333;
-      --text-main: #e0e0e0;
-      --text-muted: #888888;
-      --mozubeya-accent: #ff9800;
+      --pink: #ffc9de;
+      --pink-deep: #ff7eb3;
+      --sky: #cfe8ff;
+      --mint: #d3f5e4;
+      --lemon: #fff3c4;
+      --lavender: #e5dcff;
+      --cream: #fffaf2;
+      --ink: #6a4560;
+      --ink-soft: #a98aa0;
+      --line: #ffd9e8;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 13px;
-      line-height: 1.5;
-      padding: 10px;
+      font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      padding: 14px;
+      background-color: #fff3f8;
+      background-image: radial-gradient(#ffd6e8 18%, transparent 19%), radial-gradient(#ffd6e8 18%, transparent 19%);
+      background-size: 28px 28px;
+      background-position: 0 0, 14px 14px;
     }
+    a { color: #e0559a; text-decoration: none; }
+    a:hover { text-decoration: underline wavy; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--pink-deep); outline-offset: 2px; }
 
-    /* 市松模様パターン背景 */
-    .ichimatsu-pattern {
-      background-color: #1a1a1a;
-      background-image: 
-        linear-gradient(45deg, #111 25%, transparent 25%), 
-        linear-gradient(-45deg, #111 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #111 75%), 
-        linear-gradient(-45deg, transparent 75%, #111 75%);
-      background-size: 12px 12px;
-      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
-    }
+    .container { max-width: 1020px; margin: 0 auto; }
 
-    a {
-      color: #90caf9;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-      color: #e3f2fd;
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    /* ヘッダー */
+    /* ヘッダー：ギンガムチェック */
     header {
-      border: 1px solid var(--border-color);
-      margin-bottom: 10px;
-      padding: 12px 15px;
+      position: relative;
+      border: 3px solid #fff;
+      border-radius: 28px;
+      box-shadow: 0 0 0 2px var(--pink), 0 6px 0 var(--pink);
+      padding: 18px 24px;
+      margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 3px solid #555;
+      flex-wrap: wrap;
+      gap: 8px;
+      background-color: #fff;
+      background-image:
+        linear-gradient(90deg, rgba(255,182,213,.45) 50%, transparent 50%),
+        linear-gradient(rgba(255,182,213,.45) 50%, transparent 50%);
+      background-size: 28px 28px;
     }
-
     .logo {
-      font-size: 24px;
+      font-size: 34px;
       font-weight: 900;
-      color: #ffffff;
+      color: var(--pink-deep);
+      letter-spacing: .04em;
+      text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 0 4px 0 #ffd0e4;
     }
+    .logo span { color: #7ab8f5; font-size: 20px; }
+    .sub-text { font-size: 12px; color: var(--ink-soft); }
+    header .sub-text { background: #fff; border-radius: 99px; padding: 3px 14px; color: var(--ink); }
 
-    .logo span {
-      color: #aaaaaa;
-      font-size: 15px;
-    }
-
-    .sub-text {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* 検索バー */
+    /* 検索 */
     .search-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      margin-bottom: 10px;
       display: flex;
       gap: 8px;
+      background: #fff;
+      border: 2px solid var(--pink);
+      border-radius: 99px;
+      padding: 6px 6px 6px 18px;
+      margin-bottom: 20px;
     }
-
     .search-input {
       flex: 1;
-      background: #0d0d0d;
-      border: 1px solid #444;
-      color: #fff;
-      padding: 6px 10px;
-      font-size: 13px;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      font: inherit;
+      color: var(--ink);
     }
-
+    .search-input:focus { outline: none; }
     .search-btn {
-      background: #333;
+      border: none;
+      background: var(--pink-deep);
       color: #fff;
-      border: 1px solid #555;
-      padding: 6px 16px;
+      font: inherit;
+      font-weight: 700;
+      padding: 6px 22px;
+      border-radius: 99px;
       cursor: pointer;
-      font-size: 12px;
-      font-weight: bold;
+      box-shadow: 0 3px 0 #e45c96;
     }
+    .search-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #e45c96; }
 
-    /* メイン3カラムレイアウト */
-    .main-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .left-col { flex: 1 1 200px; }
+    /* レイアウト */
+    .main-grid { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+    .left-col  { flex: 1 1 220px; }
     .center-col { flex: 2 1 400px; }
-    .right-col { flex: 1 1 200px; }
+    .right-col { flex: 1 1 220px; }
 
     .panel {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      margin-bottom: 10px;
+      background: var(--cream);
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      margin-bottom: 18px;
+      overflow: hidden;
     }
-
     .panel-header {
-      padding: 6px 10px;
-      font-weight: bold;
-      font-size: 12px;
-      border-bottom: 1px solid var(--border-color);
-      color: #ffffff;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--pink);
+      border-bottom: 2px dashed #fff;
     }
+    .panel.sky .panel-header { background: var(--sky); }
+    .panel.mint .panel-header { background: var(--mint); }
+    .panel.lemon .panel-header { background: var(--lemon); }
+    .panel.lavender .panel-header { background: var(--lavender); }
+    .panel-body { padding: 12px 16px; }
 
-    .panel-body {
-      padding: 8px 10px;
-    }
-
-    /* 左側メニュー */
-    .category-list {
-      list-style: none;
-    }
-
-    .category-item {
-      border-bottom: 1px dashed #2a2a2a;
-    }
-
+    /* 左メニュー */
+    .category-list { list-style: none; padding: 6px 10px 10px; }
     .category-item a {
       display: block;
-      padding: 6px 8px;
-      color: var(--text-main);
+      padding: 7px 12px;
+      margin-top: 6px;
+      border-radius: 99px;
+      background: #fff;
+      border: 2px solid var(--line);
+      color: var(--ink);
+      font-weight: 500;
     }
+    .category-item a:hover { background: var(--pink); text-decoration: none; }
+    .category-item.highlight a { font-weight: 700; border-color: var(--pink); }
+    .category-item.custom-link a { border-color: #cfe8ff; }
+    .category-item.custom-link a:hover { background: var(--sky); }
+    .category-item.empty-slot a { border-style: dashed; color: var(--ink-soft); }
 
-    .category-item.highlight a {
-      color: var(--mozubeya-accent);
-      font-weight: bold;
-    }
-
-    .category-item.custom-link a {
-      color: #81c784;
-    }
-
-    /* 中央トピックス */
-    .news-list {
-      list-style: none;
-    }
-
+    /* ニュース */
+    .news-list { list-style: none; }
     .news-item {
-      padding: 6px 0;
-      border-bottom: 1px solid #222;
+      padding: 9px 0;
+      border-bottom: 2px dotted var(--line);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
     }
-
+    .news-item:last-child { border-bottom: none; }
     .news-tag {
-      background: #333;
-      color: #aaa;
-      font-size: 10px;
-      padding: 1px 5px;
-      border-radius: 2px;
-      margin-right: 6px;
-    }
-
-    .news-tag.academic { background: #1a3a5f; color: #90caf9; }
-    .news-tag.tech { background: #2e4c2f; color: #a5d6a7; }
-
-    /* ダミーログイン用スタイル */
-    .dummy-input {
-      width: 100%;
-      background: #0d0d0d;
-      border: 1px solid #444;
-      color: #fff;
-      padding: 6px 8px;
-      font-size: 12px;
-      border-radius: 3px;
-    }
-    .dummy-input:focus {
-      outline: none;
-      border-color: #666;
-    }
-
-    footer {
-      border-top: 1px solid var(--border-color);
-      margin-top: 15px;
-      padding: 12px;
+      display: inline-block;
+      min-width: 52px;
       text-align: center;
       font-size: 11px;
-      color: var(--text-muted);
+      font-weight: 700;
+      padding: 1px 8px;
+      border-radius: 99px;
+      margin-right: 8px;
+      background: var(--lemon);
+      color: #a8851f;
+    }
+    .news-tag.academic { background: var(--lavender); color: #7a5fc4; }
+    .news-tag.tech { background: var(--mint); color: #3a9a6b; }
+    .news-tag.fun { background: var(--sky); color: #3d84c6; }
+    .news-item .sub-text { white-space: nowrap; }
+
+    /* ログイン */
+    .dummy-input {
+      width: 100%;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 6px 12px;
+    }
+    .login-form { display: flex; flex-direction: column; gap: 8px; }
+    .login-form label { font-size: 12px; color: var(--ink-soft); }
+    .btn-login, .btn-admin {
+      font: inherit;
+      font-weight: 700;
+      border-radius: 99px;
+      padding: 8px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .btn-login { background: var(--pink-deep); color: #fff; border: none; box-shadow: 0 3px 0 #e45c96; }
+    .btn-admin { background: #fff; color: #7a5fc4; border: 2px solid #c9b8ff; }
+    .login-links { display: flex; justify-content: space-between; font-size: 11px; }
+    .login-links a { color: var(--ink-soft); }
+
+    footer {
+      margin-top: 8px;
+      padding: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-soft);
+      background: #fff;
+      border-radius: 99px;
+      border: 2px dashed var(--pink);
+    }
+
+    @media (max-width: 560px) {
+      .logo { font-size: 28px; }
+      .news-item { flex-direction: column; align-items: flex-start; gap: 2px; }
     }
   </style>
 </head>
@@ -218,27 +220,26 @@
 
 <div class="container">
   <!-- ヘッダー -->
-  <header class="ichimatsu-pattern">
+  <header>
     <div>
-      <div class="logo">MOZUU! <span>JAPAN</span></div>
-      <div class="sub-text">もずーじゃぱん ポータル</div>
+      <div class="logo">🎀 MOZUU! <span>JAPAN</span></div>
+      <div class="sub-text" style="background:none;padding:0;">もずーじゃぱん ポータル</div>
     </div>
-    <div class="sub-text">2026年10月31日 | ポータル公開中</div>
+    <div class="sub-text">2026年10月31日 | ポータル公開中 ✨</div>
   </header>
 
-  <!-- Google検索バー（新しいタブで検索結果が開きます） -->
-<form action="https://www.google.com/search" method="get" target="_blank" class="search-box">
-  <input type="text" name="q" class="search-input" id="searchInput" placeholder="Googleで検索...">
-  <button type="submit" class="search-btn">検索</button>
-</form>
-  <!-- メイン3カラム -->
+  <!-- Google検索（新しいタブで開きます） -->
+  <form action="https://www.google.com/search" method="get" target="_blank" class="search-box">
+    <input type="text" name="q" class="search-input" id="searchInput" placeholder="🔍 Googleで検索...">
+    <button type="submit" class="search-btn">検索</button>
+  </form>
+
   <div class="main-grid">
-    
-    <!-- 左：コンテンツメニュー ＆ カスタムリンク集 -->
+
+    <!-- 左：コンテンツ ＆ リンク集 -->
     <div class="left-col">
-      <!-- 本命コンテンツ -->
       <div class="panel">
-        <div class="panel-header ichimatsu-pattern">🐾 もずべやコンテンツ</div>
+        <div class="panel-header">🐾 もずべやコンテンツ</div>
         <ul class="category-list">
           <li class="category-item highlight"><a href="chikubi.html">🎮 乳首クリッカー</a></li>
           <li class="category-item highlight"><a href="tako.html">📋 他己診断</a></li>
@@ -248,9 +249,8 @@
         </ul>
       </div>
 
-      <!-- カスタム用 リンク集（10個） -->
-      <div class="panel">
-        <div class="panel-header ichimatsu-pattern">🔗 リンク</div>
+      <div class="panel sky">
+        <div class="panel-header">🔗 リンク</div>
         <ul class="category-list">
           <li class="category-item custom-link"><a href="https://drrrkari.com/lounge/">デュラララチャット(仮)</a></li>
           <li class="category-item custom-link"><a href="https://drrrsetting.wixsite.com/drrr-setting">DrrrCustomize Manual</a></li>
@@ -262,17 +262,30 @@
           <li class="category-item custom-link"><a href="https://www.youtube.com/channel/UCfOz2I8b2IhpIpGB0I1UgMA">YouTube</a></li>
           <li class="category-item custom-link"><a href="https://www.tiktok.com/@harapeko029sana4989">TikTok</a></li>
           <li class="category-item custom-link"><a href="https://suno.com/@mozuku4989?page=songs">Suno</a></li>
+
+          <!-- ▼▼ 追加用スロット（href の「ここにURLを貼る」と、表示名の「ここにサイトのタイトルを貼る」を書き換えてください）▼▼ -->
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">ここにサイトのタイトルを貼る</a></li>
+          <!-- ▲▲ 追加用スロットここまで ▲▲ -->
         </ul>
       </div>
     </div>
 
-    <!-- 中：トピックス（本物 ＋ 頭よさそうなダミー記事） -->
+    <!-- 中：トピックス -->
     <div class="center-col">
-      <div class="panel">
-        <div class="panel-header ichimatsu-pattern">主要トピックス・学術ニュース</div>
+      <div class="panel lavender">
+        <div class="panel-header">📰 主要トピックス・学術ニュース</div>
         <div class="panel-body">
           <ul class="news-list">
-            <!-- リアルコンテンツ -->
+            <!-- 公開中コンテンツ -->
             <li class="news-item">
               <div><span class="news-tag">GAME</span><a href="chikubi.html">乳首クリッカー（ガリママフィスティバル＆賢者タイム搭載）</a></div>
               <span class="sub-text">公開中</span>
@@ -293,30 +306,65 @@
               <div><span class="news-tag">SCRIPT</span><a href="greeting.html">挨拶スクリプト</a></div>
               <span class="sub-text">公開中</span>
             </li>
-            
-            <!-- 頭よさそうなダミー記事群 -->
+
+            <!-- 賢そうなダミー記事（元の記事） -->
             <li class="news-item">
-              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です')">次世代分散型アルゴリズムにおけるガリ穴絶頂問題の再検証</a></div>
+              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です'); return false;">次世代分散型アルゴリズムにおけるガリ穴絶頂問題の再検証</a></div>
               <span class="sub-text">学会誌</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です')">蟹コンピューティング質問の暗号（PQC）ロードマップ</a></div>
+              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">蟹コンピューティング質問の暗号（PQC）ロードマップ</a></div>
               <span class="sub-text">特集</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag academic">思考</span><a href="#" onclick="alert('賢そうなダミー論考です')">認知アプローチによる老害たかしインターフェース最適化モデル</a></div>
+              <div><span class="news-tag academic">思考</span><a href="#" onclick="alert('賢そうなダミー論考です'); return false;">認知アプローチによる老害たかしインターフェース最適化モデル</a></div>
               <span class="sub-text">論考</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です')">最終的整合性を考慮した分散サンドラベースにおけるCAP定理の限界</a></div>
+              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">最終的整合性を考慮した分散サンドラベースにおけるCAP定理の限界</a></div>
               <span class="sub-text">解説</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です')">タゴサクガリノミクスにおけるシンガポール経済のインセンティブ設計</a></div>
+              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">タゴサクガリノミクスにおけるシンガポール経済のインセンティブ設計</a></div>
+              <span class="sub-text">分析</span>
+            </li>
+
+            <!-- 追加したダミー記事 -->
+            <li class="news-item">
+              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です'); return false;">賢者タイムの非線形減衰に関する縦断的研究：ガリママ仮説の検証</a></div>
+              <span class="sub-text">学会誌</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">蟹型ニューラルネットワークにおける横歩き勾配消失問題への対処</a></div>
+              <span class="sub-text">特集</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag fun">医療</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">老害たかし症候群の早期発見とマイクロサービス化された説教の弊害</a></div>
+              <span class="sub-text">研究報告</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">タゴサク・ショックが東南アジア債券市場のボラティリティに与える影響</a></div>
               <span class="sub-text">分析</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag">DEV</span><a href="#" onclick="alert('海蘊ツールは現在準備中です')">【次回作】海蘊ツール（DRRR! 備考同期機能）</a></div>
+              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">サンドラベース設計における冪等性とガリの可逆性のトレードオフ</a></div>
+              <span class="sub-text">解説</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag fun">社会</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">もずべや住民における挨拶スクリプト依存の社会学的考察</a></div>
+              <span class="sub-text">論考</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag academic">哲学</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">「ガリアナ」概念の存在論的転回：スナイパーは何を狙っているのか</a></div>
+              <span class="sub-text">論考</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">ポスト量子時代の蟹コンピューティング：ハサミ演算子の計算量解析</a></div>
+              <span class="sub-text">特集</span>
+            </li>
+
+            <li class="news-item">
+              <div><span class="news-tag">DEV</span><a href="#" onclick="alert('海蘊ツールは現在準備中です'); return false;">【次回作】海蘊ツール（DRRR! 備考同期機能）</a></div>
               <span class="sub-text">開発中</span>
             </li>
           </ul>
@@ -324,32 +372,30 @@
       </div>
     </div>
 
-    <!-- 右：ダミーログイン ＆ 管理者ログイン（Yahoo!風） -->
+    <!-- 右：ログイン（ダミー） -->
     <div class="right-col">
-      <!-- ユーザーログイン（Yahoo!風ダミー） -->
-      <div class="panel">
-        <div class="panel-header ichimatsu-pattern">🔑 ログイン</div>
+      <div class="panel mint">
+        <div class="panel-header">🔑 ログイン</div>
         <div class="panel-body">
-          <form onsubmit="return false;" style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 11px; color: var(--text-muted);">MOZUU! ID またはメールアドレス</label>
-            <input type="text" class="dummy-input" placeholder="ID / メールアドレス">
-            <button type="button" onclick="return false;" style="background: #ff0033; color: #fff; border: none; padding: 8px; font-weight: bold; border-radius: 3px; cursor: pointer; font-size: 12px; margin-top: 4px;">ログイン</button>
-            <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 4px;">
-              <a href="#" onclick="return false;" style="color: var(--text-muted);">IDをお忘れの方</a>
-              <a href="#" onclick="return false;" style="color: var(--text-muted);">新規取得</a>
+          <form onsubmit="return false;" class="login-form">
+            <label for="uid">MOZUU! ID またはメールアドレス</label>
+            <input id="uid" type="text" class="dummy-input" placeholder="ID / メールアドレス">
+            <button type="button" class="btn-login">ログイン</button>
+            <div class="login-links">
+              <a href="#" onclick="return false;">IDをお忘れの方</a>
+              <a href="#" onclick="return false;">新規取得</a>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- 管理者用ログイン（ダミー） -->
-      <div class="panel">
-        <div class="panel-header ichimatsu-pattern">⚙️ 管理者ログイン</div>
+      <div class="panel lemon">
+        <div class="panel-header">⚙️ 管理者ログイン</div>
         <div class="panel-body">
-          <form onsubmit="return false;" style="display: flex; flex-direction: column; gap: 8px;">
-            <input type="text" class="dummy-input" placeholder="管理者ID">
-            <input type="password" class="dummy-input" placeholder="パスワード">
-            <button type="button" onclick="return false;" style="background: #282828; color: var(--mozubeya-accent); border: 1px solid var(--mozubeya-accent); padding: 6px; font-weight: bold; border-radius: 3px; cursor: pointer; font-size: 11px; margin-top: 2px;">管理者Auth</button>
+          <form onsubmit="return false;" class="login-form">
+            <input type="text" class="dummy-input" placeholder="管理者ID" aria-label="管理者ID">
+            <input type="password" class="dummy-input" placeholder="パスワード" aria-label="パスワード">
+            <button type="button" class="btn-admin">管理者Auth</button>
           </form>
         </div>
       </div>
@@ -357,9 +403,8 @@
 
   </div>
 
-  <!-- フッター -->
-  <footer class="ichimatsu-pattern">
-    <p>Copyright (C) Mozuu!-Japan & Mozubeya. All Rights Reserved.</p>
+  <footer>
+    <p>🎀 Copyright (C) Mozuu!-Japan &amp; Mozubeya. All Rights Reserved. 🎀</p>
   </footer>
 </div>
 
