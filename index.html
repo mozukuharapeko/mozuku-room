@@ -204,6 +204,29 @@
     .mail-result[readonly] { cursor: text; }
     .mail-note { min-height: 1.6em; }
 
+    /* 検索（Google / Yahoo! / Bing） */
+    .search-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .search-stack .search-box { margin-bottom: 0; }
+    .search-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .search-row .search-box { flex: 1 1 260px; }
+
+    /* おみくじ・ガリ占い */
+    .fortune-form { display: flex; flex-direction: column; gap: 8px; }
+    .fortune-form label { font-size: 12px; color: var(--ink-soft); }
+    .fortune-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fortune-actions button { flex: 1 1 150px; }
+    .fortune-result {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      background: var(--panel2);
+      min-height: 3.2em;
+    }
+    .fortune-rank { font-size: 30px; font-weight: 900; line-height: 1.3; color: #ffbf93; }
+    .fortune-rank.bad { color: #9fc5ea; }
+    .fortune-line { margin-top: 4px; }
+
     footer {
       margin-top: 8px;
       padding: 14px;
@@ -233,11 +256,23 @@
     <div class="sub-text">2026年10月31日 | ポータル公開中 ✨</div>
   </header>
 
-  <!-- Google検索（新しいタブで開きます） -->
-  <form action="https://www.google.com/search" method="get" target="_blank" class="search-box">
-    <input type="text" name="q" class="search-input" id="searchInput" placeholder="🔍 Googleで検索...">
-    <button type="submit" class="search-btn">検索</button>
-  </form>
+  <!-- 検索（新しいタブで開きます） -->
+  <div class="search-stack">
+    <form action="https://www.google.com/search" method="get" target="_blank" class="search-box">
+      <input type="text" name="q" class="search-input" id="searchInput" placeholder="🔍 Googleで検索..." aria-label="Googleで検索">
+      <button type="submit" class="search-btn">検索</button>
+    </form>
+    <div class="search-row">
+      <form action="https://search.yahoo.co.jp/search" method="get" target="_blank" class="search-box">
+        <input type="text" name="p" class="search-input" placeholder="🔍 Yahoo!で検索..." aria-label="Yahoo! JAPANで検索">
+        <button type="submit" class="search-btn">Yahoo!</button>
+      </form>
+      <form action="https://www.bing.com/search" method="get" target="_blank" class="search-box">
+        <input type="text" name="q" class="search-input" placeholder="🔍 Bingで検索..." aria-label="Bingで検索">
+        <button type="submit" class="search-btn">Bing</button>
+      </form>
+    </div>
+  </div>
 
   <div class="main-grid">
 
@@ -284,6 +319,21 @@
 
     <!-- 中：トピックス -->
     <div class="center-col">
+      <div class="panel">
+        <div class="panel-header">🎴 今日のおみくじ・ガリ占い</div>
+        <div class="panel-body">
+          <form onsubmit="return false;" class="fortune-form">
+            <label for="fortuneName">お名前（空でもOK。同じ名前・同じ日なら結果は同じだよ）</label>
+            <input id="fortuneName" type="text" class="dummy-input" maxlength="20" placeholder="なまえ">
+            <div class="fortune-actions">
+              <button type="button" class="btn-login" id="omikujiBtn">おみくじを引く</button>
+              <button type="button" class="btn-admin" id="gariBtn">ガリ占いをする</button>
+            </div>
+          </form>
+          <div class="fortune-result" id="fortuneResult" role="status" aria-live="polite">ボタンを押すと、今日の結果が出るよ ✨</div>
+        </div>
+      </div>
+
       <div class="panel lavender">
         <div class="panel-header">📰 主要トピックス・学術ニュース</div>
         <div class="panel-body">
@@ -392,7 +442,7 @@
         </div>
       </div>
 
-      <!-- 捨てメールアドレス発行 -->
+      <!-- 捨てメールアドレス発行（ドメイン取得後に使えるようにする予定） -->
       <div class="panel sky">
         <div class="panel-header">📮 捨てメールアドレス発行</div>
         <div class="panel-body">
@@ -401,7 +451,7 @@
             <input id="tmpmail" type="text" class="dummy-input mail-result" placeholder="ここに表示されるよ" readonly>
             <button type="button" class="btn-login" id="tmpmailIssue">発行する</button>
             <button type="button" class="btn-admin" id="tmpmailCopy" disabled>コピー</button>
-            <div class="sub-text mail-note" id="tmpmailNote" role="status">MOZUU! IDが無いと使えません</div>
+            <div class="sub-text mail-note" id="tmpmailNote" role="status">準備中：ドメイン取得後に使えるようになるよ</div>
           </form>
         </div>
       </div>
@@ -469,6 +519,126 @@
         out.select();
         note.textContent = '選択したよ。コピーしてね';
       }
+    });
+  })();
+</script>
+
+<script>
+  // ---- 全てのリンクを別タブで開く ----
+  (function () {
+    var links = document.querySelectorAll('a[href]');
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute('href');
+      if (!href || href.charAt(0) === '#') continue;
+      links[i].setAttribute('target', '_blank');
+      links[i].setAttribute('rel', 'noopener noreferrer');
+    }
+  })();
+
+  // ---- 今日のおみくじ・ガリ占い ----
+  (function () {
+    var nameInput = document.getElementById('fortuneName');
+    var resultBox = document.getElementById('fortuneResult');
+
+    // 🔧 文言はここで自由に書き換えられるよ
+    var LEVELS = [
+      { name: '大吉', w: 8,  msgs: ['今日は何をやっても勝てる日。蟹もうなずいている。', 'ひらめきが冴えわたる日。やりたいことは今日のうちに。'] },
+      { name: '中吉', w: 16, msgs: ['いい流れが来ている。迷ったら前に進もう。', '人との会話から、ヒントが転がってくる日。'] },
+      { name: '小吉', w: 20, msgs: ['小さな幸せが、じわっと積もる日。', 'ちょっとした挨拶が、いい縁につながるよ。'] },
+      { name: '吉',   w: 24, msgs: ['ふつうがいちばん。今日はおだやかに行こう。', 'のんびりしていれば、運が向こうからやってくる。'] },
+      { name: '末吉', w: 16, msgs: ['後半に運が上向く。夜までがんばろう。', '焦らず、あとまわしにしたことから片づけよう。'] },
+      { name: '凶',   w: 12, msgs: ['今日は横歩きでいこう。前進だけが道じゃない。', '大事な決断は、明日に持ち越すのがおすすめ。'] },
+      { name: '大凶', w: 4,  msgs: ['逆に何も起きない日。布団が最強の味方になる。', '運勢が底を打った。あとは上がるだけだよ。'] }
+    ];
+    var ITEMS = ['蟹の絵文字', '温かい飲み物', '充電器', 'ふせん', 'イヤホン', 'ソーダ味のアイス', 'メロンパン', '好きな曲のサビ', '青いもの', 'ふかふかの座布団'];
+    var COLORS = ['オレンジ', '水色', 'ミント', 'レモン', 'ラベンダー', '黒', '白', 'ピンク'];
+    var TYPES = ['ガリママ型', '蟹の横歩き型', 'スナイパー型', '老害たかし予備軍型', 'タゴサク経済型', 'ふつうの人型'];
+    var SAYINGS = ['横歩きは、後退ではない。', '撃つ前に、よく狙え。', '説教は、短いほど届く。', '困ったら、とりあえず挨拶。', '賢そうな顔は、タダで手に入る。'];
+    var PARTNERS = ['蟹', 'タゴサク', '老害たかし', 'ガリママ'];
+
+    function hash(str) {
+      var h = 2166136261;
+      for (var i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+    function makeRng(seed) {
+      return function () {
+        seed = (seed + 0x6D2B79F5) | 0;
+        var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function pick(rng, arr) { return arr[Math.floor(rng() * arr.length)]; }
+    function pickLevel(rng) {
+      var total = 0, i;
+      for (i = 0; i < LEVELS.length; i++) total += LEVELS[i].w;
+      var r = rng() * total;
+      for (i = 0; i < LEVELS.length; i++) {
+        r -= LEVELS[i].w;
+        if (r < 0) return i;
+      }
+      return LEVELS.length - 1;
+    }
+    function today() {
+      var d = new Date();
+      var y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
+      return { key: y + '-' + m + '-' + day, label: y + '年' + m + '月' + day + '日' };
+    }
+    function who() {
+      var n = nameInput.value.replace(/^\s+|\s+$/g, '');
+      return n || '名無し';
+    }
+
+    function show(title, rank, bad, lines) {
+      resultBox.textContent = '';
+      var t = document.createElement('div');
+      t.className = 'sub-text';
+      t.textContent = title;
+      resultBox.appendChild(t);
+      var r = document.createElement('div');
+      r.className = 'fortune-rank' + (bad ? ' bad' : '');
+      r.textContent = rank;
+      resultBox.appendChild(r);
+      for (var i = 0; i < lines.length; i++) {
+        var p = document.createElement('div');
+        p.className = 'fortune-line';
+        p.textContent = lines[i];
+        resultBox.appendChild(p);
+      }
+    }
+
+    document.getElementById('omikujiBtn').addEventListener('click', function () {
+      var d = today(), name = who();
+      var rng = makeRng(hash(d.key + '|' + name + '|omikuji'));
+      var idx = pickLevel(rng);
+      var lv = LEVELS[idx];
+      show(d.label + '　' + name + 'さんの運勢', lv.name, idx >= 5, [
+        pick(rng, lv.msgs),
+        'ラッキーアイテム：' + pick(rng, ITEMS),
+        'ラッキーカラー：' + pick(rng, COLORS),
+        'ラッキーナンバー：' + (Math.floor(rng() * 99) + 1)
+      ]);
+    });
+
+    document.getElementById('gariBtn').addEventListener('click', function () {
+      var d = today(), name = who();
+      var rng = makeRng(hash(d.key + '|' + name + '|gari'));
+      var level = Math.floor(rng() * 101);
+      var comment;
+      if (level >= 80) comment = 'ガリ度MAX。今日は全力でイジられて、全力で笑える日。';
+      else if (level >= 50) comment = 'ほどよくガリっている日。ツッコミのキレが冴えるよ。';
+      else if (level >= 20) comment = 'ガリ度ひかえめ。のんびり過ごすのがちょうどいい。';
+      else comment = 'ほぼ素の人。たまにはガリらない日もあっていいね。';
+      show(d.label + '　' + name + 'さんのガリ占い', 'ガリ度 ' + level + '%', false, [
+        comment,
+        'タイプ：' + pick(rng, TYPES),
+        '今日の格言：' + pick(rng, SAYINGS),
+        '相性のいい相手：' + pick(rng, PARTNERS)
+      ]);
     });
   })();
 </script>
