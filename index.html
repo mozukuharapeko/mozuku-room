@@ -196,8 +196,13 @@
     }
     .btn-login { background: var(--orange); color: var(--on-pastel); border: none; box-shadow: 0 3px 0 #c4824f; }
     .btn-admin { background: transparent; color: #cdbff5; border: 2px solid #6d6590; }
+    .btn-admin:disabled { opacity: .5; cursor: not-allowed; }
     .login-links { display: flex; justify-content: space-between; font-size: 11px; }
     .login-links a { color: var(--ink-soft); }
+
+    /* 捨てメールアドレス発行 */
+    .mail-result[readonly] { cursor: text; }
+    .mail-note { min-height: 1.6em; }
 
     footer {
       margin-top: 8px;
@@ -387,6 +392,20 @@
         </div>
       </div>
 
+      <!-- 捨てメールアドレス発行 -->
+      <div class="panel sky">
+        <div class="panel-header">📮 捨てメールアドレス発行</div>
+        <div class="panel-body">
+          <form onsubmit="return false;" class="login-form">
+            <label for="tmpmail">発行されたアドレス</label>
+            <input id="tmpmail" type="text" class="dummy-input mail-result" placeholder="ここに表示されるよ" readonly>
+            <button type="button" class="btn-login" id="tmpmailIssue">発行する</button>
+            <button type="button" class="btn-admin" id="tmpmailCopy" disabled>コピー</button>
+            <div class="sub-text mail-note" id="tmpmailNote" role="status">MOZUU! IDが無いと使えません</div>
+          </form>
+        </div>
+      </div>
+
       <div class="panel lemon">
         <div class="panel-header">⚙️ 管理者ログイン</div>
         <div class="panel-body">
@@ -405,6 +424,54 @@
     <p>🎀 Copyright (C) Mozuu!-Japan &amp; Mozubeya. All Rights Reserved. 🎀</p>
   </footer>
 </div>
+
+<script>
+  // 🔧 ドメインを取得したら、ここにドメイン名を入れる（例: 'example.com'）
+  // ※ 実際にメールを受け取るには、別途メールを受信・転送する仕組みが必要
+  var MAIL_DOMAIN = '';
+
+  (function () {
+    var out = document.getElementById('tmpmail');
+    var issueBtn = document.getElementById('tmpmailIssue');
+    var copyBtn = document.getElementById('tmpmailCopy');
+    var note = document.getElementById('tmpmailNote');
+
+    // 紛らわしい文字（0/o、1/l/i）を除いたランダムな文字列
+    function randomLocal(len) {
+      var chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+      var buf = new Uint32Array(len);
+      crypto.getRandomValues(buf);
+      var s = '';
+      for (var i = 0; i < len; i++) s += chars[buf[i] % chars.length];
+      return s;
+    }
+
+    issueBtn.addEventListener('click', function () {
+      if (!MAIL_DOMAIN) {
+        note.textContent = '準備中：ドメイン取得後に使えるようになるよ';
+        return;
+      }
+      out.value = randomLocal(10) + '@' + MAIL_DOMAIN;
+      copyBtn.disabled = false;
+      note.textContent = '発行したよ。コピーして使ってね';
+    });
+
+    copyBtn.addEventListener('click', function () {
+      if (!out.value) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(out.value).then(function () {
+          note.textContent = 'コピーしたよ';
+        }, function () {
+          out.select();
+          note.textContent = '選択したよ。コピーしてね';
+        });
+      } else {
+        out.select();
+        note.textContent = '選択したよ。コピーしてね';
+      }
+    });
+  })();
+</script>
 
 </body>
 </html>
