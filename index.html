@@ -24,6 +24,9 @@
       --on-pastel: #3d2e24;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    .panel[id] { scroll-margin-top: 14px; }
 
     body {
       font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
@@ -227,6 +230,17 @@
     .fortune-rank.bad { color: #9fc5ea; }
     .fortune-line { margin-top: 4px; }
 
+    /* たかしのROUGAI知恵袋 */
+    .takashi-result {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      background: var(--panel2);
+      min-height: 3.2em;
+      font-weight: 700;
+    }
+
     footer {
       margin-top: 8px;
       padding: 14px;
@@ -281,8 +295,11 @@
       <div class="panel">
         <div class="panel-header">🐾 MOZUU! JAPAN コンテンツ</div>
         <ul class="category-list">
+          <li class="category-item highlight"><a href="#mail">📮 捨てメール</a></li>
           <li class="category-item highlight"><a href="chikubi.html">🎮 乳首クリッカー</a></li>
           <li class="category-item highlight"><a href="tako.html">📋 他己診断</a></li>
+          <li class="category-item highlight"><a href="#fortune">🎴 おみくじ・ガリ占い</a></li>
+          <li class="category-item highlight"><a href="#takashi">👴 たかしのROUGAI知恵袋</a></li>
           <li class="category-item highlight"><a href="https://mozukuharapeko.github.io/bbs/">📢 もずれんらくちょう (BBS)</a></li>
           <li class="category-item highlight"><a href="gariana-sniper.html">💬 ガリアナスナイパー</a></li>
           <li class="category-item highlight"><a href="greeting.html">💬 挨拶スクリプト</a></li>
@@ -321,7 +338,7 @@
     <div class="center-col">
 
       <!-- 捨てメールアドレス発行（ドメイン取得後に使えるようにする予定） -->
-      <div class="panel sky">
+      <div class="panel sky" id="mail">
         <div class="panel-header">📮 捨てメールアドレス発行</div>
         <div class="panel-body">
           <form onsubmit="return false;" class="login-form">
@@ -334,7 +351,7 @@
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel" id="fortune">
         <div class="panel-header">🎴 今日のおみくじ・ガリ占い</div>
         <div class="panel-body">
           <form onsubmit="return false;" class="fortune-form">
@@ -346,6 +363,16 @@
             </div>
           </form>
           <div class="fortune-result" id="fortuneResult" role="status" aria-live="polite">ボタンを押すと、今日の結果が出るよ ✨</div>
+        </div>
+      </div>
+
+      <div class="panel lemon" id="takashi">
+        <div class="panel-header">👴 たかしのROUGAI知恵袋</div>
+        <div class="panel-body">
+          <form onsubmit="return false;" class="login-form">
+            <button type="button" class="btn-login" id="takashiBtn">たかしの一言を聞く</button>
+          </form>
+          <div class="takashi-result" id="takashiResult" role="status" aria-live="polite">ボタンを押すと、たかしがありがたいお言葉をくれるよ 👴</div>
         </div>
       </div>
 
@@ -640,6 +667,35 @@
         '今日の格言：' + pick(rng, SAYINGS),
         '相性のいい相手：' + pick(rng, PARTNERS)
       ]);
+    });
+  })();
+</script>
+
+<script>
+  // ---- たかしのROUGAI知恵袋 ----
+  (function () {
+    // 🔧 一言はここで自由に足したり変えたりできるよ
+    var WORDS = [
+      '嫌がらせ大好き、センス抜群の部屋名付けてやるぜ',
+      '嫌がらせは生きがい、52歳何も学ばず生きてきたぜ',
+      '嫌がらせ大好き、お前らへの嫌がらせは効果抜群だ',
+      '嫌がらせ大好き、俺のセンスでお前ら腰抜かすといい',
+      '嫌がらせ大好き、10年でも20年でも粘着してやるぜ',
+      '嫌がらせ大好き、部屋名のセンスはお前らに真似できないぜ',
+      '嫌がらせは日課、朝メシより先にやってるぜ',
+      '嫌がらせ大好き、説教は長いほど愛だと思ってるぜ',
+      '嫌がらせ大好き、昔はもっとすごかったと語り続けるぜ',
+      '嫌がらせは生きがい、反省という言葉は辞書にないぜ',
+      '嫌がらせ大好き、52歳でもまだまだ成長期だぜ',
+      '嫌がらせ大好き、今日コンビニ店員を説教してやったぜ店員の為だから愛の鞭だ'
+    ];
+    var box = document.getElementById('takashiResult');
+    var last = -1;
+    document.getElementById('takashiBtn').addEventListener('click', function () {
+      var i;
+      do { i = Math.floor(Math.random() * WORDS.length); } while (i === last && WORDS.length > 1);
+      last = i;
+      box.textContent = '👴 ' + WORDS[i];
     });
   })();
 </script>
