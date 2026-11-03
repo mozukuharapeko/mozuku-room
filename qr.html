@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QRコード作成 - もずーじゃぱん</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1f1f23; --orange-soft: #ffd7b8; --orange: #ffb27a; --sky: #cfe3f5;
+    --cream: #2b2b31; --panel2: #36363d; --ink: #ece6e0; --ink-soft: #a9a39e;
+    --line: #46464e; --on-pastel: #3d2e24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+    font-size: 14px; line-height: 1.6; color: var(--ink); background: var(--bg); padding: 14px;
+  }
+  a { color: #ffb98a; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  .container { max-width: 560px; margin: 0 auto; }
+  header {
+    border: 2px solid var(--line); border-radius: 28px; box-shadow: 0 5px 0 #17171a;
+    padding: 14px 22px; margin-bottom: 18px; background-color: var(--cream);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    background-image:
+      linear-gradient(90deg, rgba(255,190,140,.07) 50%, transparent 50%),
+      linear-gradient(rgba(255,190,140,.07) 50%, transparent 50%);
+    background-size: 28px 28px;
+  }
+  .logo { font-size: 24px; font-weight: 900; color: #ffbf93; text-shadow: 0 3px 0 #5a3d2a; }
+  .home-link {
+    font-size: 12px; font-weight: 700; text-decoration: none; background: var(--panel2);
+    border: 2px solid var(--line); border-radius: 99px; padding: 3px 14px; color: var(--ink);
+  }
+  .home-link:hover { background: var(--orange-soft); color: var(--on-pastel); }
+  .panel { background: var(--cream); border: 2px solid var(--line); border-radius: 22px; overflow: hidden; }
+  .panel-header {
+    padding: 8px 16px; font-weight: 700; color: var(--on-pastel);
+    background: var(--sky); border-bottom: 2px dashed rgba(0,0,0,.2);
+  }
+  .panel-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  label { font-size: 12px; color: var(--ink-soft); }
+  .dummy-input {
+    width: 100%; font: inherit; color: var(--ink); background: #232327;
+    border: 2px solid var(--line); border-radius: 14px; padding: 8px 12px;
+  }
+  .btn-main, .btn-sub { font: inherit; font-weight: 700; border-radius: 99px; padding: 8px; cursor: pointer; }
+  .btn-main { background: var(--orange); color: var(--on-pastel); border: none; box-shadow: 0 3px 0 #c4824f; }
+  .btn-main:active { transform: translateY(2px); box-shadow: 0 1px 0 #c4824f; }
+  .btn-sub { background: transparent; color: #cdbff5; border: 2px solid #6d6590; }
+  .btn-sub:disabled { opacity: .5; cursor: not-allowed; }
+  .note { font-size: 11px; color: var(--ink-soft); }
+  .error { color: #ff9b9b; min-height: 1.6em; font-size: 12px; }
+  .qr-wrap { display: none; justify-content: center; padding: 8px 0; }
+  .qr-wrap.show { display: flex; }
+  canvas { width: min(100%, 320px); height: auto; border-radius: 12px; background: #fff; image-rendering: pixelated; }
+  dialog {
+    margin: auto; max-width: min(92vw, 380px); background: var(--cream); color: var(--ink);
+    border: 2px solid var(--line); border-radius: 22px; padding: 20px; text-align: center;
+  }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  dialog p { margin-bottom: 14px; font-weight: 700; }
+  footer {
+    margin-top: 18px; padding: 12px; text-align: center; font-size: 12px; color: var(--ink-soft);
+    background: var(--cream); border-radius: 99px; border: 2px dashed var(--line);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">📱 QRコード作成</div>
+    <a class="home-link" href="https://mozukuharapeko.github.io/mozuku-room/">🏠 ポータルへ</a>
+  </header>
+
+  <div class="panel">
+    <div class="panel-header">🔗 URLを入れてね</div>
+    <div class="panel-body">
+      <label for="urlInput">URL（文字でもOK。全角を含めて213バイトまで）</label>
+      <input id="urlInput" type="text" class="dummy-input" placeholder="https://example.com/" autocomplete="off">
+      <div class="note">QRコードは株式会社デンソーウェーブの登録商標です。</div>
+      <button type="button" class="btn-main" id="makeBtn">QRコード作成</button>
+      <div class="error" id="errBox" role="alert"></div>
+      <div class="qr-wrap" id="qrWrap"><canvas id="qrCanvas" width="10" height="10" aria-label="作成したQRコード"></canvas></div>
+      <button type="button" class="btn-sub" id="saveBtn" disabled>画像として保存（PNG）</button>
+      <div class="note">入れた内容は、このページの中だけで処理されて、外には送られないよ。</div>
+    </div>
+  </div>
+
+  <footer>🎀 Copyright (C) Mozuu!-Japan &amp; Mozubeya. All Rights Reserved. 🎀</footer>
+</div>
+
+<dialog id="tmDialog" aria-label="商標のお知らせ">
+  <p>QRコードは株式会社デンソーウェーブの登録商標です。</p>
+  <button type="button" class="btn-main" id="tmClose" style="padding:8px 28px;">OK</button>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  // ===== QRコード生成（バイトモード・誤り訂正M・バージョン1〜10） =====
+  // [データ語数, ブロックあたり誤り訂正語数, [[ブロック数, ブロックのデータ語数], ...]]
+  var TABLE = [null,
+    [16, 10, [[1, 16]]], [28, 16, [[1, 28]]], [44, 26, [[1, 44]]], [64, 18, [[2, 32]]],
+    [86, 24, [[2, 43]]], [108, 16, [[4, 27]]], [124, 18, [[4, 31]]],
+    [154, 22, [[2, 38], [2, 39]]], [182, 22, [[3, 36], [2, 37]]], [216, 26, [[4, 43], [1, 44]]]
+  ];
+  var ALIGN = [null, [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50]];
+
+  var EXP = new Array(512), LOG = new Array(256);
+  (function () {
+    var x = 1;
+    for (var i = 0; i < 255; i++) {
+      EXP[i] = x; LOG[x] = i;
+      x <<= 1; if (x & 256) x ^= 0x11D;
+    }
+    for (var j = 255; j < 512; j++) EXP[j] = EXP[j - 255];
+  })();
+  function gmul(a, b) { return (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]]; }
+
+  function rsRemainder(data, ecLen) {
+    var gen = [1], i, j;
+    for (i = 0; i < ecLen; i++) {
+      var nr = new Array(gen.length + 1).fill(0);
+      for (j = 0; j < gen.length; j++) { nr[j] ^= gen[j]; nr[j + 1] ^= gmul(gen[j], EXP[i]); }
+      gen = nr;
+    }
+    gen = gen.slice(1);
+    var res = new Array(ecLen).fill(0);
+    data.forEach(function (b) {
+      var factor = b ^ res.shift();
+      res.push(0);
+      for (var k = 0; k < ecLen; k++) res[k] ^= gmul(gen[k], factor);
+    });
+    return res;
+  }
+
+  function bit(v, i) { return ((v >>> i) & 1) !== 0; }
+
+  function makeQR(text) {
+    var bytes = Array.prototype.slice.call(new TextEncoder().encode(text));
+    var ver = 0, v;
+    for (v = 1; v <= 10; v++) {
+      if (4 + (v < 10 ? 8 : 16) + 8 * bytes.length <= 8 * TABLE[v][0]) { ver = v; break; }
+    }
+    if (!ver) return null;
+
+    // --- データ語を作る ---
+    var bits = [];
+    function push(val, n) { for (var i = n - 1; i >= 0; i--) bits.push((val >>> i) & 1); }
+    var dataCW = TABLE[ver][0], ecLen = TABLE[ver][1];
+    push(4, 4);
+    push(bytes.length, ver < 10 ? 8 : 16);
+    bytes.forEach(function (b) { push(b, 8); });
+    push(0, Math.min(4, dataCW * 8 - bits.length));
+    while (bits.length % 8) bits.push(0);
+    var cw = [], i, j;
+    for (i = 0; i < bits.length; i += 8) cw.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+    for (var pad = 0xEC; cw.length < dataCW; pad ^= 0xEC ^ 0x11) cw.push(pad);
+
+    // --- ブロック分割・誤り訂正・インターリーブ ---
+    var blocks = [], pos = 0;
+    TABLE[ver][2].forEach(function (g) {
+      for (var n = 0; n < g[0]; n++) { blocks.push(cw.slice(pos, pos + g[1])); pos += g[1]; }
+    });
+    var ecs = blocks.map(function (b) { return rsRemainder(b, ecLen); });
+    var all = [], maxLen = 0;
+    blocks.forEach(function (b) { if (b.length > maxLen) maxLen = b.length; });
+    for (i = 0; i < maxLen; i++) blocks.forEach(function (b) { if (i < b.length) all.push(b[i]); });
+    for (i = 0; i < ecLen; i++) ecs.forEach(function (e) { all.push(e[i]); });
+
+    // --- 模様を置く ---
+    var size = 17 + 4 * ver, m = [], f = [], y, x;
+    for (y = 0; y < size; y++) { m.push(new Array(size).fill(false)); f.push(new Array(size).fill(false)); }
+    function setF(px, py, c) { m[py][px] = c; f[py][px] = true; }
+
+    for (i = 0; i < size; i++) { setF(6, i, i % 2 === 0); setF(i, 6, i % 2 === 0); }
+    function finder(cx, cy) {
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++) {
+        var d = Math.max(Math.abs(dx), Math.abs(dy)), xx = cx + dx, yy = cy + dy;
+        if (xx >= 0 && xx < size && yy >= 0 && yy < size) setF(xx, yy, d !== 2 && d !== 4);
+      }
+    }
+    finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+    var ap = ALIGN[ver], last = ap.length - 1;
+    for (i = 0; i < ap.length; i++) for (j = 0; j < ap.length; j++) {
+      if ((i === 0 && j === 0) || (i === 0 && j === last) || (i === last && j === 0)) continue;
+      for (var ay = -2; ay <= 2; ay++) for (var ax = -2; ax <= 2; ax++)
+        setF(ap[i] + ax, ap[j] + ay, Math.max(Math.abs(ax), Math.abs(ay)) !== 1);
+    }
+
+    function drawFormat(mask) {
+      var data = (0 << 3) | mask, rem = data, k;      // 誤り訂正M = 0
+      for (k = 0; k < 10; k++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+      var fb = ((data << 10) | rem) ^ 0x5412;
+      for (k = 0; k <= 5; k++) setF(8, k, bit(fb, k));
+      setF(8, 7, bit(fb, 6)); setF(8, 8, bit(fb, 7)); setF(7, 8, bit(fb, 8));
+      for (k = 9; k < 15; k++) setF(14 - k, 8, bit(fb, k));
+      for (k = 0; k < 8; k++) setF(size - 1 - k, 8, bit(fb, k));
+      for (k = 8; k < 15; k++) setF(8, size - 15 + k, bit(fb, k));
+      setF(8, size - 8, true);
+    }
+    drawFormat(0);
+    if (ver >= 7) {
+      var rem = ver, k;
+      for (k = 0; k < 12; k++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
+      var vb = (ver << 12) | rem;
+      for (k = 0; k < 18; k++) {
+        var a = size - 11 + (k % 3), b = Math.floor(k / 3);
+        setF(a, b, bit(vb, k)); setF(b, a, bit(vb, k));
+      }
+    }
+
+    // --- データを置く（ジグザグ） ---
+    var di = 0;
+    for (var right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (var vert = 0; vert < size; vert++) for (j = 0; j < 2; j++) {
+        x = right - j;
+        y = (((right + 1) & 2) === 0) ? size - 1 - vert : vert;
+        if (!f[y][x] && di < all.length * 8) { m[y][x] = bit(all[di >>> 3], 7 - (di & 7)); di++; }
+      }
+    }
+
+    // --- マスク ---
+    function cond(mask, px, py) {
+      switch (mask) {
+        case 0: return (px + py) % 2 === 0;
+        case 1: return py % 2 === 0;
+        case 2: return px % 3 === 0;
+        case 3: return (px + py) % 3 === 0;
+        case 4: return (Math.floor(px / 3) + Math.floor(py / 2)) % 2 === 0;
+        case 5: return (px * py) % 2 + (px * py) % 3 === 0;
+        case 6: return ((px * py) % 2 + (px * py) % 3) % 2 === 0;
+        default: return ((px + py) % 2 + (px * py) % 3) % 2 === 0;
+      }
+    }
+    function applyMask(mask) {
+      for (var yy = 0; yy < size; yy++) for (var xx = 0; xx < size; xx++)
+        if (!f[yy][xx] && cond(mask, xx, yy)) m[yy][xx] = !m[yy][xx];
+    }
+    function lineScore(l) {
+      var s = 0, run = 1, n;
+      for (n = 1; n < l.length; n++) {
+        if (l[n] === l[n - 1]) run++; else { if (run >= 5) s += run - 2; run = 1; }
+      }
+      if (run >= 5) s += run - 2;
+      var str = l.map(function (c) { return c ? 1 : 0; }).join('');
+      ['10111010000', '00001011101'].forEach(function (pt) {
+        var idx = -1;
+        while ((idx = str.indexOf(pt, idx + 1)) >= 0) s += 40;
+      });
+      return s;
+    }
+    function penalty() {
+      var p = 0, yy, xx, dark = 0;
+      for (yy = 0; yy < size; yy++) {
+        p += lineScore(m[yy]);
+        p += lineScore(m.map(function (row) { return row[yy]; }));
+      }
+      for (yy = 0; yy < size; yy++) for (xx = 0; xx < size; xx++) {
+        if (m[yy][xx]) dark++;
+        if (yy < size - 1 && xx < size - 1 && m[yy][xx] === m[yy][xx + 1] &&
+            m[yy][xx] === m[yy + 1][xx] && m[yy][xx] === m[yy + 1][xx + 1]) p += 3;
+      }
+      p += Math.floor(Math.abs(dark * 100 / (size * size) - 50) / 5) * 10;
+      return p;
+    }
+    var best = 0, bestP = Infinity, mk;
+    for (mk = 0; mk < 8; mk++) {
+      applyMask(mk); drawFormat(mk);
+      var pp = penalty();
+      if (pp < bestP) { bestP = pp; best = mk; }
+      applyMask(mk);
+    }
+    applyMask(best); drawFormat(best);
+    return m;
+  }
+
+  // ===== 画面まわり =====
+  var input = document.getElementById('urlInput');
+  var errBox = document.getElementById('errBox');
+  var canvas = document.getElementById('qrCanvas');
+  var wrap = document.getElementById('qrWrap');
+  var saveBtn = document.getElementById('saveBtn');
+  var dlg = document.getElementById('tmDialog');
+
+  function draw(m) {
+    var scale = 8, quiet = 4, n = m.length, px = (n + quiet * 2) * scale;
+    canvas.width = px; canvas.height = px;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, px, px);
+    ctx.fillStyle = '#000000';
+    for (var y = 0; y < n; y++) for (var x = 0; x < n; x++)
+      if (m[y][x]) ctx.fillRect((x + quiet) * scale, (y + quiet) * scale, scale, scale);
+  }
+
+  function make() {
+    errBox.textContent = '';
+    var text = input.value.trim();
+    if (!text) { errBox.textContent = 'URLを入れてね。'; return; }
+    var m = makeQR(text);
+    if (!m) { errBox.textContent = '長すぎて作れないよ。213バイト以内（URLなら200文字くらい）にしてね。'; return; }
+    draw(m);
+    wrap.classList.add('show');
+    saveBtn.disabled = false;
+    if (dlg.showModal) { dlg.showModal(); } else { alert('QRコードは株式会社デンソーウェーブの登録商標です。'); }
+  }
+
+  document.getElementById('makeBtn').addEventListener('click', make);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); make(); } });
+  document.getElementById('tmClose').addEventListener('click', function () { dlg.close(); });
+  saveBtn.addEventListener('click', function () {
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'qrcode.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    }, 'image/png');
+  });
+})();
+</script>
+</body>
+</html>
