@@ -319,6 +319,21 @@
 
     <!-- 中：トピックス -->
     <div class="center-col">
+
+      <!-- 捨てメールアドレス発行（ドメイン取得後に使えるようにする予定） -->
+      <div class="panel sky">
+        <div class="panel-header">📮 捨てメールアドレス発行</div>
+        <div class="panel-body">
+          <form onsubmit="return false;" class="login-form">
+            <label for="tmpmail">発行されたアドレス</label>
+            <input id="tmpmail" type="text" class="dummy-input mail-result" placeholder="ここに表示されるよ" readonly>
+            <button type="button" class="btn-login" id="tmpmailIssue">発行する</button>
+            <button type="button" class="btn-admin" id="tmpmailCopy" disabled>コピー</button>
+            <div class="sub-text mail-note" id="tmpmailNote" role="status">MOZUU! ID発行後に使用できます</div>
+          </form>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="panel-header">🎴 今日のおみくじ・ガリ占い</div>
         <div class="panel-body">
@@ -438,20 +453,6 @@
               <a href="#" onclick="return false;">IDをお忘れの方</a>
               <a href="#" onclick="return false;">新規取得は許可制💞</a>
             </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- 捨てメールアドレス発行（ドメイン取得後に使えるようにする予定） -->
-      <div class="panel sky">
-        <div class="panel-header">📮 捨てメールアドレス発行</div>
-        <div class="panel-body">
-          <form onsubmit="return false;" class="login-form">
-            <label for="tmpmail">発行されたアドレス</label>
-            <input id="tmpmail" type="text" class="dummy-input mail-result" placeholder="ここに表示されるよ" readonly>
-            <button type="button" class="btn-login" id="tmpmailIssue">発行する</button>
-            <button type="button" class="btn-admin" id="tmpmailCopy" disabled>コピー</button>
-            <div class="sub-text mail-note" id="tmpmailNote" role="status">MOZUU! ID発行後に使用できます</div>
           </form>
         </div>
       </div>
