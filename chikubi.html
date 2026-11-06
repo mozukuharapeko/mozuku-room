@@ -347,8 +347,13 @@
         }
 
         function addScore(v) {
+            // 想定外の値（NaN/無限大など）はスコアに足さない。ここでガードしておかないと、
+            // 一度でも壊れた値が入り込むと、以降の表示や計算が全部おかしくなるよ。
+            if (!Number.isFinite(v)) return;
             game.score += v;
             game.lifetimeEarned += v;
+            if (!Number.isFinite(game.score)) game.score = 0;
+            if (!Number.isFinite(game.lifetimeEarned)) game.lifetimeEarned = 0;
         }
 
         function goToHome() {
@@ -374,7 +379,8 @@
 
         // ---- クリック ----
         function clickTarget(event) {
-            const addValue = game.clickPower * feverClickMult() * boostClickMult() * globalMult();
+            let addValue = game.clickPower * feverClickMult() * boostClickMult() * globalMult();
+            if (!Number.isFinite(addValue)) addValue = game.clickPower || 1;
             addScore(addValue);
             game.totalClicks++;
 
@@ -570,38 +576,53 @@
         }
 
         function spawnGolden() {
-            // タブが見えていないときは出さない
-            if (!document.hidden) {
-                const el = document.createElement('button');
-                el.type = 'button';
-                el.className = 'golden-frog';
-                el.setAttribute('aria-label', '金のカエル（クリックでボーナス）');
-                el.textContent = '🐸';
-                const x = 20 + Math.random() * Math.max(0, window.innerWidth - 120);
-                const y = 90 + Math.random() * Math.max(0, window.innerHeight - 200);
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
-                el.onclick = () => catchGolden(el);
-                document.body.appendChild(el);
-                setTimeout(() => el.remove(), 9000);
+            // この中でどんなエラーが起きても、必ず finally で次の出現予定を入れる。
+            // ここを保証しておかないと、一度エラーが起きただけで、金のカエルが二度と出なくなってしまうよ。
+            try {
+                // タブが見えていないときは出さない
+                if (!document.hidden) {
+                    // 前のカエルが何かの理由で残っていたら、重なって押せなくなる前に片付ける
+                    document.querySelectorAll('.golden-frog').forEach(e => e.remove());
+
+                    const el = document.createElement('button');
+                    el.type = 'button';
+                    el.className = 'golden-frog';
+                    el.setAttribute('aria-label', '金のカエル（クリックでボーナス）');
+                    el.textContent = '🐸';
+                    const x = 20 + Math.random() * Math.max(0, window.innerWidth - 120);
+                    const y = 90 + Math.random() * Math.max(0, window.innerHeight - 200);
+                    el.style.left = x + 'px';
+                    el.style.top = y + 'px';
+                    el.onclick = () => catchGolden(el);
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 9000);
+                }
+            } catch (e) {
+                console.error('🐸 金のカエルの表示でエラーが起きたよ:', e);
+            } finally {
+                scheduleGolden(false);
             }
-            scheduleGolden(false);
         }
 
         function catchGolden(el) {
-            el.remove();
-            game.goldenClicks++;
-            const r = Math.random();
-            if (r < 0.4) {
-                const bonus = Math.max(100, getCps() * 120);
-                addScore(bonus);
-                toast(`🐸✨ 金のカエル！ +${fmt(bonus)} CP`);
-            } else if (r < 0.7) {
-                boost = { cpsMult: 7, clickMult: 1, until: Date.now() + 20000, label: '金のカエル加速：自動生産 ×7' };
-                toast('🐸✨ 金のカエル！ 20秒間、自動生産 ×7');
-            } else {
-                boost = { cpsMult: 1, clickMult: 20, until: Date.now() + 10000, label: '金のカエル大暴れ：タップ ×20' };
-                toast('🐸✨ 金のカエル！ 10秒間、タップ ×20');
+            try {
+                el.remove();
+                game.goldenClicks++;
+                const r = Math.random();
+                if (r < 0.4) {
+                    let bonus = Math.max(100, getCps() * 120);
+                    if (!Number.isFinite(bonus)) bonus = 100;
+                    addScore(bonus);
+                    toast(`🐸✨ 金のカエル！ +${fmt(bonus)} CP`);
+                } else if (r < 0.7) {
+                    boost = { cpsMult: 7, clickMult: 1, until: Date.now() + 20000, label: '金のカエル加速：自動生産 ×7' };
+                    toast('🐸✨ 金のカエル！ 20秒間、自動生産 ×7');
+                } else {
+                    boost = { cpsMult: 1, clickMult: 20, until: Date.now() + 10000, label: '金のカエル大暴れ：タップ ×20' };
+                    toast('🐸✨ 金のカエル！ 10秒間、タップ ×20');
+                }
+            } catch (e) {
+                console.error('🐸 金のカエルを捕まえる処理でエラーが起きたよ:', e);
             }
             updateDisplay();
         }
