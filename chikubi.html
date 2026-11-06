@@ -12,17 +12,36 @@
             50% { box-shadow: 0 0 50px #8b5cf6, inset 0 0 50px #8b5cf6; }
             100% { box-shadow: 0 0 20px #ec4899, inset 0 0 20px #ec4899; }
         }
+        @keyframes gari-glow {
+            0% { box-shadow: 0 0 25px #fbbf24, inset 0 0 25px #fbbf24; }
+            33% { box-shadow: 0 0 60px #22d3ee, inset 0 0 40px #22d3ee; }
+            66% { box-shadow: 0 0 60px #f472b6, inset 0 0 40px #f472b6; }
+            100% { box-shadow: 0 0 25px #fbbf24, inset 0 0 25px #fbbf24; }
+        }
         @keyframes cut-in {
             0% { transform: translateX(-150%) scale(0.8); opacity: 0; }
             20% { transform: translateX(0) scale(1.1); opacity: 1; }
             80% { transform: translateX(0) scale(1); opacity: 1; }
             100% { transform: translateX(150%) scale(0.8); opacity: 0; }
         }
-        .fever-mode {
-            animation: fever-glow 1s infinite;
+        @keyframes frog-pulse {
+            from { transform: scale(1) rotate(-6deg); }
+            to { transform: scale(1.15) rotate(6deg); }
         }
-        .cutin-anim {
-            animation: cut-in 3s ease-in-out forwards;
+        .fever-mode { animation: fever-glow 1s infinite; }
+        .fever-gari { animation: gari-glow 0.7s infinite; }
+        .cutin-anim { animation: cut-in 3s ease-in-out forwards; }
+        .golden-frog {
+            position: fixed; z-index: 60; font-size: 44px; line-height: 1; padding: 6px 10px;
+            border-radius: 9999px; border: 3px solid #fbbf24;
+            background: radial-gradient(circle, #fde68a, #f59e0b);
+            box-shadow: 0 0 24px #fbbf24; cursor: pointer;
+            animation: frog-pulse 0.8s ease-in-out infinite alternate;
+        }
+        .golden-frog:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
+        @media (prefers-reduced-motion: reduce) {
+            .fever-mode, .fever-gari, .golden-frog { animation: none; }
+            .cutin-anim { animation: none; }
         }
     </style>
 </head>
@@ -30,6 +49,9 @@
 
     <!-- カットイン演出レイヤー -->
     <div id="cutin-container" class="fixed inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden"></div>
+
+    <!-- お知らせ（実績解除など） -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none" aria-live="polite"></div>
 
     <!-- ヘッダー -->
     <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 flex justify-between items-center shadow-md">
@@ -48,15 +70,25 @@
 
     <!-- メインレイアウト -->
     <main class="flex-grow container mx-auto px-4 py-6 max-w-4xl grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        
+
         <!-- 左側：クリックエリア＆スコア -->
         <div id="main-card" class="md:col-span-6 bg-slate-800/80 backdrop-blur border border-slate-700 p-6 rounded-2xl shadow-xl text-center space-y-6 flex flex-col items-center justify-center transition-all">
-            
+
             <div class="space-y-1 w-full">
                 <p class="text-xs text-pink-400 font-bold uppercase tracking-widest" id="player-title">称号：ただの通りすがりの変態</p>
-                <h2 class="text-4xl font-black text-white tracking-tight"><span id="score">0</span> <span class="text-lg text-slate-400">CP</span></h2>
+
+                <!-- 次の称号までのメーター -->
+                <div class="w-full pt-1">
+                    <div class="w-full bg-slate-700 rounded-full h-2 overflow-hidden border border-slate-600">
+                        <div id="title-bar" class="bg-gradient-to-r from-emerald-400 to-sky-400 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-300 mt-1" id="title-next">次の称号まで…</p>
+                </div>
+
+                <h2 class="text-4xl font-black text-white tracking-tight pt-2"><span id="score">0</span> <span class="text-lg text-slate-400">CP</span></h2>
                 <p class="text-xs text-slate-400">毎秒獲得: <span id="cps">0</span> CP/s</p>
-                
+                <p class="text-xs text-slate-400">クリック回数: <span id="click-count" class="font-bold text-slate-200">0</span> 回</p>
+
                 <!-- ゲージ -->
                 <div class="w-full bg-slate-700 rounded-full h-3 mt-3 overflow-hidden p-0.5 border border-slate-600">
                     <div id="fever-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full rounded-full transition-all duration-200" style="width: 0%"></div>
@@ -76,11 +108,12 @@
             </div>
 
             <p class="text-xs text-slate-400" id="action-hint">カエルさんをクリックしてポイントを稼ごう！</p>
+            <p class="text-xs font-bold text-amber-300 min-h-[1rem]" id="boost-status"></p>
         </div>
 
         <!-- 右側：ショップ（アップグレード） -->
         <div class="md:col-span-6 space-y-6">
-            
+
             <!-- タップ威力アップセクション -->
             <div class="bg-slate-800/80 backdrop-blur border border-slate-700 p-5 rounded-2xl shadow-xl space-y-3">
                 <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
@@ -103,7 +136,7 @@
                     <span>🤖</span> 自動生産マシーン（放置稼ぎ）
                 </h3>
                 <div class="space-y-2.5 max-h-80 overflow-y-auto pr-1" id="auto-shop-container">
-                    
+
                     <button onclick="buyAuto(0)" class="w-full flex justify-between items-center bg-slate-700/60 hover:bg-slate-700 p-3 rounded-xl border border-slate-600 transition cursor-pointer text-left">
                         <div>
                             <p class="font-bold text-sm text-indigo-300">温かい吐息 <span class="text-xs font-normal text-slate-400">(所持: <span id="auto-count-0">0</span>)</span></p>
@@ -147,6 +180,33 @@
                 </div>
             </div>
 
+            <!-- 転生 -->
+            <div class="bg-slate-800/80 backdrop-blur border border-slate-700 p-5 rounded-2xl shadow-xl space-y-3">
+                <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+                    <span>♻️</span> 転生（強くなってやり直し）
+                </h3>
+                <p class="text-xs text-slate-400">これまでの稼ぎに応じて「転生ポイント(TP)」がもらえるよ。TP1つにつき、タップと自動生産が <span class="font-bold text-slate-200">+5%</span> ずつ、ずっと強くなる。
+                    転生すると、CP・タップ強化・マシーンはリセット。称号（クリック回数）・実績・TPは残るよ。</p>
+                <div class="text-sm space-y-1">
+                    <p>所持TP: <span id="tp-have" class="font-bold text-amber-300">0</span>
+                        <span class="text-xs text-slate-400">（ボーナス +<span id="tp-bonus">0</span>%）</span></p>
+                    <p>いま転生すると: <span class="font-bold text-emerald-400">+<span id="tp-gain">0</span> TP</span></p>
+                    <p class="text-xs text-slate-400">転生した回数: <span id="prestige-count">0</span> 回</p>
+                </div>
+                <button id="prestige-btn" onclick="doPrestige()" class="w-full bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-xl transition cursor-pointer">
+                    ♻️ 転生する
+                </button>
+            </div>
+
+        </div>
+
+        <!-- 実績 -->
+        <div class="md:col-span-12 bg-slate-800/80 backdrop-blur border border-slate-700 p-5 rounded-2xl shadow-xl space-y-3">
+            <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+                <span>🏅</span> 実績
+                <span class="text-xs font-normal text-slate-400">(<span id="ach-count">0</span> / <span id="ach-total">0</span>)　実績ボーナス +<span id="ach-bonus">0</span>%</span>
+            </h3>
+            <div id="achievement-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"></div>
         </div>
 
     </main>
@@ -157,6 +217,33 @@
 
     <!-- ゲームロジック -->
     <script>
+        const SAVE_KEY = "chikubi_game_save_v6";
+        const maxFeverCount = 50;
+
+        // 自動生産マシーンの初期設定（転生のときも、ここから作り直す）
+        const AUTO_BASE = [
+            { cps: 1, cost: 50, costMult: 1.15 },
+            { cps: 5, cost: 300, costMult: 1.15 },
+            { cps: 25, cost: 1400, costMult: 1.17 },
+            { cps: 100, cost: 7000, costMult: 1.18 },
+            { cps: 500, cost: 35000, costMult: 1.20 }
+        ];
+        function freshAutos() {
+            return AUTO_BASE.map(a => ({ count: 0, cps: a.cps, cost: a.cost, costMult: a.costMult }));
+        }
+
+        // 祭り（フィーバー）の設定：weight は出やすさ、ms は続く時間
+        const FEVER = {
+            mama: { weight: 45, ms: 10000 }, // ガリママフィスティバル：タップ10倍
+            nana: { weight: 45, ms: 10000 }, // 魔法使いなの 賢者タイム：お買い物1/10
+            gari: { weight: 10, ms: 10000 }  // ガリ穴フィーバー：タップ50倍
+        };
+
+        // 転生：必要な稼ぎの目安。大きくすると、転生が遠くなるよ
+        const PRESTIGE_DIV = 25000;
+        const PRESTIGE_BONUS = 0.05;   // TP1つあたり +5%
+        const ACHIEVEMENT_BONUS = 0.01; // 実績1つあたり +1%
+
         let game = {
             score: 0,
             totalClicks: 0,
@@ -164,17 +251,20 @@
             powerLevel: 0,
             powerCost: 15,
             feverCount: 0,
-            feverType: null, // 'mama' (10倍) または 'nana' (10分の1買い物)
-            autos: [
-                { count: 0, cps: 1, cost: 50, costMult: 1.15 },
-                { count: 0, cps: 5, cost: 300, costMult: 1.15 },
-                { count: 0, cps: 25, cost: 1400, costMult: 1.17 },
-                { count: 0, cps: 100, cost: 7000, costMult: 1.18 },
-                { count: 0, cps: 500, cost: 35000, costMult: 1.20 }
-            ]
+            feverType: null, // 'mama' | 'nana' | 'gari'
+            autos: freshAutos(),
+            // ---- 追加分 ----
+            lifetimeEarned: 0,  // これまでに稼いだCPの合計（転生をまたいで増える）
+            tpAwarded: 0,       // これまでに受け取った転生ポイント
+            prestigeCount: 0,
+            goldenClicks: 0,
+            feverCounts: { mama: 0, nana: 0, gari: 0 },
+            achievements: {}
         };
 
-        const maxFeverCount = 50;
+        let feverTimer = null;
+        let boost = null; // 金のカエルの効果 { cpsMult, clickMult, until, label }
+        let goldenTimer = null;
 
         const titles = [
             { threshold: 0, name: "ただの通りすがりの変態" },
@@ -185,24 +275,62 @@
             { threshold: 10000, name: "観測不能の変態神（マスター）" }
         ];
 
+        // ---- 数字の見せ方 ----
+        function fmt(n) {
+            n = Math.floor(n);
+            if (n >= 1e12) return (n / 1e12).toFixed(2) + "兆";
+            if (n >= 1e8) return (n / 1e8).toFixed(2) + "億";
+            return n.toLocaleString("ja-JP");
+        }
+        function fmtRate(n) {
+            if (n >= 1000) return fmt(n);
+            return String(Math.round(n * 10) / 10);
+        }
+
+        // ---- 倍率 ----
+        function achievementCount() { return Object.keys(game.achievements).length; }
+        function achievementBonus() { return 1 + ACHIEVEMENT_BONUS * achievementCount(); }
+        function prestigeBonus() { return 1 + PRESTIGE_BONUS * game.tpAwarded; }
+        function globalMult() { return achievementBonus() * prestigeBonus(); }
+        function boostActive() { return boost && Date.now() < boost.until; }
+        function boostCpsMult() { return boostActive() ? boost.cpsMult : 1; }
+        function boostClickMult() { return boostActive() ? boost.clickMult : 1; }
+        function feverClickMult() {
+            if (game.feverType === 'mama') return 10;
+            if (game.feverType === 'gari') return 50;
+            return 1;
+        }
+
+        function addScore(v) {
+            game.score += v;
+            game.lifetimeEarned += v;
+        }
+
         function goToHome() {
             window.location.href = "./index.html";
         }
 
         function resetGame() {
-            if (confirm("セーブデータをリセットして最初からやり直すよ？いいかな？")) {
-                localStorage.removeItem("chikubi_game_save_v6");
+            if (confirm("セーブデータをリセットして最初からやり直すよ？実績や転生ポイントも消えるけど、いいかな？")) {
+                try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
                 location.reload();
             }
         }
 
+        // ---- お知らせ ----
+        function toast(text) {
+            const c = document.getElementById("toast-container");
+            const t = document.createElement("div");
+            t.className = "bg-slate-800 border border-amber-400 text-amber-200 text-sm font-bold px-4 py-2 rounded-xl shadow-lg";
+            t.textContent = text;
+            c.appendChild(t);
+            setTimeout(() => { t.remove(); }, 3500);
+        }
+
+        // ---- クリック ----
         function clickTarget(event) {
-            let multiplier = 1;
-            if (game.feverType === 'mama') {
-                multiplier = 10; // ガリママフィスティバルで10倍！
-            }
-            let addValue = game.clickPower * multiplier;
-            game.score += addValue;
+            const addValue = game.clickPower * feverClickMult() * boostClickMult() * globalMult();
+            addScore(addValue);
             game.totalClicks++;
 
             if (!game.feverType) {
@@ -211,35 +339,59 @@
                     triggerRandomFever();
                 }
             }
-            
-            showFloatingText(event.clientX, event.clientY, `+${addValue}` + (game.feverType ? ' 🔥' : ''));
+
+            showFloatingText(event.clientX, event.clientY, `+${fmtRate(addValue)}` + (game.feverType ? ' 🔥' : ''));
             updateDisplay();
         }
 
-        function triggerRandomFever() {
-            // 50%の確率で「ガリママフィスティバル」か「魔法使いなの 賢者タイム」がランダム発動！
-            const isMama = Math.random() < 0.5;
-            game.feverType = isMama ? 'mama' : 'nana';
-            game.feverCount = maxFeverCount;
-
-            document.getElementById("main-card").classList.add("fever-mode");
-
-            if (game.feverType === 'mama') {
-                document.getElementById("action-hint").innerText = "👵✨ 【ガリママフィスティバル】獲得ポイント10倍！！ ✨👵";
-                showCutIn('./garimama.png', 'ガリママフィスティバル発動！！');
-            } else {
-                document.getElementById("action-hint").innerText = "🪄✨ 【魔法使いなの：賢者タイム】お買い物が10分の1に！ ✨🪄";
-                showCutIn('./mahoushoujo.png', '賢者タイム：お買い物破格化！');
+        // ---- 祭り（フィーバー）----
+        function pickFeverType() {
+            let total = 0;
+            for (const k in FEVER) total += FEVER[k].weight;
+            let r = Math.random() * total;
+            for (const k in FEVER) {
+                r -= FEVER[k].weight;
+                if (r < 0) return k;
             }
-            
-            // 10秒後にフィーバー終了
-            setTimeout(() => {
-                game.feverType = null;
-                game.feverCount = 0;
-                document.getElementById("main-card").classList.remove("fever-mode");
-                document.getElementById("action-hint").innerText = "カエルさんをクリックしてポイントを稼ごう！";
-                updateDisplay();
-            }, 10000);
+            return 'mama';
+        }
+
+        function triggerRandomFever() {
+            startFever(pickFeverType());
+        }
+
+        function startFever(type) {
+            game.feverType = type;
+            game.feverCount = maxFeverCount;
+            game.feverCounts[type] = (game.feverCounts[type] || 0) + 1;
+
+            const card = document.getElementById("main-card");
+            card.classList.add(type === 'gari' ? "fever-gari" : "fever-mode");
+
+            const hint = document.getElementById("action-hint");
+            if (type === 'mama') {
+                hint.innerText = "👵✨ 【ガリママフィスティバル】獲得ポイント10倍！！ ✨👵";
+                showCutIn('./garimama.png', 'ガリママフィスティバル発動！！');
+            } else if (type === 'nana') {
+                hint.innerText = "🪄✨ 【魔法使いなの：賢者タイム】お買い物が10分の1に！ ✨🪄";
+                showCutIn('./mahoushoujo.png', '賢者タイム：お買い物破格化！');
+            } else {
+                hint.innerText = "🌈✨ 【ガリ穴フィーバー】獲得ポイント50倍！！ ✨🌈";
+                showCutIn('./gariana.png', 'ガリ穴フィーバー発動！！ ×50');
+            }
+
+            clearTimeout(feverTimer);
+            feverTimer = setTimeout(endFever, FEVER[type].ms);
+        }
+
+        function endFever() {
+            game.feverType = null;
+            game.feverCount = 0;
+            const card = document.getElementById("main-card");
+            card.classList.remove("fever-mode");
+            card.classList.remove("fever-gari");
+            document.getElementById("action-hint").innerText = "カエルさんをクリックしてポイントを稼ごう！";
+            updateDisplay();
         }
 
         function showCutIn(imgSrc, titleText) {
@@ -259,7 +411,7 @@
         function showFloatingText(x, y, text) {
             const el = document.createElement('div');
             el.innerText = text;
-            el.className = 'absolute text-pink-400 font-bold text-lg pointer-events-none transition-all duration-500 z-50';
+            el.className = 'fixed text-pink-400 font-bold text-lg pointer-events-none transition-all duration-500 z-50';
             el.style.left = (x || window.innerWidth / 2) + 'px';
             el.style.top = (y || window.innerHeight / 2) + 'px';
             document.body.appendChild(el);
@@ -274,6 +426,7 @@
             }, 500);
         }
 
+        // ---- 買い物 ----
         function buyUpgrade() {
             // 賢者タイム（nana）中ならコストが10分の1に！
             let cost = game.feverType === 'nana' ? Math.floor(game.powerCost / 10) : game.powerCost;
@@ -305,40 +458,201 @@
             }
         }
 
-        function getCps() {
-            let totalCps = 0;
+        function getBaseCps() {
+            let total = 0;
             for (let i = 0; i < game.autos.length; i++) {
-                totalCps += game.autos[i].count * game.autos[i].cps;
+                total += game.autos[i].count * game.autos[i].cps;
             }
-            return totalCps;
+            return total;
+        }
+
+        function getCps() {
+            return getBaseCps() * globalMult() * boostCpsMult();
+        }
+
+        // ---- 転生 ----
+        function potentialTp() { return Math.floor(Math.sqrt(game.lifetimeEarned / PRESTIGE_DIV)); }
+        function pendingTp() { return Math.max(0, potentialTp() - game.tpAwarded); }
+
+        function doPrestige() {
+            const gain = pendingTp();
+            if (gain < 1) {
+                alert("まだ転生ポイントがもらえないよ。もう少し稼いでからにしてね！");
+                return;
+            }
+            if (!confirm(`転生すると TP が +${gain} もらえるよ。\nCP・タップ強化・マシーンはリセットされるけど、いいかな？`)) return;
+
+            game.tpAwarded += gain;
+            game.prestigeCount++;
+            game.score = 0;
+            game.clickPower = 1;
+            game.powerLevel = 0;
+            game.powerCost = 15;
+            game.autos = freshAutos();
+            boost = null;
+            clearTimeout(feverTimer);
+            game.feverType = null;
+            game.feverCount = 0;
+            document.getElementById("main-card").classList.remove("fever-mode", "fever-gari");
+            document.getElementById("action-hint").innerText = "カエルさんをクリックしてポイントを稼ごう！";
+            toast(`♻️ 転生したよ！ TP +${gain}`);
+            saveGame();
+            updateDisplay();
+        }
+
+        // ---- 金のカエル（ランダムイベント）----
+        function scheduleGolden(first) {
+            const delay = (first ? 20000 : 40000) + Math.random() * 80000;
+            clearTimeout(goldenTimer);
+            goldenTimer = setTimeout(spawnGolden, delay);
+        }
+
+        function spawnGolden() {
+            // タブが見えていないときは出さない
+            if (!document.hidden) {
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'golden-frog';
+                el.setAttribute('aria-label', '金のカエル（クリックでボーナス）');
+                el.textContent = '🐸';
+                const x = 20 + Math.random() * Math.max(0, window.innerWidth - 120);
+                const y = 90 + Math.random() * Math.max(0, window.innerHeight - 200);
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                el.onclick = () => catchGolden(el);
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 9000);
+            }
+            scheduleGolden(false);
+        }
+
+        function catchGolden(el) {
+            el.remove();
+            game.goldenClicks++;
+            const r = Math.random();
+            if (r < 0.4) {
+                const bonus = Math.max(100, getCps() * 120);
+                addScore(bonus);
+                toast(`🐸✨ 金のカエル！ +${fmt(bonus)} CP`);
+            } else if (r < 0.7) {
+                boost = { cpsMult: 7, clickMult: 1, until: Date.now() + 20000, label: '金のカエル加速：自動生産 ×7' };
+                toast('🐸✨ 金のカエル！ 20秒間、自動生産 ×7');
+            } else {
+                boost = { cpsMult: 1, clickMult: 20, until: Date.now() + 10000, label: '金のカエル大暴れ：タップ ×20' };
+                toast('🐸✨ 金のカエル！ 10秒間、タップ ×20');
+            }
+            updateDisplay();
+        }
+
+        // ---- 実績 ----
+        const achievementDefs = [
+            { id: 'c100', icon: '🔰', name: '見習い卒業', desc: '100回クリック', check: () => game.totalClicks >= 100 },
+            { id: 'c1000', icon: '🖱️', name: '指がつりそう', desc: '1,000回クリック', check: () => game.totalClicks >= 1000 },
+            { id: 'c10000', icon: '🏆', name: '連打の鬼', desc: '10,000回クリック', check: () => game.totalClicks >= 10000 },
+            { id: 'cp1k', icon: '💰', name: '小銭持ち', desc: '合計で1,000 CP稼ぐ', check: () => game.lifetimeEarned >= 1000 },
+            { id: 'cp100k', icon: '💎', name: 'CP長者', desc: '合計で100,000 CP稼ぐ', check: () => game.lifetimeEarned >= 100000 },
+            { id: 'cp10m', icon: '🌌', name: 'CP宇宙', desc: '合計で10,000,000 CP稼ぐ', check: () => game.lifetimeEarned >= 10000000 },
+            { id: 'power10', icon: '💪', name: '指先の鍛錬', desc: 'タップ強化 Lv.10', check: () => game.powerLevel >= 10 },
+            { id: 'auto1', icon: '🤖', name: 'はじめてのマシーン', desc: 'マシーンを1台買う', check: () => game.autos.some(a => a.count >= 1) },
+            { id: 'autoall', icon: '🏭', name: 'コンプリート', desc: '5種類すべてのマシーンを持つ', check: () => game.autos.every(a => a.count >= 1) },
+            { id: 'auto10', icon: '🔟', name: '大量生産', desc: '同じマシーンを10台', check: () => game.autos.some(a => a.count >= 10) },
+            { id: 'cps100', icon: '⚡', name: '毎秒100', desc: '毎秒100 CP', check: () => getCps() >= 100 },
+            { id: 'cps1000', icon: '⚡', name: '毎秒1,000', desc: '毎秒1,000 CP', check: () => getCps() >= 1000 },
+            { id: 'mama', icon: '👵', name: 'ガリママ降臨', desc: 'ガリママフィスティバルを発動', check: () => game.feverCounts.mama >= 1 },
+            { id: 'nana', icon: '🪄', name: '賢者タイム突入', desc: '賢者タイムを発動', check: () => game.feverCounts.nana >= 1 },
+            { id: 'gari', icon: '🌈', name: 'ガリ穴フィーバー', desc: 'ガリ穴フィーバーを発動（運がいいと出る！）', check: () => game.feverCounts.gari >= 1 },
+            { id: 'golden1', icon: '🐸', name: '金のカエル発見', desc: '金のカエルを捕まえる', check: () => game.goldenClicks >= 1 },
+            { id: 'golden10', icon: '✨', name: '金のカエルハンター', desc: '金のカエルを10匹捕まえる', check: () => game.goldenClicks >= 10 },
+            { id: 'prestige1', icon: '♻️', name: '生まれ変わり', desc: '転生を1回する', check: () => game.prestigeCount >= 1 },
+            { id: 'prestige5', icon: '🌀', name: '転生マスター', desc: '転生を5回する', check: () => game.prestigeCount >= 5 }
+        ];
+
+        function checkAchievements() {
+            achievementDefs.forEach(def => {
+                if (!game.achievements[def.id] && def.check()) {
+                    game.achievements[def.id] = true;
+                    toast(`🏅 実績解除！ ${def.icon} ${def.name}`);
+                }
+            });
+        }
+
+        let lastAchCount = -1;
+        function renderAchievements() {
+            const n = achievementCount();
+            document.getElementById("ach-count").textContent = n;
+            document.getElementById("ach-total").textContent = achievementDefs.length;
+            document.getElementById("ach-bonus").textContent = Math.round(n * ACHIEVEMENT_BONUS * 100);
+            if (n === lastAchCount) return;
+            lastAchCount = n;
+            const grid = document.getElementById("achievement-grid");
+            grid.innerHTML = "";
+            achievementDefs.forEach(def => {
+                const got = !!game.achievements[def.id];
+                const d = document.createElement("div");
+                d.className = "rounded-xl border p-2 text-center " + (got ? "border-amber-400 bg-slate-700/70" : "border-slate-700 bg-slate-800/60 opacity-60");
+                const icon = document.createElement("div");
+                icon.className = "text-2xl";
+                icon.textContent = got ? def.icon : "🔒";
+                const name = document.createElement("p");
+                name.className = "text-xs font-bold " + (got ? "text-amber-300" : "text-slate-400");
+                name.textContent = def.name;
+                const desc = document.createElement("p");
+                desc.className = "text-[10px] text-slate-400";
+                desc.textContent = def.desc;
+                d.append(icon, name, desc);
+                grid.appendChild(d);
+            });
+        }
+
+        // ---- 称号と、次の称号までのメーター ----
+        function titleIndex() {
+            let idx = 0;
+            for (let i = 0; i < titles.length; i++) {
+                if (game.totalClicks >= titles[i].threshold) idx = i;
+            }
+            return idx;
         }
 
         function updateTitle() {
-            let currentTitle = titles[0].name;
-            for (let i = 0; i < titles.length; i++) {
-                if (game.totalClicks >= titles[i].threshold) {
-                    currentTitle = titles[i].name;
-                }
+            const idx = titleIndex();
+            document.getElementById("player-title").innerText = "称号：" + titles[idx].name;
+            document.getElementById("click-count").innerText = fmt(game.totalClicks);
+
+            const bar = document.getElementById("title-bar");
+            const label = document.getElementById("title-next");
+            const next = titles[idx + 1];
+            if (next) {
+                const span = next.threshold - titles[idx].threshold;
+                const done = game.totalClicks - titles[idx].threshold;
+                bar.style.width = Math.min(100, (done / span) * 100) + "%";
+                label.innerText = `次の称号「${next.name}」まで あと ${fmt(next.threshold - game.totalClicks)} 回`;
+            } else {
+                bar.style.width = "100%";
+                label.innerText = "最高の称号に到達したよ！🎉";
             }
-            document.getElementById("player-title").innerText = "称号：" + currentTitle;
         }
 
+        // ---- 画面の更新 ----
         function updateDisplay() {
-            document.getElementById("score").innerText = Math.floor(game.score);
-            document.getElementById("cps").innerText = getCps();
-            
+            checkAchievements();
+
+            document.getElementById("score").innerText = fmt(game.score);
+            document.getElementById("cps").innerText = fmtRate(getCps());
+
             // 賢者タイム中ならコスト表示も10分の1（端数切り捨て、最低1）にして分かりやすく！
             let powerDisplayCost = game.feverType === 'nana' ? Math.max(1, Math.floor(game.powerCost / 10)) : game.powerCost;
             document.getElementById("lvl-power").innerText = game.powerLevel;
-            document.getElementById("cost-power").innerText = powerDisplayCost + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
+            document.getElementById("cost-power").innerText = fmt(powerDisplayCost) + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
 
             let percent = (game.feverCount / maxFeverCount) * 100;
             document.getElementById("fever-bar").style.width = percent + "%";
-            
+
             if (game.feverType === 'mama') {
                 document.getElementById("fever-status").innerText = "👵🔥 ガリママフィスティバル発動中(10倍)！！ 🔥👵";
             } else if (game.feverType === 'nana') {
                 document.getElementById("fever-status").innerText = "🪄🔥 魔法使いなの 賢者タイム発動中(1/10)！！ 🔥🪄";
+            } else if (game.feverType === 'gari') {
+                document.getElementById("fever-status").innerText = "🌈🔥 ガリ穴フィーバー発動中(50倍)！！ 🔥🌈";
             } else {
                 document.getElementById("fever-status").innerText = `🔥 ゲージ: ${game.feverCount} / ${maxFeverCount}`;
             }
@@ -346,35 +660,72 @@
             for (let i = 0; i < game.autos.length; i++) {
                 document.getElementById(`auto-count-${i}`).innerText = game.autos[i].count;
                 let autoDisplayCost = game.feverType === 'nana' ? Math.max(1, Math.floor(game.autos[i].cost / 10)) : game.autos[i].cost;
-                document.getElementById(`auto-cost-${i}`).innerText = autoDisplayCost + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
+                document.getElementById(`auto-cost-${i}`).innerText = fmt(autoDisplayCost) + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
             }
 
+            // 金のカエルの効果
+            const bs = document.getElementById("boost-status");
+            if (boostActive()) {
+                bs.innerText = `🐸 ${boost.label}（あと${Math.ceil((boost.until - Date.now()) / 1000)}秒）`;
+            } else {
+                bs.innerText = "";
+            }
+
+            // 転生
+            const gain = pendingTp();
+            document.getElementById("tp-have").innerText = game.tpAwarded;
+            document.getElementById("tp-bonus").innerText = Math.round(game.tpAwarded * PRESTIGE_BONUS * 100);
+            document.getElementById("tp-gain").innerText = gain;
+            document.getElementById("prestige-count").innerText = game.prestigeCount;
+            document.getElementById("prestige-btn").disabled = gain < 1;
+
+            renderAchievements();
             updateTitle();
         }
 
+        // ---- 自動生産（0.1秒ごと）----
         setInterval(() => {
-            let cps = getCps();
+            const cps = getCps();
             if (cps > 0) {
-                game.score += cps / 10;
-                updateDisplay();
-            }
-        }, 100);
-
-        window.onload = function() {
-            let saved = localStorage.getItem("chikubi_game_save_v6");
-            if (saved) {
-                try {
-                    let loaded = JSON.parse(saved);
-                    game = Object.assign(game, loaded);
-                    game.feverType = null;
-                } catch(e) {}
+                addScore(cps / 10);
             }
             updateDisplay();
+        }, 100);
+
+        // ---- セーブとロード ----
+        function saveGame() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify(game));
+            } catch (e) {}
+        }
+
+        function loadGame() {
+            let saved = null;
+            try { saved = localStorage.getItem(SAVE_KEY); } catch (e) {}
+            if (!saved) return;
+            try {
+                const loaded = JSON.parse(saved);
+                game = Object.assign(game, loaded);
+                game.feverType = null;
+                // 古いセーブには無い項目を、安全な値にそろえる
+                if (!Array.isArray(game.autos) || game.autos.length !== AUTO_BASE.length) game.autos = freshAutos();
+                game.feverCounts = Object.assign({ mama: 0, nana: 0, gari: 0 }, game.feverCounts || {});
+                game.achievements = game.achievements || {};
+                if (typeof loaded.lifetimeEarned !== 'number') game.lifetimeEarned = Math.max(0, game.score || 0);
+                ['score', 'lifetimeEarned', 'tpAwarded', 'prestigeCount', 'goldenClicks', 'totalClicks'].forEach(k => {
+                    if (!Number.isFinite(game[k])) game[k] = 0;
+                });
+            } catch (e) {}
+        }
+
+        window.onload = function() {
+            loadGame();
+            updateDisplay();
+            scheduleGolden(true);
         };
 
-        setInterval(() => {
-            localStorage.setItem("chikubi_game_save_v6", JSON.stringify(game));
-        }, 5000);
+        setInterval(saveGame, 5000);
+        window.addEventListener("beforeunload", saveGame);
     </script>
 </body>
 </html>
