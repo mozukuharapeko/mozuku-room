@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚪ 乳首クリッカー Deluxe + 祭り ⚪</title>
+    <title>⚪ 乳首クリッカー Ultimate Fever DX+ ⚪</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -360,8 +360,13 @@
             window.location.href = "./index.html";
         }
 
+        // リセット中は自動保存を止める（止めないと、再読み込みの瞬間に
+        // 「閉じる直前の自動保存」が働いて、消したデータが書き戻ってしまうよ）
+        let skipAutoSave = false;
+
         function resetGame() {
             if (confirm("セーブデータをリセットして最初からやり直すよ？実績や転生ポイントも消えるけど、いいかな？")) {
+                skipAutoSave = true;
                 try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
                 location.reload();
             }
@@ -786,6 +791,7 @@
 
         // ---- セーブとロード ----
         function saveGame() {
+            if (skipAutoSave) return;
             try {
                 localStorage.setItem(SAVE_KEY, JSON.stringify(game));
             } catch (e) {}
