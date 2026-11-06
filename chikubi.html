@@ -18,6 +18,18 @@
             66% { box-shadow: 0 0 60px #f472b6, inset 0 0 40px #f472b6; }
             100% { box-shadow: 0 0 25px #fbbf24, inset 0 0 25px #fbbf24; }
         }
+        @keyframes kaiun-glow {
+            0% { box-shadow: 0 0 30px #f472b6, inset 0 0 30px #f472b6; }
+            50% { box-shadow: 0 0 70px #a78bfa, inset 0 0 50px #a78bfa; }
+            100% { box-shadow: 0 0 30px #f472b6, inset 0 0 30px #f472b6; }
+        }
+        @keyframes sailor-glow {
+            0% { box-shadow: 0 0 35px #38bdf8, inset 0 0 35px #38bdf8; }
+            25% { box-shadow: 0 0 80px #fde047, inset 0 0 55px #fde047; }
+            50% { box-shadow: 0 0 80px #f472b6, inset 0 0 55px #f472b6; }
+            75% { box-shadow: 0 0 80px #a78bfa, inset 0 0 55px #a78bfa; }
+            100% { box-shadow: 0 0 35px #38bdf8, inset 0 0 35px #38bdf8; }
+        }
         @keyframes cut-in {
             0% { transform: translateX(-150%) scale(0.8); opacity: 0; }
             20% { transform: translateX(0) scale(1.1); opacity: 1; }
@@ -30,6 +42,8 @@
         }
         .fever-mode { animation: fever-glow 1s infinite; }
         .fever-gari { animation: gari-glow 0.7s infinite; }
+        .fever-kaiun { animation: kaiun-glow 0.6s infinite; }
+        .fever-sailor { animation: sailor-glow 0.5s infinite; }
         .cutin-anim { animation: cut-in 3s ease-in-out forwards; }
         .golden-frog {
             position: fixed; z-index: 60; font-size: 44px; line-height: 1; padding: 6px 10px;
@@ -40,7 +54,7 @@
         }
         .golden-frog:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
         @media (prefers-reduced-motion: reduce) {
-            .fever-mode, .fever-gari, .golden-frog { animation: none; }
+            .fever-mode, .fever-gari, .fever-kaiun, .fever-sailor, .golden-frog { animation: none; }
             .cutin-anim { animation: none; }
         }
     </style>
@@ -234,9 +248,20 @@
 
         // 祭り（フィーバー）の設定：weight は出やすさ、ms は続く時間
         const FEVER = {
-            mama: { weight: 45, ms: 10000 }, // ガリママフィスティバル：タップ10倍
-            nana: { weight: 45, ms: 10000 }, // 魔法使いなの 賢者タイム：お買い物1/10
-            gari: { weight: 10, ms: 10000 }  // ガリ穴フィーバー：タップ50倍
+            mama:   { weight: 43, ms: 10000 }, // ガリママフィスティバル：タップ10倍
+            nana:   { weight: 43, ms: 10000 }, // 魔法使いなの 賢者タイム：お買い物1/10
+            gari:   { weight: 9,  ms: 10000 }, // ガリ穴フィーバー：タップ50倍
+            kaiun:  { weight: 4,  ms: 8000  }, // 魔法少女海蘊：タップ100倍＆お買い物1/100（低確率）
+            sailor: { weight: 1,  ms: 6000  }  // 美少女戦士セーラー海蘊：タップ1000倍＆お買い物1/1000（激レア）
+        };
+
+        // 各フィーバーの効果（クリック倍率／お買い物の割引）をここにまとめておくよ
+        const FEVER_EFFECT = {
+            mama:   { clickMult: 10,   costDiv: 1    },
+            nana:   { clickMult: 1,    costDiv: 10   },
+            gari:   { clickMult: 50,   costDiv: 1    },
+            kaiun:  { clickMult: 100,  costDiv: 100  },
+            sailor: { clickMult: 1000, costDiv: 1000 }
         };
 
         // 転生：必要な稼ぎの目安。大きくすると、転生が遠くなるよ
@@ -251,14 +276,14 @@
             powerLevel: 0,
             powerCost: 15,
             feverCount: 0,
-            feverType: null, // 'mama' | 'nana' | 'gari'
+            feverType: null, // 'mama' | 'nana' | 'gari' | 'kaiun' | 'sailor'
             autos: freshAutos(),
             // ---- 追加分 ----
             lifetimeEarned: 0,  // これまでに稼いだCPの合計（転生をまたいで増える）
             tpAwarded: 0,       // これまでに受け取った転生ポイント
             prestigeCount: 0,
             goldenClicks: 0,
-            feverCounts: { mama: 0, nana: 0, gari: 0 },
+            feverCounts: { mama: 0, nana: 0, gari: 0, kaiun: 0, sailor: 0 },
             achievements: {}
         };
 
@@ -266,13 +291,18 @@
         let boost = null; // 金のカエルの効果 { cpsMult, clickMult, until, label }
         let goldenTimer = null;
 
+        // 称号（村人スタートから、超界王神まで）
         const titles = [
-            { threshold: 0, name: "ただの通りすがりの変態" },
-            { threshold: 100, name: "見習いポチポチer" },
-            { threshold: 500, name: "深夜のテンション限界突破" },
-            { threshold: 1000, name: "常識を置き去りにした者" },
-            { threshold: 5000, name: "神聖なる無駄骨の極み" },
-            { threshold: 10000, name: "観測不能の変態神（マスター）" }
+            { threshold: 0,       name: "乳首クリック村人" },
+            { threshold: 50,      name: "乳首クリック町人" },
+            { threshold: 200,     name: "乳首クリック貴族" },
+            { threshold: 800,     name: "乳首クリック大臣" },
+            { threshold: 3000,    name: "乳首クリック王" },
+            { threshold: 10000,   name: "乳首神" },
+            { threshold: 30000,   name: "乳首界王" },
+            { threshold: 100000,  name: "乳首大界王" },
+            { threshold: 300000,  name: "乳首大界王神" },
+            { threshold: 1000000, name: "乳首超界王神" }
         ];
 
         // ---- 数字の見せ方 ----
@@ -296,9 +326,17 @@
         function boostCpsMult() { return boostActive() ? boost.cpsMult : 1; }
         function boostClickMult() { return boostActive() ? boost.clickMult : 1; }
         function feverClickMult() {
-            if (game.feverType === 'mama') return 10;
-            if (game.feverType === 'gari') return 50;
-            return 1;
+            const e = FEVER_EFFECT[game.feverType];
+            return e ? e.clickMult : 1;
+        }
+        // 祭り中のお買い物の割引（例：100なら「価格が100分の1」）
+        function feverCostDiv() {
+            const e = FEVER_EFFECT[game.feverType];
+            return e ? e.costDiv : 1;
+        }
+        function feverCostLabel() {
+            const d = feverCostDiv();
+            return d > 1 ? ` 🔥(1/${d})` : '';
         }
 
         function addScore(v) {
@@ -366,7 +404,11 @@
             game.feverCounts[type] = (game.feverCounts[type] || 0) + 1;
 
             const card = document.getElementById("main-card");
-            card.classList.add(type === 'gari' ? "fever-gari" : "fever-mode");
+            const cls = type === 'gari' ? 'fever-gari'
+                : type === 'kaiun' ? 'fever-kaiun'
+                : type === 'sailor' ? 'fever-sailor'
+                : 'fever-mode';
+            card.classList.add(cls);
 
             const hint = document.getElementById("action-hint");
             if (type === 'mama') {
@@ -375,9 +417,15 @@
             } else if (type === 'nana') {
                 hint.innerText = "🪄✨ 【魔法使いなの：賢者タイム】お買い物が10分の1に！ ✨🪄";
                 showCutIn('./mahoushoujo.png', '賢者タイム：お買い物破格化！');
-            } else {
+            } else if (type === 'gari') {
                 hint.innerText = "🌈✨ 【ガリ穴フィーバー】獲得ポイント50倍！！ ✨🌈";
                 showCutIn('./gariana.png', 'ガリ穴フィーバー発動！！ ×50');
+            } else if (type === 'kaiun') {
+                hint.innerText = "🪄💗 【魔法少女海蘊】クリック100倍＆お買い物100分の1！！ 💗🪄";
+                showCutIn('./mahou_umi.png', '魔法少女海蘊 降臨！！');
+            } else {
+                hint.innerText = "🌙⭐ 【美少女戦士セーラー海蘊】クリック1000倍＆お買い物1000分の1！！！ ⭐🌙";
+                showCutIn('./sailor_umi.png', '美少女戦士セーラー海蘊 参上！！');
             }
 
             clearTimeout(feverTimer);
@@ -388,8 +436,7 @@
             game.feverType = null;
             game.feverCount = 0;
             const card = document.getElementById("main-card");
-            card.classList.remove("fever-mode");
-            card.classList.remove("fever-gari");
+            card.classList.remove("fever-mode", "fever-gari", "fever-kaiun", "fever-sailor");
             document.getElementById("action-hint").innerText = "カエルさんをクリックしてポイントを稼ごう！";
             updateDisplay();
         }
@@ -428,8 +475,8 @@
 
         // ---- 買い物 ----
         function buyUpgrade() {
-            // 賢者タイム（nana）中ならコストが10分の1に！
-            let cost = game.feverType === 'nana' ? Math.floor(game.powerCost / 10) : game.powerCost;
+            // 祭り中は、祭りの種類に応じてコストが割引に！
+            let cost = Math.floor(game.powerCost / feverCostDiv());
             if (cost < 1) cost = 1;
 
             if (game.score >= cost) {
@@ -445,7 +492,7 @@
 
         function buyAuto(index) {
             let auto = game.autos[index];
-            let cost = game.feverType === 'nana' ? Math.floor(auto.cost / 10) : auto.cost;
+            let cost = Math.floor(auto.cost / feverCostDiv());
             if (cost < 1) cost = 1;
 
             if (game.score >= cost) {
@@ -493,7 +540,7 @@
             clearTimeout(feverTimer);
             game.feverType = null;
             game.feverCount = 0;
-            document.getElementById("main-card").classList.remove("fever-mode", "fever-gari");
+            document.getElementById("main-card").classList.remove("fever-mode", "fever-gari", "fever-kaiun", "fever-sailor");
             document.getElementById("action-hint").innerText = "カエルさんをクリックしてポイントを稼ごう！";
             toast(`♻️ 転生したよ！ TP +${gain}`);
             saveGame();
@@ -561,6 +608,8 @@
             { id: 'mama', icon: '👵', name: 'ガリママ降臨', desc: 'ガリママフィスティバルを発動', check: () => game.feverCounts.mama >= 1 },
             { id: 'nana', icon: '🪄', name: '賢者タイム突入', desc: '賢者タイムを発動', check: () => game.feverCounts.nana >= 1 },
             { id: 'gari', icon: '🌈', name: 'ガリ穴フィーバー', desc: 'ガリ穴フィーバーを発動（運がいいと出る！）', check: () => game.feverCounts.gari >= 1 },
+            { id: 'kaiun', icon: '🪄', name: '魔法少女海蘊、見参', desc: '魔法少女海蘊イベントを発動（低確率）', check: () => game.feverCounts.kaiun >= 1 },
+            { id: 'sailor', icon: '🌙', name: 'セーラー海蘊、参上', desc: '美少女戦士セーラー海蘊イベントを発動（激レア）', check: () => game.feverCounts.sailor >= 1 },
             { id: 'golden1', icon: '🐸', name: '金のカエル発見', desc: '金のカエルを捕まえる', check: () => game.goldenClicks >= 1 },
             { id: 'golden10', icon: '✨', name: '金のカエルハンター', desc: '金のカエルを10匹捕まえる', check: () => game.goldenClicks >= 10 },
             { id: 'prestige1', icon: '♻️', name: '生まれ変わり', desc: '転生を1回する', check: () => game.prestigeCount >= 1 },
@@ -628,7 +677,7 @@
                 label.innerText = `次の称号「${next.name}」まで あと ${fmt(next.threshold - game.totalClicks)} 回`;
             } else {
                 bar.style.width = "100%";
-                label.innerText = "最高の称号に到達したよ！🎉";
+                label.innerText = "最高の称号「乳首超界王神」に到達したよ！🎉";
             }
         }
 
@@ -639,10 +688,10 @@
             document.getElementById("score").innerText = fmt(game.score);
             document.getElementById("cps").innerText = fmtRate(getCps());
 
-            // 賢者タイム中ならコスト表示も10分の1（端数切り捨て、最低1）にして分かりやすく！
-            let powerDisplayCost = game.feverType === 'nana' ? Math.max(1, Math.floor(game.powerCost / 10)) : game.powerCost;
+            // 祭り中ならコスト表示も割引後の金額にして分かりやすく！
+            let powerDisplayCost = Math.max(1, Math.floor(game.powerCost / feverCostDiv()));
             document.getElementById("lvl-power").innerText = game.powerLevel;
-            document.getElementById("cost-power").innerText = fmt(powerDisplayCost) + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
+            document.getElementById("cost-power").innerText = fmt(powerDisplayCost) + " CP" + feverCostLabel();
 
             let percent = (game.feverCount / maxFeverCount) * 100;
             document.getElementById("fever-bar").style.width = percent + "%";
@@ -653,14 +702,18 @@
                 document.getElementById("fever-status").innerText = "🪄🔥 魔法使いなの 賢者タイム発動中(1/10)！！ 🔥🪄";
             } else if (game.feverType === 'gari') {
                 document.getElementById("fever-status").innerText = "🌈🔥 ガリ穴フィーバー発動中(50倍)！！ 🔥🌈";
+            } else if (game.feverType === 'kaiun') {
+                document.getElementById("fever-status").innerText = "🪄💗 魔法少女海蘊 発動中(100倍/1-100)！！ 💗🪄";
+            } else if (game.feverType === 'sailor') {
+                document.getElementById("fever-status").innerText = "🌙⭐ セーラー海蘊 発動中(1000倍/1-1000)！！！ ⭐🌙";
             } else {
                 document.getElementById("fever-status").innerText = `🔥 ゲージ: ${game.feverCount} / ${maxFeverCount}`;
             }
 
             for (let i = 0; i < game.autos.length; i++) {
                 document.getElementById(`auto-count-${i}`).innerText = game.autos[i].count;
-                let autoDisplayCost = game.feverType === 'nana' ? Math.max(1, Math.floor(game.autos[i].cost / 10)) : game.autos[i].cost;
-                document.getElementById(`auto-cost-${i}`).innerText = fmt(autoDisplayCost) + " CP" + (game.feverType === 'nana' ? ' 🔥(1/10)' : '');
+                let autoDisplayCost = Math.max(1, Math.floor(game.autos[i].cost / feverCostDiv()));
+                document.getElementById(`auto-cost-${i}`).innerText = fmt(autoDisplayCost) + " CP" + feverCostLabel();
             }
 
             // 金のカエルの効果
@@ -709,7 +762,7 @@
                 game.feverType = null;
                 // 古いセーブには無い項目を、安全な値にそろえる
                 if (!Array.isArray(game.autos) || game.autos.length !== AUTO_BASE.length) game.autos = freshAutos();
-                game.feverCounts = Object.assign({ mama: 0, nana: 0, gari: 0 }, game.feverCounts || {});
+                game.feverCounts = Object.assign({ mama: 0, nana: 0, gari: 0, kaiun: 0, sailor: 0 }, game.feverCounts || {});
                 game.achievements = game.achievements || {};
                 if (typeof loaded.lifetimeEarned !== 'number') game.lifetimeEarned = Math.max(0, game.score || 0);
                 ['score', 'lifetimeEarned', 'tpAwarded', 'prestigeCount', 'goldenClicks', 'totalClicks'].forEach(k => {
