@@ -248,20 +248,22 @@
 
         // 祭り（フィーバー）の設定：weight は出やすさ、ms は続く時間
         const FEVER = {
-            mama:   { weight: 43, ms: 10000 }, // ガリママフィスティバル：タップ10倍
-            nana:   { weight: 43, ms: 10000 }, // 魔法使いなの 賢者タイム：お買い物1/10
-            gari:   { weight: 9,  ms: 10000 }, // ガリ穴フィーバー：タップ50倍
-            kaiun:  { weight: 4,  ms: 8000  }, // 魔法少女海蘊：タップ100倍＆お買い物1/100（低確率）
-            sailor: { weight: 1,  ms: 6000  }  // 美少女戦士セーラー海蘊：タップ1000倍＆お買い物1/1000（激レア）
+            mama:       { weight: 430, ms: 10000 }, // ガリママフィスティバル：タップ10倍
+            nana:       { weight: 430, ms: 10000 }, // 魔法使いなの 賢者タイム：お買い物1/10
+            gari:       { weight: 90,  ms: 10000 }, // ガリ穴フィーバー：タップ50倍
+            kaiun:      { weight: 40,  ms: 8000  }, // 魔法少女海蘊：タップ100倍＆お買い物1/100（低確率）
+            sailor:     { weight: 9,   ms: 6000  }, // 美少女戦士セーラー海蘊：タップ1000倍＆お買い物1/1000（激レア）
+            sailornano: { weight: 1,   ms: 4000  }  // 美少女戦士セーラーなの：タップ1000倍＆お買い物1/1000＆クリックごとにTP+1（超激レア）
         };
 
-        // 各フィーバーの効果（クリック倍率／お買い物の割引）をここにまとめておくよ
+        // 各フィーバーの効果（クリック倍率／お買い物の割引／クリックごとのTPボーナス）をここにまとめておくよ
         const FEVER_EFFECT = {
-            mama:   { clickMult: 10,   costDiv: 1    },
-            nana:   { clickMult: 1,    costDiv: 10   },
-            gari:   { clickMult: 50,   costDiv: 1    },
-            kaiun:  { clickMult: 100,  costDiv: 100  },
-            sailor: { clickMult: 1000, costDiv: 1000 }
+            mama:       { clickMult: 10,   costDiv: 1,    tpPerClick: 0 },
+            nana:       { clickMult: 1,    costDiv: 10,   tpPerClick: 0 },
+            gari:       { clickMult: 50,   costDiv: 1,    tpPerClick: 0 },
+            kaiun:      { clickMult: 100,  costDiv: 100,  tpPerClick: 0 },
+            sailor:     { clickMult: 1000, costDiv: 1000, tpPerClick: 0 },
+            sailornano: { clickMult: 1000, costDiv: 1000, tpPerClick: 1 }
         };
 
         // 転生：必要な稼ぎの目安。大きくすると、転生が遠くなるよ
@@ -283,7 +285,7 @@
             tpAwarded: 0,       // これまでに受け取った転生ポイント
             prestigeCount: 0,
             goldenClicks: 0,
-            feverCounts: { mama: 0, nana: 0, gari: 0, kaiun: 0, sailor: 0 },
+            feverCounts: { mama: 0, nana: 0, gari: 0, kaiun: 0, sailor: 0, sailornano: 0 },
             achievements: {}
         };
 
@@ -338,6 +340,11 @@
             const d = feverCostDiv();
             return d > 1 ? ` 🔥(1/${d})` : '';
         }
+        // 祭り中、クリックごとにもらえるTP（通常は0。セーラーなのだけ特別）
+        function feverTpPerClick() {
+            const e = FEVER_EFFECT[game.feverType];
+            return e ? (e.tpPerClick || 0) : 0;
+        }
 
         function addScore(v) {
             game.score += v;
@@ -371,6 +378,10 @@
             addScore(addValue);
             game.totalClicks++;
 
+            // セーラーなの発動中は、クリックごとにTPも直接もらえる（転生しなくても、ずっと残るボーナス）
+            const tpGain = feverTpPerClick();
+            if (tpGain) game.tpAwarded += tpGain;
+
             if (!game.feverType) {
                 game.feverCount++;
                 if (game.feverCount >= maxFeverCount) {
@@ -378,7 +389,8 @@
                 }
             }
 
-            showFloatingText(event.clientX, event.clientY, `+${fmtRate(addValue)}` + (game.feverType ? ' 🔥' : ''));
+            const tpLabel = tpGain ? ` +${tpGain}TP` : '';
+            showFloatingText(event.clientX, event.clientY, `+${fmtRate(addValue)}${tpLabel}` + (game.feverType ? ' 🔥' : ''));
             updateDisplay();
         }
 
@@ -406,7 +418,7 @@
             const card = document.getElementById("main-card");
             const cls = type === 'gari' ? 'fever-gari'
                 : type === 'kaiun' ? 'fever-kaiun'
-                : type === 'sailor' ? 'fever-sailor'
+                : (type === 'sailor' || type === 'sailornano') ? 'fever-sailor'
                 : 'fever-mode';
             card.classList.add(cls);
 
@@ -423,9 +435,12 @@
             } else if (type === 'kaiun') {
                 hint.innerText = "🪄💗 【魔法少女海蘊】クリック100倍＆お買い物100分の1！！ 💗🪄";
                 showCutIn('./mahou_umi.png', '魔法少女海蘊 降臨！！');
-            } else {
+            } else if (type === 'sailor') {
                 hint.innerText = "🌙⭐ 【美少女戦士セーラー海蘊】クリック1000倍＆お買い物1000分の1！！！ ⭐🌙";
                 showCutIn('./sailor_umi.png', '美少女戦士セーラー海蘊 参上！！');
+            } else {
+                hint.innerText = "🌙💖 【美少女戦士セーラーなの】クリック1000倍＆お買い物1000分の1＆クリックごとにTP+1！！！ 💖🌙";
+                showCutIn('./sailor_nano.png', '美少女戦士セーラーなの 覚醒！！');
             }
 
             clearTimeout(feverTimer);
@@ -610,6 +625,7 @@
             { id: 'gari', icon: '🌈', name: 'ガリ穴フィーバー', desc: 'ガリ穴フィーバーを発動（運がいいと出る！）', check: () => game.feverCounts.gari >= 1 },
             { id: 'kaiun', icon: '🪄', name: '魔法少女海蘊、見参', desc: '魔法少女海蘊イベントを発動（低確率）', check: () => game.feverCounts.kaiun >= 1 },
             { id: 'sailor', icon: '🌙', name: 'セーラー海蘊、参上', desc: '美少女戦士セーラー海蘊イベントを発動（激レア）', check: () => game.feverCounts.sailor >= 1 },
+            { id: 'sailornano', icon: '💖', name: 'セーラーなの、覚醒', desc: '美少女戦士セーラーなのイベントを発動（超激レア・クリックごとにTPも貰える）', check: () => game.feverCounts.sailornano >= 1 },
             { id: 'golden1', icon: '🐸', name: '金のカエル発見', desc: '金のカエルを捕まえる', check: () => game.goldenClicks >= 1 },
             { id: 'golden10', icon: '✨', name: '金のカエルハンター', desc: '金のカエルを10匹捕まえる', check: () => game.goldenClicks >= 10 },
             { id: 'prestige1', icon: '♻️', name: '生まれ変わり', desc: '転生を1回する', check: () => game.prestigeCount >= 1 },
@@ -706,6 +722,8 @@
                 document.getElementById("fever-status").innerText = "🪄💗 魔法少女海蘊 発動中(100倍/1-100)！！ 💗🪄";
             } else if (game.feverType === 'sailor') {
                 document.getElementById("fever-status").innerText = "🌙⭐ セーラー海蘊 発動中(1000倍/1-1000)！！！ ⭐🌙";
+            } else if (game.feverType === 'sailornano') {
+                document.getElementById("fever-status").innerText = "💖🌙 セーラーなの 発動中(1000倍/1-1000＋クリック毎TP+1)！！！ 🌙💖";
             } else {
                 document.getElementById("fever-status").innerText = `🔥 ゲージ: ${game.feverCount} / ${maxFeverCount}`;
             }
@@ -762,7 +780,7 @@
                 game.feverType = null;
                 // 古いセーブには無い項目を、安全な値にそろえる
                 if (!Array.isArray(game.autos) || game.autos.length !== AUTO_BASE.length) game.autos = freshAutos();
-                game.feverCounts = Object.assign({ mama: 0, nana: 0, gari: 0, kaiun: 0, sailor: 0 }, game.feverCounts || {});
+                game.feverCounts = Object.assign({ mama: 0, nana: 0, gari: 0, kaiun: 0, sailor: 0, sailornano: 0 }, game.feverCounts || {});
                 game.achievements = game.achievements || {};
                 if (typeof loaded.lifetimeEarned !== 'number') game.lifetimeEarned = Math.max(0, game.score || 0);
                 ['score', 'lifetimeEarned', 'tpAwarded', 'prestigeCount', 'goldenClicks', 'totalClicks'].forEach(k => {
