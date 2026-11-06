@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔️ にゃんこ大決戦 超簡易版 ⚔️</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+    body { user-select: none; }
+    #field { position: relative; overflow: hidden; background:
+        repeating-linear-gradient(90deg, #1e293b, #1e293b 39px, #27354a 39px, #27354a 40px); }
+    .unit { position: absolute; bottom: 6px; transform: translateX(-50%); text-align: center;
+            transition: left 0.1s linear; }
+    .unit .emoji { font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,.6)); }
+    .unit.enemy .emoji { transform: scaleX(-1); display: inline-block; }
+    .unit .hpwrap { width: 34px; height: 4px; background: #0f172a; border-radius: 2px; margin: 2px auto 0; overflow: hidden; }
+    .unit .hpbar { height: 100%; }
+    .unit.player .hpbar { background: #34d399; }
+    .unit.enemy .hpbar { background: #f87171; }
+    .base-hpbar { transition: width 0.2s linear; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+    .shake { animation: shake 0.3s; }
+</style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+<header class="bg-slate-800 border-b border-slate-700 py-3 px-4 flex justify-between items-center shadow-md">
+    <h1 class="text-lg font-bold tracking-wider">⚔️ にゃんこ大決戦 <span class="text-xs bg-pink-600 px-2 py-0.5 rounded-full">超簡易版</span></h1>
+    <div class="flex gap-2">
+        <button onclick="restartGame()" class="text-xs bg-rose-700 hover:bg-rose-600 font-bold py-2 px-3 rounded-xl transition">🔄 最初から</button>
+        <a href="./index.html" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-2 px-3 rounded-xl transition">🏠 もずべやに戻る</a>
+    </div>
+</header>
+
+<main class="flex-grow container mx-auto px-3 py-4 max-w-3xl w-full flex flex-col gap-3">
+
+    <!-- 城のHP -->
+    <div class="flex items-center gap-2 text-xs font-bold">
+        <span class="w-16 text-sky-300">🏠 自軍</span>
+        <div class="flex-1 h-3 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
+            <div id="player-hpbar" class="base-hpbar bg-sky-400 h-full" style="width:100%"></div>
+        </div>
+        <span id="player-hp-text" class="w-12 text-right"></span>
+    </div>
+    <div class="flex items-center gap-2 text-xs font-bold">
+        <span class="w-16 text-rose-300">👹 敵軍</span>
+        <div class="flex-1 h-3 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
+            <div id="enemy-hpbar" class="base-hpbar bg-rose-400 h-full" style="width:100%"></div>
+        </div>
+        <span id="enemy-hp-text" class="w-12 text-right"></span>
+    </div>
+
+    <!-- お金 -->
+    <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="text-sm font-bold text-amber-300">💰 にゃんこポイント：<span id="np">0</span>
+            <span class="text-xs text-slate-400 font-normal">(毎秒 +<span id="np-rate">0</span>)</span>
+        </div>
+        <button id="btn-np-upgrade" onclick="upgradeNpRate()"
+                class="bg-slate-800 border border-amber-500 text-amber-300 text-xs font-bold py-1.5 px-3 rounded-xl hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
+            ⬆️ 収入レベルアップ Lv.<span id="np-level">0</span>（💰<span id="np-upgrade-cost">0</span>）
+        </button>
+    </div>
+
+    <!-- 戦場 -->
+    <div id="field-wrap" class="relative">
+        <div id="field" class="relative h-40 rounded-2xl border-2 border-slate-700 shadow-xl">
+            <div class="absolute inset-y-0 left-0 w-3 bg-sky-500/70"></div>
+            <div class="absolute inset-y-0 right-0 w-3 bg-rose-500/70"></div>
+        </div>
+        <div id="overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black/70 rounded-2xl">
+            <div class="text-center">
+                <p id="overlay-text" class="text-3xl font-black mb-3"></p>
+                <button onclick="restartGame()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-2 px-5 rounded-xl">もう一回！</button>
+            </div>
+        </div>
+        <div id="start-overlay" class="absolute inset-0 flex items-center justify-center bg-black/70 rounded-2xl">
+            <button onclick="startGame()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold text-lg py-3 px-8 rounded-xl">▶️ たたかいスタート</button>
+        </div>
+    </div>
+
+    <!-- ユニット出撃ボタン -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="unit-buttons"></div>
+
+    <p class="text-xs text-slate-400">お金が貯まったらユニットを出して、敵の城を壊そう！数値はまだ仮調整だよ。</p>
+</main>
+
+<footer class="text-center py-4 text-xs text-slate-500">&copy; 2026 もずべや - AI海蘊 監修</footer>
+
+<script>
+// ---- ユニットの設定（プレイヤー側） ----
+const UNIT_TYPES = [
+    { id: 'cat',      name: 'カニ', emoji: '🦀', cost: 10,  hp: 25,  atk: 5,  atkMs: 1200, speed: 6, cooldownMs: 1000 },
+    { id: 'tank',     name: 'ガリ', emoji: '🐻', cost: 40,  hp: 90,  atk: 4,  atkMs: 1400, speed: 4, cooldownMs: 2500 },
+    { id: 'attacker', name: 'イヌ', emoji: '🐶', cost: 70,  hp: 30,  atk: 25, atkMs: 1800, speed: 6, cooldownMs: 3500 },
+    { id: 'ace',      name: 'ネコ', emoji: '🐱', cost: 150, hp: 120, atk: 35, atkMs: 1500, speed: 5, cooldownMs: 6000 }
+];
+const ATTACK_RANGE = 3;      // この％距離まで近づいたら戦闘開始
+const BASE_ZONE = 4;         // 城のそばの、攻撃できる範囲（％）
+const PLAYER_BASE_MAX = 500;
+const ENEMY_BASE_MAX = 600;
+const NP_START = 50;
+const NP_PER_SEC_BASE = 2;
+const NP_UPGRADE_BASE_COST = 50;
+const NP_UPGRADE_COST_MULT = 1.6;   // レベルが上がるごとに、コストはこの倍率で増える
+const NP_UPGRADE_GAIN = 1;          // レベル1につき、毎秒の収入が+1
+const TICK_MS = 100;
+
+let running = false;
+let np = 0;
+let playerBaseHP = PLAYER_BASE_MAX;
+let enemyBaseHP = ENEMY_BASE_MAX;
+let units = [];
+let uidCounter = 0;
+let matchSec = 0;
+let enemySpawnTimerMs = 0;
+let enemySpawnIntervalMs = 3000;
+let cooldownUntil = {};
+let loopTimer = null;
+let npLevel = 0;
+
+function npRate() { return NP_PER_SEC_BASE + npLevel * NP_UPGRADE_GAIN; }
+function npUpgradeCost() { return Math.round(NP_UPGRADE_BASE_COST * Math.pow(NP_UPGRADE_COST_MULT, npLevel)); }
+
+function upgradeNpRate() {
+    if (!running) return;
+    const cost = npUpgradeCost();
+    if (np < cost) return;
+    np -= cost;
+    npLevel++;
+    render();
+}
+
+const fieldEl = document.getElementById('field');
+const npEl = document.getElementById('np');
+
+function fmt(n) { return Math.max(0, Math.round(n)).toLocaleString('ja-JP'); }
+
+// ---- ボタンの用意 ----
+function buildButtons() {
+    const wrap = document.getElementById('unit-buttons');
+    wrap.innerHTML = '';
+    UNIT_TYPES.forEach(u => {
+        const b = document.createElement('button');
+        b.id = 'btn-' + u.id;
+        b.className = 'bg-slate-800 border border-slate-600 rounded-xl p-2 text-left hover:bg-slate-700 transition disabled:opacity-40 disabled:cursor-not-allowed';
+        b.innerHTML = `<div class="text-sm font-bold">${u.emoji} ${u.name}</div>
+                        <div class="text-xs text-emerald-400">💰 ${u.cost}</div>
+                        <div class="text-[10px] text-slate-400">HP${u.hp} / ATK${u.atk}</div>`;
+        b.onclick = () => spawnPlayerUnit(u);
+        wrap.appendChild(b);
+    });
+}
+
+function spawnPlayerUnit(def) {
+    if (!running) return;
+    const now = Date.now();
+    if (np < def.cost) return;
+    if ((cooldownUntil[def.id] || 0) > now) return;
+    np -= def.cost;
+    cooldownUntil[def.id] = now + def.cooldownMs;
+    units.push(makeUnit('player', def));
+}
+
+function makeUnit(side, def) {
+    return {
+        uid: ++uidCounter,
+        side, def,
+        x: side === 'player' ? 2 : 98,
+        hp: def.hp, maxHp: def.hp,
+        target: null,
+        atBase: false,
+        lastAttack: 0,
+        el: null
+    };
+}
+
+// ---- 敵の自動生成（時間が経つほど強く・速く）----
+function enemyDefForTime(t) {
+    return {
+        id: 'enemy',
+        name: 'てきねこ',
+        emoji: '👹',
+        hp: Math.round(15 + t * 0.6),
+        atk: Math.round(4 + t * 0.15),
+        atkMs: 1300,
+        speed: 5,
+        cost: 0, cooldownMs: 0
+    };
+}
+
+// ---- 1ティックごとの更新 ----
+function tick() {
+    if (!running) return;
+    const dt = TICK_MS / 1000;
+    matchSec += dt;
+
+    // お金
+    np += npRate() * dt;
+    npEl.textContent = fmt(np);
+
+    // 敵の出現
+    enemySpawnTimerMs += TICK_MS;
+    enemySpawnIntervalMs = Math.max(1200, 3500 - matchSec * 20);
+    if (enemySpawnTimerMs >= enemySpawnIntervalMs) {
+        enemySpawnTimerMs = 0;
+        units.push(makeUnit('enemy', enemyDefForTime(matchSec)));
+    }
+
+    // ユニットの行動
+    units.forEach(u => {
+        if (u.hp <= 0) return;
+
+        // 攻撃対象がまだ生きていれば、殴り合いを続ける
+        if (u.target && u.target.hp > 0) {
+            attackIfReady(u, u.target);
+            return;
+        }
+        u.target = null;
+
+        // 城に張り付いていたら、城を攻撃し続ける
+        if (u.atBase) {
+            attackBase(u);
+            return;
+        }
+
+        // 近くに敵がいないか探す
+        const foe = findNearestFoe(u);
+        if (foe && Math.abs(foe.x - u.x) <= ATTACK_RANGE) {
+            u.target = foe;
+            attackIfReady(u, foe);
+            return;
+        }
+
+        // 前進
+        const dir = u.side === 'player' ? 1 : -1;
+        u.x += dir * u.def.speed * dt;
+        if (u.side === 'player' && u.x >= 100 - BASE_ZONE) { u.x = 100 - BASE_ZONE; u.atBase = true; }
+        if (u.side === 'enemy' && u.x <= BASE_ZONE) { u.x = BASE_ZONE; u.atBase = true; }
+    });
+
+    units = units.filter(u => u.hp > 0);
+
+    if (playerBaseHP <= 0) return endGame(false);
+    if (enemyBaseHP <= 0) return endGame(true);
+
+    render();
+}
+
+function findNearestFoe(u) {
+    let best = null, bestDist = Infinity;
+    units.forEach(o => {
+        if (o.side === u.side || o.hp <= 0) return;
+        const d = Math.abs(o.x - u.x);
+        // 自分より前方（進行方向）にいる敵だけを狙う
+        const ahead = u.side === 'player' ? (o.x >= u.x - 1) : (o.x <= u.x + 1);
+        if (ahead && d < bestDist) { bestDist = d; best = o; }
+    });
+    return best;
+}
+
+function attackIfReady(u, target) {
+    const now = Date.now();
+    if (now - u.lastAttack < u.def.atkMs) return;
+    u.lastAttack = now;
+    target.hp -= u.def.atk;
+    if (target.hp <= 0) { u.target = null; }
+}
+
+function attackBase(u) {
+    const now = Date.now();
+    if (now - u.lastAttack < u.def.atkMs) return;
+    u.lastAttack = now;
+    if (u.side === 'player') {
+        enemyBaseHP -= u.def.atk;
+        shakeField();
+    } else {
+        playerBaseHP -= u.def.atk;
+        shakeField();
+    }
+    updateBaseBars();
+}
+
+function shakeField() {
+    fieldEl.classList.remove('shake');
+    void fieldEl.offsetWidth;
+    fieldEl.classList.add('shake');
+}
+
+function updateBaseBars() {
+    document.getElementById('player-hpbar').style.width = Math.max(0, playerBaseHP / PLAYER_BASE_MAX * 100) + '%';
+    document.getElementById('enemy-hpbar').style.width = Math.max(0, enemyBaseHP / ENEMY_BASE_MAX * 100) + '%';
+    document.getElementById('player-hp-text').textContent = fmt(playerBaseHP) + '/' + PLAYER_BASE_MAX;
+    document.getElementById('enemy-hp-text').textContent = fmt(enemyBaseHP) + '/' + ENEMY_BASE_MAX;
+}
+
+// ---- 描画 ----
+function render() {
+    const seen = new Set();
+    units.forEach(u => {
+        seen.add(u.uid);
+        if (!u.el) {
+            u.el = document.createElement('div');
+            u.el.className = 'unit ' + u.side;
+            u.el.innerHTML = `<div class="emoji">${u.def.emoji}</div><div class="hpwrap"><div class="hpbar" style="width:100%"></div></div>`;
+            fieldEl.appendChild(u.el);
+        }
+        u.el.style.left = u.x + '%';
+        u.el.querySelector('.hpbar').style.width = Math.max(0, u.hp / u.maxHp * 100) + '%';
+    });
+    // 消えたユニットのDOMを片付ける
+    fieldEl.querySelectorAll('.unit').forEach(el => {});
+    Array.from(fieldEl.children).forEach(el => {
+        if (el.classList && el.classList.contains('unit')) {
+            const match = units.find(u => u.el === el);
+            if (!match) el.remove();
+        }
+    });
+
+    // ボタンの有効/無効
+    const now = Date.now();
+    UNIT_TYPES.forEach(def => {
+        const b = document.getElementById('btn-' + def.id);
+        const onCooldown = (cooldownUntil[def.id] || 0) > now;
+        b.disabled = np < def.cost || onCooldown;
+    });
+
+    // 収入レベルアップの表示
+    document.getElementById('np-rate').textContent = fmt(npRate());
+    document.getElementById('np-level').textContent = npLevel;
+    document.getElementById('np-upgrade-cost').textContent = fmt(npUpgradeCost());
+    document.getElementById('btn-np-upgrade').disabled = np < npUpgradeCost();
+}
+
+// ---- 開始・終了 ----
+function startGame() {
+    document.getElementById('start-overlay').classList.add('hidden');
+    document.getElementById('overlay').classList.add('hidden');
+    running = true;
+    np = NP_START;
+    npLevel = 0;
+    playerBaseHP = PLAYER_BASE_MAX;
+    enemyBaseHP = ENEMY_BASE_MAX;
+    units = [];
+    cooldownUntil = {};
+    matchSec = 0;
+    enemySpawnTimerMs = 0;
+    fieldEl.querySelectorAll('.unit').forEach(el => el.remove());
+    npEl.textContent = fmt(np);
+    updateBaseBars();
+    render();
+    clearInterval(loopTimer);
+    loopTimer = setInterval(tick, TICK_MS);
+}
+
+function endGame(won) {
+    running = false;
+    clearInterval(loopTimer);
+    const overlay = document.getElementById('overlay');
+    document.getElementById('overlay-text').textContent = won ? '🎉 勝利！！' : '💥 敗北…';
+    document.getElementById('overlay-text').className = 'text-3xl font-black mb-3 ' + (won ? 'text-amber-300' : 'text-rose-400');
+    overlay.classList.remove('hidden');
+    render();
+}
+
+function restartGame() {
+    startGame();
+}
+
+buildButtons();
+updateBaseBars();
+</script>
+</body>
+</html>
