@@ -6,6 +6,9 @@
     <title>⚪ 乳首クリッカー Ultimate Fever DX+ ⚪</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- ランキング機能用（Firebase） -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <style>
         @keyframes fever-glow {
             0% { box-shadow: 0 0 20px #ec4899, inset 0 0 20px #ec4899; }
@@ -223,6 +226,25 @@
             <div id="achievement-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"></div>
         </div>
 
+        <!-- 身内ランキング -->
+        <div class="md:col-span-12 bg-slate-800/80 backdrop-blur border border-slate-700 p-5 rounded-2xl shadow-xl space-y-3">
+            <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
+                <span>🏆</span> 身内ランキング <span class="text-xs font-normal text-slate-400">（通算で稼いだCPの合計で勝負）</span>
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <input id="ranking-name" type="text" maxlength="20" placeholder="表示する名前（例：海蘊）"
+                       class="flex-1 min-w-[140px] bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-slate-100">
+                <button onclick="submitRanking()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm px-4 py-1.5 rounded-xl transition cursor-pointer">
+                    🏆 登録／更新
+                </button>
+                <button onclick="loadRanking()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-sm px-3 py-1.5 rounded-xl transition cursor-pointer">
+                    🔄 更新
+                </button>
+            </div>
+            <div id="ranking-status" class="text-xs text-slate-400 min-h-[1em]"></div>
+            <div id="ranking-list" class="space-y-1"></div>
+        </div>
+
     </main>
 
     <footer class="text-center py-6 text-xs text-slate-500">
@@ -232,6 +254,27 @@
     <!-- ゲームロジック -->
     <script>
         const SAVE_KEY = "chikubi_game_save_v6";
+
+        // 🔧 ランキング機能：Firebaseの設定を、ここに貼り付けてね（手順はチャットで説明するよ）
+        const firebaseConfig = {
+            apiKey: "ここに貼り替えてね",
+            authDomain: "ここに貼り替えてね",
+            projectId: "ここに貼り替えてね",
+            storageBucket: "ここに貼り替えてね",
+            messagingSenderId: "ここに貼り替えてね",
+            appId: "ここに貼り替えてね"
+        };
+        const RANKING_COLLECTION = "chikubi_ranking";
+        let rankingDb = null;
+        try {
+            if (firebaseConfig.apiKey !== "ここに貼り替えてね" && window.firebase) {
+                firebase.initializeApp(firebaseConfig);
+                rankingDb = firebase.firestore();
+            }
+        } catch (e) {
+            console.warn("🏆 ランキング機能の初期化でエラーが起きたよ（設定が未入力か、間違っている可能性があるよ）:", e);
+        }
+
         const maxFeverCount = 50;
 
         // 自動生産マシーンの初期設定（転生のときも、ここから作り直す）
@@ -573,6 +616,82 @@
             updateDisplay();
         }
 
+        // ---- ランキング（身内で共有）----
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function rankingStatus(text) {
+            document.getElementById("ranking-status").textContent = text;
+        }
+
+        async function submitRanking() {
+            if (!rankingDb) {
+                rankingStatus("ランキング機能がまだ使えないよ（設定が未入力みたい）");
+                return;
+            }
+            const nameInput = document.getElementById("ranking-name");
+            const name = (nameInput.value || "").trim().slice(0, 20);
+            if (!name) {
+                rankingStatus("名前を入れてね！");
+                return;
+            }
+            try { localStorage.setItem("chikubi_ranking_name", name); } catch (e) {}
+
+            // ランキングの基準は「通算で稼いだCP」。score は転生でリセットされちゃうから、こっちを使うよ
+            const value = Math.floor(game.lifetimeEarned);
+            rankingStatus("送信中…");
+            try {
+                const ref = rankingDb.collection(RANKING_COLLECTION).doc(name);
+                const snap = await ref.get();
+                const prev = snap.exists ? (snap.data().value || 0) : 0;
+                if (value > prev) {
+                    await ref.set({
+                        name: name,
+                        value: value,
+                        title: titles[titleIndex()].name,
+                        prestigeCount: game.prestigeCount,
+                        updatedAt: Date.now()
+                    });
+                    rankingStatus("🏆 ランキングを更新したよ！");
+                } else {
+                    rankingStatus("前回登録したときの記録の方が高いみたい。今回は更新しなかったよ。");
+                }
+            } catch (e) {
+                console.error(e);
+                rankingStatus("送信に失敗したよ…通信状況を確認してね");
+            }
+            loadRanking();
+        }
+
+        async function loadRanking() {
+            const list = document.getElementById("ranking-list");
+            if (!rankingDb) {
+                list.innerHTML = '<p class="text-xs text-slate-400">ランキング機能はまだ設定されていないよ</p>';
+                return;
+            }
+            list.innerHTML = '<p class="text-xs text-slate-400">読み込み中…</p>';
+            try {
+                const snap = await rankingDb.collection(RANKING_COLLECTION).orderBy("value", "desc").limit(20).get();
+                list.innerHTML = "";
+                let rank = 0;
+                snap.forEach(doc => {
+                    rank++;
+                    const d = doc.data();
+                    const row = document.createElement("div");
+                    row.className = "flex justify-between items-center text-xs py-1 border-b border-slate-700/60";
+                    const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : (rank + ".");
+                    row.innerHTML = `<span>${medal} ${escapeHtml(d.name || "???")} <span class="text-slate-500">(${escapeHtml(d.title || "")})</span></span>` +
+                                     `<span class="font-bold text-amber-300">${fmt(d.value || 0)} CP</span>`;
+                    list.appendChild(row);
+                });
+                if (rank === 0) list.innerHTML = '<p class="text-xs text-slate-400">まだ誰も登録してないよ。一番乗りになろう！</p>';
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = '<p class="text-xs text-rose-400">読み込みに失敗したよ</p>';
+            }
+        }
+
         // ---- 金のカエル（ランダムイベント）----
         function scheduleGolden(first) {
             const delay = (first ? 20000 : 40000) + Math.random() * 80000;
@@ -820,6 +939,12 @@
             loadGame();
             updateDisplay();
             scheduleGolden(true);
+
+            try {
+                const savedName = localStorage.getItem("chikubi_ranking_name");
+                if (savedName) document.getElementById("ranking-name").value = savedName;
+            } catch (e) {}
+            loadRanking();
         };
 
         setInterval(saveGame, 5000);
