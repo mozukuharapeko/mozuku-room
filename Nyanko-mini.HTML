@@ -2,10 +2,12 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>⚔️ にゃんこ大決戦 超簡易版 ⚔️</title>
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
 <style>
+    :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+    html { scroll-padding-top: env(safe-area-inset-top, 0px); }
     body { user-select: none; }
     #field { position: relative; overflow: hidden; background:
         repeating-linear-gradient(90deg, #1e293b, #1e293b 39px, #27354a 39px, #27354a 40px); }
@@ -20,6 +22,10 @@
     .base-hpbar { transition: width 0.2s linear; }
     @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
     .shake { animation: shake 0.3s; }
+    @keyframes pop-up { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -24px); } }
+    .pop { position: absolute; bottom: 46px; transform: translateX(-50%); font-weight: 700; font-size: 12px;
+           color: #fcd34d; text-shadow: 0 1px 2px #000; pointer-events: none; animation: pop-up 0.8s ease-out forwards; }
+    @media (prefers-reduced-motion: reduce) { .shake, .pop { animation: none; } .unit { transition: none; } }
 </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
@@ -54,6 +60,7 @@
     <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="text-sm font-bold text-amber-300">💰 にゃんこポイント：<span id="np">0</span>
             <span class="text-xs text-slate-400 font-normal">(毎秒 +<span id="np-rate">0</span>)</span>
+            <span class="text-xs text-slate-400 font-normal ml-2">撃破 <span id="kills">0</span></span>
         </div>
         <button id="btn-np-upgrade" onclick="upgradeNpRate()"
                 class="bg-slate-800 border border-amber-500 text-amber-300 text-xs font-bold py-1.5 px-3 rounded-xl hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
@@ -69,7 +76,8 @@
         </div>
         <div id="overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black/70 rounded-2xl">
             <div class="text-center">
-                <p id="overlay-text" class="text-3xl font-black mb-3"></p>
+                <p id="overlay-text" class="text-3xl font-black mb-1"></p>
+                <p id="overlay-sub" class="text-sm text-slate-300 mb-3"></p>
                 <button onclick="restartGame()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-2 px-5 rounded-xl">もう一回！</button>
             </div>
         </div>
@@ -117,6 +125,7 @@ let enemySpawnIntervalMs = 3000;
 let cooldownUntil = {};
 let loopTimer = null;
 let npLevel = 0;
+let kills = 0;
 
 function npRate() { return NP_PER_SEC_BASE + npLevel * NP_UPGRADE_GAIN; }
 function npUpgradeCost() { return Math.round(NP_UPGRADE_BASE_COST * Math.pow(NP_UPGRADE_COST_MULT, npLevel)); }
@@ -182,6 +191,7 @@ function enemyDefForTime(t) {
         emoji: '👹',
         hp: Math.round(15 + t * 0.6),
         atk: Math.round(4 + t * 0.15),
+        reward: Math.round(4 + t * 0.12),   // 倒したときにもらえるポイント（時間が経つほど増える）
         atkMs: 1300,
         speed: 5,
         cost: 0, cooldownMs: 0
@@ -263,7 +273,25 @@ function attackIfReady(u, target) {
     if (now - u.lastAttack < u.def.atkMs) return;
     u.lastAttack = now;
     target.hp -= u.def.atk;
-    if (target.hp <= 0) { u.target = null; }
+    if (target.hp <= 0) {
+        u.target = null;
+        // 自軍が敵を倒したら、ポイントがもらえる
+        if (u.side === 'player' && target.side === 'enemy') {
+            const gain = target.def.reward || 0;
+            np += gain;
+            kills++;
+            popReward(target.x, '+' + gain + '💰');
+        }
+    }
+}
+
+function popReward(x, text) {
+    const el = document.createElement('div');
+    el.textContent = text;
+    el.className = 'pop';
+    el.style.left = x + '%';
+    fieldEl.appendChild(el);
+    setTimeout(() => el.remove(), 800);
 }
 
 function attackBase(u) {
@@ -295,9 +323,7 @@ function updateBaseBars() {
 
 // ---- 描画 ----
 function render() {
-    const seen = new Set();
     units.forEach(u => {
-        seen.add(u.uid);
         if (!u.el) {
             u.el = document.createElement('div');
             u.el.className = 'unit ' + u.side;
@@ -308,7 +334,6 @@ function render() {
         u.el.querySelector('.hpbar').style.width = Math.max(0, u.hp / u.maxHp * 100) + '%';
     });
     // 消えたユニットのDOMを片付ける
-    fieldEl.querySelectorAll('.unit').forEach(el => {});
     Array.from(fieldEl.children).forEach(el => {
         if (el.classList && el.classList.contains('unit')) {
             const match = units.find(u => u.el === el);
@@ -326,6 +351,7 @@ function render() {
 
     // 収入レベルアップの表示
     document.getElementById('np-rate').textContent = fmt(npRate());
+    document.getElementById('kills').textContent = fmt(kills);
     document.getElementById('np-level').textContent = npLevel;
     document.getElementById('np-upgrade-cost').textContent = fmt(npUpgradeCost());
     document.getElementById('btn-np-upgrade').disabled = np < npUpgradeCost();
@@ -338,6 +364,7 @@ function startGame() {
     running = true;
     np = NP_START;
     npLevel = 0;
+    kills = 0;
     playerBaseHP = PLAYER_BASE_MAX;
     enemyBaseHP = ENEMY_BASE_MAX;
     units = [];
@@ -357,7 +384,8 @@ function endGame(won) {
     clearInterval(loopTimer);
     const overlay = document.getElementById('overlay');
     document.getElementById('overlay-text').textContent = won ? '🎉 勝利！！' : '💥 敗北…';
-    document.getElementById('overlay-text').className = 'text-3xl font-black mb-3 ' + (won ? 'text-amber-300' : 'text-rose-400');
+    document.getElementById('overlay-sub').textContent = '倒した敵：' + fmt(kills) + '体';
+    document.getElementById('overlay-text').className = 'text-3xl font-black mb-1 ' + (won ? 'text-amber-300' : 'text-rose-400');
     overlay.classList.remove('hidden');
     render();
 }
