@@ -242,6 +242,11 @@
                 </button>
             </div>
             <div id="ranking-status" class="text-xs text-slate-400 min-h-[1em]"></div>
+            <div id="ranking-top" class="hidden text-center py-3 px-4 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-500/20 to-pink-500/20">
+                <p class="text-xs font-bold text-amber-300 tracking-widest">🏆 ランキング1位 🏆</p>
+                <p class="text-xl font-black text-white mt-1"><span id="ranking-top-name"></span>さん</p>
+                <p class="text-sm font-bold text-amber-300"><span id="ranking-top-value"></span> CP</p>
+            </div>
             <div id="ranking-list" class="space-y-1"></div>
         </div>
 
@@ -257,12 +262,12 @@
 
         // 🔧 ランキング機能：Firebaseの設定を、ここに貼り付けてね（手順はチャットで説明するよ）
         const firebaseConfig = {
-            apiKey: "ここに貼り替えてね",
-            authDomain: "ここに貼り替えてね",
-            projectId: "ここに貼り替えてね",
-            storageBucket: "ここに貼り替えてね",
-            messagingSenderId: "ここに貼り替えてね",
-            appId: "ここに貼り替えてね"
+            apiKey: "AIzaSyB7aI1HOAjVR9sN-sMzuOuMvHDA5t0xWWY",
+            authDomain: "mozube-ranking.firebaseapp.com",
+            projectId: "mozube-ranking",
+            storageBucket: "mozube-ranking.firebasestorage.app",
+            messagingSenderId: "935884347719",
+            appId: "1:935884347719:web:61e73aa0db71c2095a9462"
         };
         const RANKING_COLLECTION = "chikubi_ranking";
         let rankingDb = null;
@@ -666,7 +671,9 @@
 
         async function loadRanking() {
             const list = document.getElementById("ranking-list");
+            const topBox = document.getElementById("ranking-top");
             if (!rankingDb) {
+                topBox.classList.add("hidden");
                 list.innerHTML = '<p class="text-xs text-slate-400">ランキング機能はまだ設定されていないよ</p>';
                 return;
             }
@@ -675,9 +682,18 @@
                 const snap = await rankingDb.collection(RANKING_COLLECTION).orderBy("value", "desc").limit(20).get();
                 list.innerHTML = "";
                 let rank = 0;
+                topBox.classList.add("hidden");
                 snap.forEach(doc => {
                     rank++;
                     const d = doc.data();
+
+                    // 1位だけ、上に大きく表示するよ
+                    if (rank === 1) {
+                        document.getElementById("ranking-top-name").textContent = d.name || "???";
+                        document.getElementById("ranking-top-value").textContent = fmt(d.value || 0);
+                        topBox.classList.remove("hidden");
+                    }
+
                     const row = document.createElement("div");
                     row.className = "flex justify-between items-center text-xs py-1 border-b border-slate-700/60";
                     const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : (rank + ".");
