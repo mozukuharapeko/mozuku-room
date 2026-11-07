@@ -126,6 +126,19 @@
 
             <p class="text-xs text-slate-400" id="action-hint">カエルさんをクリックしてポイントを稼ごう！</p>
             <p class="text-xs font-bold text-amber-300 min-h-[1rem]" id="boost-status"></p>
+
+            <!-- ランキング登録（クリックエリアのすぐ下） -->
+            <div class="w-full pt-2 border-t border-slate-700 space-y-2">
+                <p class="text-xs font-bold text-slate-300 flex items-center justify-center gap-1">🏆 身内ランキングに登録</p>
+                <div class="flex gap-2">
+                    <input id="ranking-name" type="text" maxlength="20" placeholder="表示する名前（例：海蘊）"
+                           class="flex-1 min-w-0 bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-slate-100">
+                    <button onclick="submitRanking()" class="shrink-0 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition cursor-pointer">
+                        登録／更新
+                    </button>
+                </div>
+                <p id="ranking-status" class="text-xs text-slate-400 min-h-[1em] text-center"></p>
+            </div>
         </div>
 
         <!-- 右側：ショップ（アップグレード） -->
@@ -228,20 +241,12 @@
 
         <!-- 身内ランキング -->
         <div class="md:col-span-12 bg-slate-800/80 backdrop-blur border border-slate-700 p-5 rounded-2xl shadow-xl space-y-3">
-            <h3 class="font-bold text-slate-200 text-sm flex items-center gap-2">
-                <span>🏆</span> 身内ランキング <span class="text-xs font-normal text-slate-400">（通算で稼いだCPの合計で勝負）</span>
+            <h3 class="font-bold text-slate-200 text-sm flex items-center justify-between gap-2">
+                <span class="flex items-center gap-2"><span>🏆</span> 身内ランキング <span class="text-xs font-normal text-slate-400">（通算で稼いだCPの合計で勝負）</span></span>
+                <button onclick="loadRanking()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-3 py-1 rounded-xl transition cursor-pointer">
+                    🔄 最新に更新
+                </button>
             </h3>
-            <div class="flex flex-wrap gap-2">
-                <input id="ranking-name" type="text" maxlength="20" placeholder="表示する名前（例：海蘊）"
-                       class="flex-1 min-w-[140px] bg-slate-900 border border-slate-600 rounded-xl px-3 py-1.5 text-sm text-slate-100">
-                <button onclick="submitRanking()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm px-4 py-1.5 rounded-xl transition cursor-pointer">
-                    🏆 登録／更新
-                </button>
-                <button onclick="loadRanking()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-sm px-3 py-1.5 rounded-xl transition cursor-pointer">
-                    🔄 更新
-                </button>
-            </div>
-            <div id="ranking-status" class="text-xs text-slate-400 min-h-[1em]"></div>
             <div id="ranking-top" class="hidden text-center py-3 px-4 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-500/20 to-pink-500/20">
                 <p class="text-xs font-bold text-amber-300 tracking-widest">🏆 ランキング1位 🏆</p>
                 <p class="text-xl font-black text-white mt-1"><span id="ranking-top-name"></span>さん</p>
