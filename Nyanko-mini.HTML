@@ -98,15 +98,15 @@
 // ---- ユニットの設定（プレイヤー側） ----
 const UNIT_TYPES = [
     { id: 'cat',      name: 'カニ', emoji: '🦀', cost: 10,  hp: 25,  atk: 5,  atkMs: 1200, speed: 6, cooldownMs: 1000 },
-    { id: 'tank',     name: 'ガリ', emoji: '🐻', cost: 30,  hp: 100,  atk: 5,  atkMs: 1400, speed: 4, cooldownMs: 2500 },
-    { id: 'attacker', name: 'イヌ', emoji: '🐶', cost: 70,  hp: 30,  atk: 25, atkMs: 1800, speed: 6, cooldownMs: 3500 },
-    { id: 'ace',      name: 'ネコ', emoji: '🐱', cost: 150, hp: 120, atk: 35, atkMs: 1500, speed: 5, cooldownMs: 6000 }
+    { id: 'tank',     name: 'ガリ', emoji: '🐻', cost: 30,  hp: 100,  atk: 5,  atkMs: 1400, speed: 5, cooldownMs: 2500 },
+    { id: 'attacker', name: 'イヌ', emoji: '🐶', cost: 70,  hp: 100,  atk: 25, atkMs: 1800, speed: 6, cooldownMs: 3500 },
+    { id: 'ace',      name: 'ネコ', emoji: '🐱', cost: 150, hp: 120, atk: 35, atkMs: 1500, speed: 10, cooldownMs: 6000 }
 ];
 const ATTACK_RANGE = 3;      // この％距離まで近づいたら戦闘開始
 const BASE_ZONE = 4;         // 城のそばの、攻撃できる範囲（％）
 const PLAYER_BASE_MAX = 500;
 const ENEMY_BASE_MAX = 600;
-const NP_START = 100;
+const NP_START = 10000;
 const NP_PER_SEC_BASE = 2;
 const NP_UPGRADE_BASE_COST = 50;
 const NP_UPGRADE_COST_MULT = 1.5;   // レベルが上がるごとに、コストはこの倍率で増える
