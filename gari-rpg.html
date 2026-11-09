@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ガリゴンクエスト</title>
+<style>
+  :root { --bg:#1f1f23; --panel:#2b2b31; --panel2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --sky:#cfe3f5; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif; font-size: 15px; line-height: 1.6; background: var(--bg); color: var(--ink); padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px)); user-select: none; }
+  .wrap { max-width: 460px; margin: 0 auto; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+  h1 { font-size: 16px; color: #ffbf93; }
+  a.home { font-size: 12px; color: var(--ink); background: var(--panel2); border: 2px solid var(--line); border-radius: 99px; padding: 2px 12px; text-decoration: none; white-space: nowrap; }
+  .panel { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 12px; }
+  #status { font-size: 13px; color: var(--sky); margin-bottom: 8px; }
+  #view { height: 120px; display: flex; align-items: center; justify-content: center; background: #17171a; border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+  .strip { display: flex; gap: 2px; }
+  .strip span { width: 32px; text-align: center; font-size: 24px; }
+  .foe { text-align: center; }
+  .foe .big { font-size: 56px; line-height: 1.1; }
+  .foe .nm { font-size: 13px; }
+  .bar { width: 140px; height: 8px; background: var(--line); border-radius: 4px; margin: 4px auto 0; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: #f87171; }
+  #msg { min-height: 4.8em; background: var(--panel2); border: 2px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+  #menu { min-height: 1.6em; margin-top: 6px; font-size: 14px; color: var(--soft); }
+  #menu div { color: var(--ink); }
+  #menu .sel { color: var(--orange); font-weight: 700; }
+  .ctrl { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+  .pad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 48px); gap: 4px; }
+  .pad button:nth-child(1) { grid-column: 2; grid-row: 1; }
+  .pad button:nth-child(2) { grid-column: 1; grid-row: 2; }
+  .pad button:nth-child(3) { grid-column: 2; grid-row: 2; }
+  .pad button:nth-child(4) { grid-column: 3; grid-row: 2; }
+  button { font: inherit; color: var(--ink); background: var(--panel2); border: 2px solid var(--line); border-radius: 12px; cursor: pointer; touch-action: manipulation; }
+  button:active { background: #46464e; }
+  button:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  .acts { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .acts button { padding: 12px 8px; font-weight: 700; }
+  #ok { background: var(--orange); color: var(--on); border-color: #c4824f; }
+  .note { margin-top: 10px; font-size: 11px; color: var(--soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🐻 ガリゴンクエスト</h1>
+    <a class="home" href="./index.html">🏠 もずべや</a>
+  </header>
+  <div class="panel">
+    <div id="status"></div>
+    <div id="view"></div>
+    <div id="msg" role="status" aria-live="polite"></div>
+    <div id="menu"></div>
+    <div class="ctrl">
+      <div class="pad">
+        <button data-k="up" aria-label="上">▲</button>
+        <button data-k="left" aria-label="左">◀</button>
+        <button data-k="down" aria-label="下">▼</button>
+        <button data-k="right" aria-label="右">▶</button>
+      </div>
+      <div class="acts">
+        <button id="ok" data-k="ok">はい / 決定</button>
+        <button id="no" data-k="no">いいえ / キャンセル</button>
+      </div>
+    </div>
+  </div>
+  <p class="note">キーボード：矢印キー＝移動・選択／Enter・Zキー＝決定／Esc・Xキー＝キャンセル。進行は、このブラウザの中に自動で記録されるよ。</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var LAST = 20, SAVE = 'gari_rpg_v1';
+
+  // 敵（z は出現する場所：0=序盤 1=中盤 2=終盤）。数値は仮調整だよ
+  var MON = [
+    { n: '質問の蟹', e: '🦀', hp: 8, atk: 2, exp: 8, z: 0, line: 'ぬくもりを求めてさまよっている！' },
+    { n: 'たかし', e: '👴', hp: 14, atk: 5, exp: 9, z: 0, line: '「ホーケー牧場」と叫んでいる！' },
+    { n: 'ドブネズミ', e: '🐀', hp: 13, atk: 5, exp: 9, z: 0, line: 'チューチュー言いながら見つめている！' },
+    { n: 'しつこいクリップ', e: '📎', hp: 30, atk: 9, exp: 16, z: 1, line: '何にでも挟まろうとしてくる！' },
+    { n: '長すぎるレシート', e: '🧾', hp: 34, atk: 8, exp: 16, z: 1, line: '「ポイントカードはお持ちですか？」と迫る！' },
+    { n: '未読通知99+', e: '📱', hp: 32, atk: 10, exp: 18, z: 1, line: 'ピコピコ鳴って落ち着かない！' },
+    { n: '終電の幻', e: '🚃', hp: 55, atk: 14, exp: 30, z: 2, line: '目の前で扉が閉まりそうだ！' },
+    { n: '月曜日の朝', e: '🏢', hp: 60, atk: 13, exp: 32, z: 2, line: '全員の気分をどんより重くしている！' },
+    { n: '説教が長いおばさん', e: '👵', hp: 58, atk: 15, exp: 32, z: 2, line: '「男なんて…」と語りはじめた！' }
+  ];
+  var BOSS = { n: '大魔王サンドラ', e: '😈', hp: 130, atk: 18, exp: 0, line: '「あたしを口説こうなんて、百年早いわ」' };
+  var ATK_LINES = ['今夜、一杯どうだい？', '君の瞳に、ハイボール', 'とりあえず生で！（意味不明）', '孤独な夜に、ちょうどいい男さ', '連絡先、交換しない？', '俺、お酒とタバコ以外にも、取り柄があるんだ…'];
+  var LV_LINES = ['酒の強さが少し上がった気がする。', '孤独への耐性が上がった。', '肺活量が増えた気がする。', '口説き文句の精度が上がった。'];
+
+  var p = { lv: 1, exp: 0, hp: 30, items: 3, pos: 0 };
+  var st = 'map', q = [], after = null, cur = 0, b = null, yn = null;
+
+  function $(id) { return document.getElementById(id); }
+  function maxHp() { return 30 + 10 * (p.lv - 1); }
+  function atk() { return 5 + 2 * (p.lv - 1); }
+  function need() { return 10 + p.lv * 8; }
+  function rnd(n) { return Math.floor(Math.random() * n); }
+  function pick(a) { return a[rnd(a.length)]; }
+  function zone(i) { return i <= 6 ? 0 : i <= 13 ? 1 : 2; }
+  function tile(i) { return i === 0 ? '🏠' : i === LAST ? '🏰' : ['🌾', '🌲', '🌋'][zone(i)]; }
+
+  function save() { try { localStorage.setItem(SAVE, JSON.stringify(p)); } catch (e) {} }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SAVE));
+      if (s && [s.lv, s.exp, s.hp, s.items, s.pos].every(Number.isFinite)) {
+        s.lv = Math.max(1, Math.min(20, s.lv));
+        s.pos = Math.max(0, Math.min(LAST - 1, s.pos));
+        s.items = Math.max(0, Math.min(9, s.items));
+        return s;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function el(tag, cls, text) {
+    var d = document.createElement(tag);
+    if (cls) d.className = cls;
+    if (text !== undefined) d.textContent = text;
+    return d;
+  }
+
+  function render() {
+    $('status').textContent = 'Lv' + p.lv + '　HP ' + p.hp + '/' + maxHp() + '　EXP ' + p.exp + '/' + need() + '　🧪×' + p.items;
+    var v = $('view'); v.textContent = '';
+    if (b) {
+      var f = el('div', 'foe');
+      f.appendChild(el('div', 'big', b.m.e));
+      f.appendChild(el('div', 'nm', b.m.n));
+      var bar = el('div', 'bar'), i = el('i');
+      i.style.width = Math.round(b.m.hp / b.m.max * 100) + '%';
+      bar.appendChild(i); f.appendChild(bar); v.appendChild(f);
+    } else {
+      var s = el('div', 'strip');
+      for (var k = -4; k <= 4; k++) {
+        var idx = p.pos + k;
+        s.appendChild(el('span', '', k === 0 ? '🐻' : (idx < 0 || idx > LAST ? '　' : tile(idx))));
+      }
+      v.appendChild(s);
+    }
+    var m = $('menu'); m.textContent = '';
+    if (st === 'battle') {
+      ['口説く（たたかう）', 'ガンギマリンα ×' + p.items, 'にげる'].forEach(function (t, n) {
+        m.appendChild(el('div', n === cur ? 'sel' : '', (n === cur ? '▶ ' : '　') + t));
+      });
+    } else if (st === 'yn') {
+      m.textContent = '決定＝はい　／　キャンセル＝いいえ';
+    }
+  }
+
+  function say(lines, then) { q = lines.slice(); after = then || null; st = 'msg'; $('msg').textContent = q.shift(); render(); }
+  function advance() {
+    if (q.length) { $('msg').textContent = q.shift(); render(); }
+    else { var a = after; after = null; if (a) a(); else toMap(); }
+  }
+  function toMap() { st = 'map'; b = null; $('msg').textContent = '▲▶ で奥へ、◀▼ で手前へ進もう。（いちばん奥に大魔王の城があるよ）'; save(); render(); }
+  function yesNo(text, y, n) { st = 'yn'; yn = { y: y, n: n }; $('msg').textContent = text; render(); }
+
+  function newGame() {
+    p = { lv: 1, exp: 0, hp: 30, items: 3, pos: 0 };
+    say(['ガリ（独身・孤独・酒とタバコが友）は、大魔王サンドラを口説き（討伐し）に旅立った！',
+         '持ち物：ガンギマリンα×3（目がガンギマリするほど元気になる謎のドリンク）'], toMap);
+  }
+
+  function move(d) {
+    var np = Math.max(0, Math.min(LAST, p.pos + d));
+    if (np === p.pos) return;
+    p.pos = np;
+    render();
+    if (p.pos === LAST) {
+      yesNo('大魔王サンドラの城だ…… 口説き（討伐）に挑む？', function () { startBattle(BOSS, true); }, function () { p.pos--; toMap(); });
+    } else if (p.pos > 0 && rnd(100) < 22) {
+      var z = zone(p.pos);
+      startBattle(pick(MON.filter(function (m) { return m.z === z; })), false);
+    }
+  }
+
+  function startBattle(m, boss) {
+    b = { m: { n: m.n, e: m.e, hp: m.hp, max: m.hp, atk: m.atk, exp: m.exp, line: m.line }, boss: boss };
+    say([m.e + ' ' + m.n + 'が現れた！', m.line], battleMenu);
+  }
+  function battleMenu() { st = 'battle'; cur = 0; $('msg').textContent = 'どうする？'; render(); }
+
+  function enemyAttack(lines) {
+    var d = Math.max(1, b.m.atk - Math.floor(p.lv / 2) + rnd(3));
+    p.hp = Math.max(0, p.hp - d);
+    lines.push(b.m.n + 'の攻撃！ ガリは' + d + 'のダメージを受けた！');
+  }
+  function endTurn(lines) {
+    if (p.hp <= 0) {
+      lines.push('ガリは力尽きた…', '目が覚めると、居酒屋の座敷で寝ていた。（もう一度、旅立とう）');
+      say(lines, function () { p.hp = maxHp(); p.pos = 0; toMap(); });
+    } else {
+      say(lines, battleMenu);
+    }
+  }
+
+  function doAttack() {
+    var d = atk() + rnd(4);
+    b.m.hp = Math.max(0, b.m.hp - d);
+    var lines = ['ガリ「' + pick(ATK_LINES) + '」！ ' + b.m.n + 'に' + d + 'のダメージ！'];
+    if (b.m.hp <= 0) return win(lines);
+    enemyAttack(lines); endTurn(lines);
+  }
+  function useItem() {
+    if (p.items <= 0) { say(['ガンギマリンαが ない！'], battleMenu); return; }
+    p.items--;
+    var h = Math.min(40, maxHp() - p.hp); p.hp += h;
+    var lines = ['ガリはガンギマリンαを飲んだ！ 目がガンギマリして HPが' + h + '回復した！'];
+    enemyAttack(lines); endTurn(lines);
+  }
+  function flee() {
+    if (b.boss) { say(['大魔王サンドラからは逃げられない！（口説きたいので）'], battleMenu); return; }
+    if (rnd(100) < 60) { say(['ガリは逃げ出した！（格好悪い）'], toMap); return; }
+    var lines = ['逃げられなかった！']; enemyAttack(lines); endTurn(lines);
+  }
+
+  function win(lines) {
+    if (b.boss) {
+      try { localStorage.removeItem(SAVE); } catch (e) {}
+      lines.push('大魔王サンドラ「……友だちからなら、いいわよ」', 'ガリは大魔王サンドラを口説き落とした（討伐した）！！', '孤独な旅は、ちょっとだけ報われた。');
+      say(lines, function () { st = 'clear'; b = null; $('msg').textContent = '〜 FIN 〜　決定ボタンで、はじめから遊べるよ'; render(); });
+      return;
+    }
+    p.exp += b.m.exp;
+    lines.push(b.m.n + 'を倒した！ 経験値' + b.m.exp + 'を得た！');
+    while (p.lv < 20 && p.exp >= need()) {
+      p.exp -= need(); p.lv++; p.hp = Math.min(maxHp(), p.hp + 10);
+      lines.push('ガリはレベル' + p.lv + 'になった！' + pick(LV_LINES));
+    }
+    if (rnd(100) < 30 && p.items < 9) { p.items++; lines.push('ガンギマリンαを拾った！（×' + p.items + '）'); }
+    say(lines, toMap);
+  }
+
+  function press(k) {
+    if (st === 'map') {
+      if (k === 'up' || k === 'right') move(1);
+      else if (k === 'down' || k === 'left') move(-1);
+    } else if (st === 'msg') {
+      if (k === 'ok') advance();
+    } else if (st === 'battle') {
+      if (k === 'up' || k === 'left') { cur = (cur + 2) % 3; render(); }
+      else if (k === 'down' || k === 'right') { cur = (cur + 1) % 3; render(); }
+      else if (k === 'ok') [doAttack, useItem, flee][cur]();
+    } else if (st === 'yn') {
+      if (k === 'ok') { var f = yn.y; yn = null; f(); }
+      else if (k === 'no') { var g = yn.n; yn = null; g(); }
+    } else if (st === 'clear') {
+      if (k === 'ok') newGame();
+    }
+  }
+
+  var KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'ok', ' ': 'ok', z: 'ok', Z: 'ok', Escape: 'no', Backspace: 'no', x: 'no', X: 'no' };
+  document.addEventListener('keydown', function (e) {
+    var k = KEYS[e.key];
+    if (!k) return;
+    e.preventDefault();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); // ボタンが二重に反応しないように
+    press(k);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-k]'), function (btn) {
+    btn.addEventListener('click', function () { press(btn.getAttribute('data-k')); });
+  });
+
+  // 起動：前回の記録があれば、続きから遊べる
+  var s = load();
+  if (s) {
+    yesNo('前回の続きから始める？（はい＝つづき／いいえ＝はじめから）',
+      function () { p = s; if (p.hp > maxHp()) p.hp = maxHp(); toMap(); },
+      newGame);
+  } else {
+    newGame();
+  }
+})();
+</script>
+</body>
+</html>
