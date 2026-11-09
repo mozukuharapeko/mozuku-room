@@ -75,17 +75,17 @@
 
   // 敵（z は出現する場所：0=序盤 1=中盤 2=終盤）。数値は仮調整だよ
   var MON = [
-    { n: '質問の蟹', e: '🦀', hp: 8, atk: 2, exp: 8, z: 0, line: 'ぬくもりを求めてさまよっている！' },
-    { n: 'たかし', e: '👴', hp: 14, atk: 5, exp: 9, z: 0, line: '「ホーケー牧場」と叫んでいる！' },
-    { n: 'ドブネズミ', e: '🐀', hp: 13, atk: 5, exp: 9, z: 0, line: 'チューチュー言いながら見つめている！' },
+    { n: '質問の蟹', e: '🦀', hp: 1, atk: 2, exp: 4, z: 0, line: 'ぬくもりを求めてさまよっている！' },
+    { n: 'たかし', e: '👴', hp: 1, atk: 1, exp: 4, z: 0, line: '「ホーケー牧場」と叫んでいる！' },
+    { n: 'スライム', e: '🫠', hp: 13, atk: 5, exp: 9, z: 0, line: 'ぷるんぷるん揺れながら見つめている！' },
     { n: 'しつこいクリップ', e: '📎', hp: 30, atk: 9, exp: 16, z: 1, line: '何にでも挟まろうとしてくる！' },
     { n: '長すぎるレシート', e: '🧾', hp: 34, atk: 8, exp: 16, z: 1, line: '「ポイントカードはお持ちですか？」と迫る！' },
     { n: '未読通知99+', e: '📱', hp: 32, atk: 10, exp: 18, z: 1, line: 'ピコピコ鳴って落ち着かない！' },
     { n: '終電の幻', e: '🚃', hp: 55, atk: 14, exp: 30, z: 2, line: '目の前で扉が閉まりそうだ！' },
     { n: '月曜日の朝', e: '🏢', hp: 60, atk: 13, exp: 32, z: 2, line: '全員の気分をどんより重くしている！' },
-    { n: '説教が長いおばさん', e: '👵', hp: 58, atk: 15, exp: 32, z: 2, line: '「男なんて…」と語りはじめた！' }
+    { n: 'あすか', e: '👵', hp: 58, atk: 15, exp: 32, z: 2, line: '「男なんて…」と語りはじめた！' }
   ];
-  var BOSS = { n: '大魔王サンドラ', e: '😈', hp: 130, atk: 18, exp: 0, line: '「あたしを口説こうなんて、百年早いわ」' };
+  var BOSS = { n: '大魔王サンドゥーラ', e: '😈', hp: 130, atk: 18, exp: 0, line: '「あたしを口説こうなんて、百年早いわ」' };
   var ATK_LINES = ['今夜、一杯どうだい？', '君の瞳に、ハイボール', 'とりあえず生で！（意味不明）', '孤独な夜に、ちょうどいい男さ', '連絡先、交換しない？', '俺、お酒とタバコ以外にも、取り柄があるんだ…'];
   var LV_LINES = ['酒の強さが少し上がった気がする。', '孤独への耐性が上がった。', '肺活量が増えた気がする。', '口説き文句の精度が上がった。'];
 
@@ -160,7 +160,7 @@
 
   function newGame() {
     p = { lv: 1, exp: 0, hp: 30, items: 3, pos: 0 };
-    say(['ガリ（独身・孤独・酒とタバコが友）は、大魔王サンドラを口説き（討伐し）に旅立った！',
+    say(['ガリ（独身・孤独・酒とタバコが友）は、大魔王サンドゥーラを口説き（討伐し）に旅立った！',
          '持ち物：ガンギマリンα×3（目がガンギマリするほど元気になる謎のドリンク）'], toMap);
   }
 
@@ -170,7 +170,7 @@
     p.pos = np;
     render();
     if (p.pos === LAST) {
-      yesNo('大魔王サンドラの城だ…… 口説き（討伐）に挑む？', function () { startBattle(BOSS, true); }, function () { p.pos--; toMap(); });
+      yesNo('大魔王サンドゥーラの城だ…… 口説き（討伐）に挑む？', function () { startBattle(BOSS, true); }, function () { p.pos--; toMap(); });
     } else if (p.pos > 0 && rnd(100) < 22) {
       var z = zone(p.pos);
       startBattle(pick(MON.filter(function (m) { return m.z === z; })), false);
@@ -212,7 +212,7 @@
     enemyAttack(lines); endTurn(lines);
   }
   function flee() {
-    if (b.boss) { say(['大魔王サンドラからは逃げられない！（口説きたいので）'], battleMenu); return; }
+    if (b.boss) { say(['大魔王サンドゥーラからは逃げられない！（口説きたいので）'], battleMenu); return; }
     if (rnd(100) < 60) { say(['ガリは逃げ出した！（格好悪い）'], toMap); return; }
     var lines = ['逃げられなかった！']; enemyAttack(lines); endTurn(lines);
   }
@@ -220,7 +220,7 @@
   function win(lines) {
     if (b.boss) {
       try { localStorage.removeItem(SAVE); } catch (e) {}
-      lines.push('大魔王サンドラ「……友だちからなら、いいわよ」', 'ガリは大魔王サンドラを口説き落とした（討伐した）！！', '孤独な旅は、ちょっとだけ報われた。');
+      lines.push('大魔王サンドゥーラ「……友だちからなら、いいわよ」', 'ガリは大魔王サンドゥーラを口説き落とした（討伐した）！！', '孤独な旅は、ちょっとだけ報われた。');
       say(lines, function () { st = 'clear'; b = null; $('msg').textContent = '〜 FIN 〜　決定ボタンで、はじめから遊べるよ'; render(); });
       return;
     }
