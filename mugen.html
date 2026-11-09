@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>無限読本</title>
+    <style>
+        body {
+            background-color: #0f0f13;
+            color: #e0e0e0;
+            font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: #1a1a24;
+            border: 1px solid #33334d;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 10px;
+            color: #d4af37;
+        }
+        .subtitle {
+            font-size: 0.85rem;
+            color: #8a8a9e;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            background: #111116;
+            border: 1px solid #444466;
+            color: #fff;
+            font-size: 1rem;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #252538;
+            color: #e0e0e0;
+            border: 1px solid #444466;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        button:hover {
+            background: #d4af37;
+            color: #0f0f13;
+            border-color: #d4af37;
+        }
+        .primary-btn {
+            grid-column: span 2;
+            background: #d4af37;
+            color: #0f0f13;
+            font-weight: bold;
+        }
+        .primary-btn:hover {
+            background: #f3cf5b;
+        }
+        .story-text {
+            text-align: left;
+            line-height: 1.8;
+            max-height: 350px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+        }
+        .hidden { display: none; }
+        .loading { color: #d4af37; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ステップ1: タイトルと開始 -->
+    <div id="step-start">
+        <h1>無限読本</h1>
+        <div class="subtitle">〜一期一会の物語。過去のお話は再読できません。〜</div>
+        <button class="primary-btn" onclick="goToStep(1)">物語を始める</button>
+    </div>
+
+    <!-- ステップ2: 名前入力 -->
+    <div id="step-name" class="hidden">
+        <h1>主人公の名</h1>
+        <div class="subtitle">あなたのお名前を入力してください</div>
+        <input type="text" id="player-name" placeholder="例：海蘊" value="旅人">
+        <br>
+        <button class="primary-btn" onclick="goToStep(2)">次へ</button>
+    </div>
+
+    <!-- ステップ3: ジャンル選択 -->
+    <div id="step-genre" class="hidden">
+        <h1>物語の種別</h1>
+        <div class="subtitle">どのようなお話が良いですか？</div>
+        <div class="btn-grid">
+            <button onclick="selectGenre('恋愛物')">恋愛物</button>
+            <button onclick="selectGenre('ファンタジー物')">ファンタジー物</button>
+            <button onclick="selectGenre('メルヘン物')">メルヘン物</button>
+            <button onclick="selectGenre('アクション物')">アクション物</button>
+            <button class="primary-btn" onclick="selectGenre('お笑い物')">お笑い物</button>
+        </div>
+    </div>
+
+    <!-- ステップ4: キーワード入力 -->
+    <div id="step-keyword" class="hidden">
+        <h1>物語の核</h1>
+        <div class="subtitle">物語の核や伏線となるキーワードを一つ教えてください</div>
+        <input type="text" id="story-keyword" placeholder="例：壊れた時計、青い蝶、秘密の合言葉">
+        <br>
+        <button class="primary-btn" onclick="startStory()">物語を紡ぐ</button>
+    </div>
+
+    <!-- ステップ5: 物語表示 -->
+    <div id="step-story" class="hidden">
+        <h1 id="story-title" style="font-size: 1.5rem; margin-bottom: 15px;"></h1>
+        <div id="story-content" class="story-text loading">運命のページをめくっています……</div>
+        <button class="primary-btn" onclick="location.reload()">この本を閉じる（二度と開けません）</button>
+    </div>
+</div>
+
+<script>
+    let gameData = {
+        name: "",
+        genre: "",
+        keyword: ""
+    };
+
+    function goToStep(step) {
+        document.getElementById('step-start').classList.add('hidden');
+        document.getElementById('step-name').classList.add('hidden');
+        document.getElementById('step-genre').classList.add('hidden');
+        document.getElementById('step-keyword').classList.add('hidden');
+
+        if (step === 1) {
+            document.getElementById('step-name').classList.remove('hidden');
+        } else if (step === 2) {
+            gameData.name = document.getElementById('player-name').value || '旅人';
+            document.getElementById('step-genre').classList.remove('hidden');
+        }
+    }
+
+    function selectGenre(genre) {
+        gameData.genre = genre;
+        document.getElementById('step-genre').classList.add('hidden');
+        document.getElementById('step-keyword').classList.remove('hidden');
+    }
+
+    async function startStory() {
+        gameData.keyword = document.getElementById('story-keyword').value || '運命の出会い';
+        document.getElementById('step-keyword').classList.add('hidden');
+        document.getElementById('step-story').classList.remove('hidden');
+
+        // ご自身のGemini APIキーをここに設定してね！
+        const apiKey = "process.env.GCP_API_KEY"; 
+        
+        const prompt = `あなたは一期一会のショートノベル作家です。
+以下の条件に従って、約5分〜10分ほどで読める短編小説（一話完結・過去に戻れない儚い物語）を生成してください。
+
+【設定】
+- 主人公の名前: ${gameData.name}
+- ジャンル: ${gameData.genre}
+- 物語の核・伏線となるキーワード: ${gameData.keyword}
+
+【出力形式】
+1行目に「【物語のタイトル】」を出力し、その後に空行を挟んで、本文の小説を出力してください。
+小説は情景描写や心理描写を丁寧に織り交ぜ、読後に余韻が残る美しい短編に仕上げてください。`;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            const data = await response.json();
+            const text = data.candidates[0].content.parts[0].text;
+
+            // タイトルと本文を簡易的に分ける処理
+            const lines = text.split('\n');
+            let title = "一期一会の物語";
+            let body = text;
+
+            if (text.includes('【')) {
+                title = lines[0].replace(/【|】/g, '');
+                body = lines.slice(2).join('\n');
+            }
+
+            document.getElementById('story-title').innerText = title;
+            document.getElementById('story-content').innerText = body;
+            document.getElementById('story-content').classList.remove('loading');
+
+        } catch (error) {
+            document.getElementById('story-content').innerText = "物語の紡ぎ手（API）との接続に失敗したみたい……APIキーを確認してねっ！";
+            document.getElementById('story-content').classList.remove('loading');
+        }
+    }
+</script>
+
+</body>
+</html>
