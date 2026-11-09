@@ -5,9 +5,9 @@
     <title>無限読本</title>
     <style>
         body {
-            background-color: #0f0f13;
-            color: #e0e0e0;
-            font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+            background: linear-gradient(135deg, #ffe6f0 0%, #e6f0ff 100%);
+            color: #4a4a5e;
+            font-family: 'Rounded Mplus 1c', 'Hiragino Maru Gothic ProN', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,78 +18,88 @@
         .container {
             width: 90%;
             max-width: 600px;
-            background: #1a1a24;
-            border: 1px solid #33334d;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #ffffff;
+            border: 2px solid #ffccd5;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 15px 35px rgba(255, 182, 193, 0.3);
             text-align: center;
         }
         h1 {
-            font-size: 2rem;
-            letter-spacing: 0.2em;
+            font-size: 2.2rem;
+            letter-spacing: 0.1em;
             margin-bottom: 10px;
-            color: #d4af37;
+            color: #ff6b8b;
         }
         .subtitle {
-            font-size: 0.85rem;
-            color: #8a8a9e;
+            font-size: 0.9rem;
+            color: #9999bb;
             margin-bottom: 30px;
         }
         input[type="text"] {
             width: 80%;
-            padding: 10px;
-            background: #111116;
-            border: 1px solid #444466;
-            color: #fff;
-            font-size: 1rem;
-            border-radius: 4px;
-            margin-bottom: 20px;
+            padding: 12px 18px;
+            background: #fff5f7;
+            border: 2px solid #ffb6c1;
+            color: #4a4a5e;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            margin-bottom: 25px;
             text-align: center;
+            outline: none;
+            font-family: inherit;
+        }
+        input[type="text"]:focus {
+            border-color: #ff6b8b;
+            box-shadow: 0 0 10px rgba(255, 107, 139, 0.2);
         }
         .btn-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 20px;
         }
         button {
-            background: #252538;
-            color: #e0e0e0;
-            border: 1px solid #444466;
-            padding: 12px;
-            font-size: 1rem;
-            border-radius: 4px;
+            background: #fff0f3;
+            color: #ff6b8b;
+            border: 2px solid #ffb6c1;
+            padding: 14px;
+            font-size: 1.05rem;
+            border-radius: 50px;
             cursor: pointer;
             transition: 0.2s;
             font-family: inherit;
+            font-weight: bold;
         }
         button:hover {
-            background: #d4af37;
-            color: #0f0f13;
-            border-color: #d4af37;
+            background: #ffb6c1;
+            color: #ffffff;
+            transform: translateY(-2px);
         }
         .primary-btn {
             grid-column: span 2;
-            background: #d4af37;
-            color: #0f0f13;
-            font-weight: bold;
+            background: linear-gradient(135deg, #ff8da1 0%, #ff6b8b 100%);
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 6px 15px rgba(255, 107, 139, 0.4);
         }
         .primary-btn:hover {
-            background: #f3cf5b;
+            background: linear-gradient(135deg, #ff9eb1 0%, #ff7b9b 100%);
+            transform: translateY(-2px);
         }
         .story-text {
             text-align: left;
-            line-height: 1.8;
+            line-height: 1.9;
             max-height: 350px;
             overflow-y: auto;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             padding-right: 10px;
             white-space: pre-wrap;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            color: #5a5a6e;
         }
         .hidden { display: none; }
-        .loading { color: #d4af37; animation: pulse 1.5s infinite; }
+        .loading { color: #ff6b8b; animation: pulse 1.5s infinite; font-weight: bold; }
         @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
     </style>
 </head>
@@ -98,46 +108,46 @@
 <div class="container">
     <!-- ステップ1: タイトルと開始 -->
     <div id="step-start">
-        <h1>無限読本</h1>
+        <h1>🐰 無限読本 🌸</h1>
         <div class="subtitle">〜一期一会の物語。過去のお話は再読できません。〜</div>
-        <button class="primary-btn" onclick="goToStep(1)">物語を始める</button>
+        <button class="primary-btn" onclick="goToStep(1)">✨ 物語を始める ✨</button>
     </div>
 
     <!-- ステップ2: 名前入力 -->
     <div id="step-name" class="hidden">
         <h1>主人公の名</h1>
-        <div class="subtitle">あなたのお名前を入力してください</div>
-        <input type="text" id="player-name" placeholder="例：海蘊" value="旅人">
+        <div class="subtitle">あなたのお名前を入力してね</div>
+        <input type="text" id="player-name" placeholder="例：海蘊" value="海蘊">
         <br>
-        <button class="primary-btn" onclick="goToStep(2)">次へ</button>
+        <button class="primary-btn" onclick="goToStep(2)">次へ進む ➔</button>
     </div>
 
     <!-- ステップ3: ジャンル選択 -->
     <div id="step-genre" class="hidden">
         <h1>物語の種別</h1>
-        <div class="subtitle">どのようなお話が良いですか？</div>
+        <div class="subtitle">どんなお話が読んでみたい？</div>
         <div class="btn-grid">
-            <button onclick="selectGenre('恋愛物')">恋愛物</button>
-            <button onclick="selectGenre('ファンタジー物')">ファンタジー物</button>
-            <button onclick="selectGenre('メルヘン物')">メルヘン物</button>
-            <button onclick="selectGenre('アクション物')">アクション物</button>
-            <button class="primary-btn" onclick="selectGenre('お笑い物')">お笑い物</button>
+            <button onclick="selectGenre('恋愛物')">💖 恋愛物</button>
+            <button onclick="selectGenre('ファンタジー物')">✨ ファンタジー物</button>
+            <button onclick="selectGenre('メルヘン物')">🧸 メルヘン物</button>
+            <button onclick="selectGenre('アクション物')">🔥 アクション物</button>
+            <button class="primary-btn" onclick="selectGenre('お笑い物')">🍀 お笑い物</button>
         </div>
     </div>
 
     <!-- ステップ4: キーワード入力 -->
     <div id="step-keyword" class="hidden">
         <h1>物語の核</h1>
-        <div class="subtitle">物語の核や伏線となるキーワードを一つ教えてください</div>
-        <input type="text" id="story-keyword" placeholder="例：壊れた時計、青い蝶、秘密の合言葉">
+        <div class="subtitle">物語の鍵になるキーワードをひとつ教えてね</div>
+        <input type="text" id="story-keyword" placeholder="例：魔法の切符、星のペンダント">
         <br>
-        <button class="primary-btn" onclick="startStory()">物語を紡ぐ</button>
+        <button class="primary-btn" onclick="startStory()">✨ 物語を紡ぐ ✨</button>
     </div>
 
     <!-- ステップ5: 物語表示 -->
     <div id="step-story" class="hidden">
-        <h1 id="story-title" style="font-size: 1.5rem; margin-bottom: 15px;"></h1>
-        <div id="story-content" class="story-text loading">運命のページをめくっています……</div>
+        <h1 id="story-title" style="font-size: 1.4rem; margin-bottom: 15px; color: #ff6b8b;"></h1>
+        <div id="story-content" class="story-text loading">✨ 運命のページをめくっています…… ✨</div>
         <button class="primary-btn" onclick="location.reload()">この本を閉じる（二度と開けません）</button>
     </div>
 </div>
@@ -174,8 +184,7 @@
         document.getElementById('step-keyword').classList.add('hidden');
         document.getElementById('step-story').classList.remove('hidden');
 
-        // ご自身のGemini APIキーをここに設定してね！
-        const apiKey = "process.env.GCP_API_KEY"; 
+        const apiKey = "ここに実際のGeminiAPIキーまたはダミー文字列を入れてね"; 
         
         const prompt = `あなたは一期一会のショートノベル作家です。
 以下の条件に従って、約5分〜10分ほどで読める短編小説（一話完結・過去に戻れない儚い物語）を生成してください。
@@ -201,7 +210,6 @@
             const data = await response.json();
             const text = data.candidates[0].content.parts[0].text;
 
-            // タイトルと本文を簡易的に分ける処理
             const lines = text.split('\n');
             let title = "一期一会の物語";
             let body = text;
