@@ -281,7 +281,7 @@
           if (res.status === 404) {
             throw new Error('このページでは動かないみたい。vercel.app のURLで開いてね');
           }
-          throw new Error((data && data.error) || 'うまくいかなかったよ（エラー ' + res.status + '）');
+          throw new Error(((data && data.error) || 'うまくいかなかったよ') + '［' + ((data && data.code) || ('http_' + res.status)) + '］');
         }
         if (!data || typeof data.scene !== 'string' || !data.scene) {
           throw new Error('返事がうまく読めなかったよ。もう一度試してね');
