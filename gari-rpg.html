@@ -1,230 +1,352 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ガリゴンクエスト2</title>
 <style>
-:root{color-scheme:dark;--bg:#111827;--panel:#1f2937;--panel2:#273449;--line:#475569;--gold:#facc15;--green:#4ade80;--red:#fb7185;--blue:#7dd3fc;--txt:#f8fafc;--muted:#cbd5e1}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#263449,#0b1020 65%);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;padding:16px}
-#app{max-width:900px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}h1{font-size:clamp(22px,4vw,34px);margin:4px 0;color:var(--gold);text-shadow:0 2px #000}.sub{color:var(--muted);font-size:12px}.panel{background:linear-gradient(145deg,#202d40,#172233);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 8px 24px #0005}.scene{min-height:170px;display:flex;flex-direction:column;justify-content:center;text-align:center;background:linear-gradient(180deg,#1e3448,#142033)}.emoji{font-size:clamp(42px,10vw,76px);line-height:1.4;letter-spacing:5px}.sceneText{font-size:16px;line-height:1.7;margin-top:8px;white-space:pre-line}.log{height:160px;overflow:auto;text-align:left;background:#0b1220;border:1px solid #334155;border-radius:10px;padding:10px;font-size:13px;line-height:1.65}.log p{margin:0 0 4px}.muted{color:var(--muted)}.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}.stat{background:#0e1726;border:1px solid #334155;border-radius:10px;padding:9px;font-size:13px}.stat .exp{color:#fde68a;font-size:11px;margin-top:3px}.bar{height:7px;background:#334155;border-radius:9px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--green)}.bar.mp i{background:#60a5fa}.buttons{display:flex;flex-wrap:wrap;gap:8px}.actionbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.actionbar button{width:100%}.buttons button,button{background:#334155;color:white;border:1px solid #64748b;border-radius:9px;padding:10px 13px;font-weight:700;cursor:pointer;font-size:14px}button:hover{background:#475569}button:disabled{opacity:.35;cursor:not-allowed}.primary{background:#854d0e;border-color:#eab308}.danger{background:#7f1d1d;border-color:#ef4444}.small{font-size:12px;padding:7px 9px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hidden{display:none!important}.tag{display:inline-block;border:1px solid #64748b;border-radius:99px;padding:3px 8px;font-size:11px;color:var(--muted)}.mapline{display:flex;gap:5px;flex-wrap:wrap;align-items:center;justify-content:center;font-size:20px}.mapline span{opacity:.35}.mapline .here{opacity:1;filter:drop-shadow(0 0 7px #facc15)}.choice{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.footer{font-size:11px;color:#94a3b8;text-align:center;margin:14px 0}.modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:16px;z-index:5}.modal>div{max-width:520px;width:100%;max-height:85vh;overflow:auto;background:#1e293b;border:1px solid #64748b;border-radius:15px;padding:16px}.modal h2{margin-top:0;color:var(--gold)}.shoprow{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #334155;padding:8px 0}.key{border:1px solid #64748b;border-radius:5px;padding:1px 5px;font-size:11px}
-
-/* スマホ向け簡易レイアウト */
-@media (max-width:600px){
-  body{padding:5px;background:#0b1020}
-  #app{width:100%;max-width:100%}
-  .top{gap:6px;margin-bottom:6px}
-  h1{font-size:20px;margin:2px 0}
-  .sub{font-size:10px}
-  .panel{padding:8px;margin:6px 0;border-radius:9px;box-shadow:none}
-  .scene{min-height:112px;padding:10px 7px}
-  .emoji{font-size:40px;line-height:1.15;letter-spacing:2px}
-  .sceneText{font-size:13px;line-height:1.45;margin-top:6px}
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
-  .stat{padding:6px;font-size:11px;border-radius:7px;min-width:0}
-  .stat b{font-size:12px}
-  .bar{height:5px;margin-top:3px}
-  .buttons{gap:5px}
-  .buttons button,button{font-size:12px;padding:9px 8px;border-radius:7px;min-height:38px}
-  .buttons button.small,button.small{font-size:11px;padding:6px 7px;min-height:30px}
-  .actionbar{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-  .actionbar button{padding:9px 3px;font-size:12px}
-  #battleActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-  #battleActions button{width:100%}
-  #app>section:last-of-type .buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
-  #nextBtn{grid-column:1/-1}
-  .log{height:90px;padding:7px;font-size:11px;line-height:1.45}
-  .mapline{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;font-size:16px;gap:3px;padding:2px 0}
-  .tag{font-size:10px;padding:2px 6px}
-  .choice{gap:5px;margin-top:7px}
-  .choice button{flex:1 1 auto}
-  .footer{font-size:9px;margin:8px 0}
-  .modal{padding:7px}
-  .modal>div{padding:11px;border-radius:10px;max-height:90vh}
-  .shoprow{font-size:12px;gap:5px;padding:6px 0}
-  .shoprow button{white-space:nowrap}
-}
-@media (max-width:360px){
-  .stats{grid-template-columns:1fr}
-  .stat{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:6px}
-  .stat .bar{grid-column:1/-1}
-  .top .buttons button{padding:5px 6px}
-}
+  :root { --bg:#1f1f23; --card:#2b2b31; --card2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --mint:#8fd9b0; --red:#f87171; --sky:#cfe3f5; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif; font-size: 15px; line-height: 1.6; color: var(--ink); background: var(--bg); user-select: none; -webkit-tap-highlight-color: transparent;
+         padding: calc(10px + env(safe-area-inset-top, 0px)) 10px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  #app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  h1 { font-size: 15px; color: #ffbf93; line-height: 1.3; }
+  h1 small { display: block; font-size: 10px; color: var(--soft); font-weight: 400; }
+  header div { display: flex; gap: 6px; }
+  header button, header a { font: inherit; font-size: 12px; color: var(--ink); background: var(--card2); border: 2px solid var(--line); border-radius: 99px; padding: 2px 12px; text-decoration: none; cursor: pointer; }
+  .box { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 8px 10px; }
+  #party { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 84px; }
+  .hero { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 6px 8px; font-size: 11px; text-align: center; }
+  .hero.cur { border-color: var(--orange); }
+  .hero.down { opacity: .45; }
+  .hero b { display: block; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 3px 0; }
+  .bar i { display: block; height: 100%; background: var(--mint); }
+  .bar.mp i { background: #7aa8ff; }
+  #stage { height: 130px; display: flex; align-items: center; justify-content: center; background: #17171a; border-radius: 16px; border: 2px solid var(--line); text-align: center; padding: 6px; }
+  .big { font-size: 56px; line-height: 1.1; }
+  .ttl { font-size: 14px; color: var(--orange); font-weight: 700; }
+  .foe .bar { width: 150px; margin: 4px auto 0; }
+  .foe .bar i { background: var(--red); }
+  #log { min-height: 13.5em; white-space: pre-wrap; font-size: 14px; }
+  #cmd { display: flex; flex-direction: column; gap: 8px; min-height: 52px; }
+  #cmd p { font-size: 13px; color: var(--sky); }
+  #cmd button { font: inherit; font-weight: 700; min-height: 48px; padding: 8px 12px; border-radius: 14px; border: 2px solid #c4824f; background: var(--orange); color: var(--on); cursor: pointer; touch-action: manipulation; }
+  #cmd button.sub { background: transparent; color: var(--ink); border-color: var(--line); min-height: 38px; font-weight: 500; font-size: 13px; }
+  #cmd button:disabled { opacity: .4; cursor: not-allowed; }
+  #cmd button:active:not(:disabled) { transform: translateY(2px); }
+  #cmd .row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  #cmd .row button { font-size: 13px; padding: 6px 4px; }
+  button:focus-visible, a:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  .note { font-size: 11px; color: var(--soft); text-align: center; }
 </style>
 </head>
-<body><div id="app">
-<header class="top"><div><h1>🐻 ガリゴンクエスト2</h1><div class="sub">～絵文字と勢いで世界を救え～</div></div><div class="buttons"><button class="small" onclick="saveGame()">💾 セーブ</button><button class="small" onclick="loadGame()">📂 ロード</button><button class="small" onclick="showHelp()">❔ 操作</button></div></header>
-<section class="panel"><div class="top"><b id="areaName">なの城</b><span class="tag" id="progress">冒険前</span><span class="gold" id="money">0デュラ</span></div><div class="mapline" id="mapline"></div></section>
-<section class="panel scene"><div class="emoji" id="picture">🏰 👸 🐻</div><div class="sceneText" id="sceneText">姫「なの」の命令により、ガリの冒険が始まる。</div><div class="choice" id="choices"></div></section>
-<section class="panel" id="actionPanel"><div class="buttons actionbar" id="actionButtons"></div><div class="sub" style="margin-top:6px">キー操作：<span class="key">→</span>進む / <span class="key">←</span>戻る / <span class="key">T</span>修行 / <span class="key">Esc</span>閉じる</div></section>
-<section class="panel"><div class="top"><b>👥 パーティー</b><span class="tag" id="partyLabel">準備中</span></div><div class="stats" id="partyStats"></div></section>
-<section class="panel hidden" id="battlePanel"><div class="top"><b>⚔️ バトル</b><span class="tag" id="enemyInfo">敵</span></div><div class="emoji" id="enemyEmoji">👹</div><div id="enemyName" style="text-align:center;font-weight:800"></div><div class="bar"><i id="enemyBar" style="width:100%;background:#fb7185"></i></div><div class="sub" id="enemyHp" style="text-align:center;margin:5px"></div><div class="buttons" id="battleActions"></div></section>
-<section class="panel"><div class="top"><b>📜 冒険ログ</b><button class="small" onclick="clearLog()">ログ消去</button></div><div class="log" id="log"></div></section>
-<section class="panel"><div class="top"><b>🎒 所持品</b><span class="tag" id="itemCount">0個</span></div><div id="items" class="buttons"></div></section>
+<body>
+<div id="app">
+  <header>
+    <h1 id="h1"></h1>
+    <div><button id="restart" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
+  </header>
+  <div id="party"></div>
+  <div id="stage"></div>
+  <div id="log" class="box" role="log" aria-live="polite"></div>
+  <div id="cmd"></div>
+  <p class="note">スマホ：ボタンをタップ／PC：Enter・Spaceで進む、1〜4で選ぶ</p>
+</div>
 
-<div class="footer">セーブデータはこのブラウザ内に保存されます。画像素材なし・HTML単体で動作。</div>
-</div><div id="modal" class="modal hidden" onclick="if(event.target.id==='modal')closeModal()"><div id="modalBody"></div></div>
 <script>
-const $=id=>document.getElementById(id);
-const clone=o=>JSON.parse(JSON.stringify(o));
-const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-const baseChars={
- gari:{name:'ガリ',emoji:'🐻',maxHp:120,hp:120,maxMp:35,mp:35,atk:19,def:9,lv:1,exp:0,role:'勇者'},
- crab:{name:'質問の蟹',emoji:'🦀',maxHp:95,hp:95,maxMp:18,mp:18,atk:17,def:8,lv:1,exp:0,role:'仲間（仮）'},
- merc:{name:'傭兵',emoji:'🗡️',maxHp:80,hp:80,maxMp:0,mp:0,atk:13,def:11,lv:1,exp:0,role:'使い捨て'},
- sand:{name:'サンドゥーラ',emoji:'😈',maxHp:100,hp:100,maxMp:75,mp:75,atk:12,def:7,lv:1,exp:0,role:'魔法・回復'},
- takashi:{name:'たかし',emoji:'🐄',maxHp:170,hp:170,maxMp:22,mp:22,atk:12,def:20,lv:1,exp:0,role:'盾役'}
-};
-// レベルアップで増える分（仲間ごと）。レベルアップするとHP・MPは全回復する
-const GROW={gari:{hp:12,mp:3,atk:3,def:1},crab:{hp:10,mp:2,atk:3,def:1},merc:{hp:9,mp:0,atk:2,def:1},sand:{hp:8,mp:6,atk:1,def:1},takashi:{hp:14,mp:1,atk:1,def:2}};
-const need=c=>c.lv*20; // 次のレベルに必要な経験値
-let S;
-function fresh(){return {started:false,step:0,reach:0,sinceBattle:0,lock:false,phase:'intro',money:35,items:{やくそう:3,まほうの水:1},chars:clone(baseChars),party:['gari'],mercDeaths:0,wipes:0,grave:[],eventSeen:[],battle:null,story:{crabJoined:false,mercJoined:false,sandJoined:false,takashiJoined:false,firstBoss:false,crabGod:false},done:false,log:[]}}
-S=fresh();
-const zones=[
-['城下町','🏰','なの姫の城下町。'],['草原','🌱','草原に出た。'],['森の入口','🌳','森の入口。'],['小さな橋','🌉','橋がある。'],['古い街道','🛤️','誰もいない街道。'],['コンビニ前','🏪','なぜかコンビニがある。'],['洞窟入口','🕳️','暗い洞窟が口を開けている。'],['洞窟奥','🪨','じめじめしている。'],['魔王城前','🏰','魔王城に到着した。'],['魔王の間','😈','魔王サンドゥーラが待ち受ける。'],['焼け野原','🔥','蟹が力を得た場所。'],['給湯ポット前','♨️','コンビニの給湯ポットがある。'],['なの城','🏰','姫の城に戻ってきた。'],['城門','🚪','姫にシバかれた魔王がいる。'],['魔王城下','🏚️','元魔王の手下がうろつく。'],['沼地','🫧','足元がぬかるむ。'],['砂漠','🏜️','暑い。とにかく暑い。'],['廃村','🏚️','人の気配がない。'],['山道','⛰️','坂が続く。'],['古戦場','⚔️','昔の戦場らしい。'],['毒沼','☠️','入らない方がよさそう。'],['温泉','♨️','温泉が湧いている。'],['謎の祠','⛩️','何かを祀っている。'],['巨大な門','🚧','先に進むしかない。'],['蟹の領域','🦀','蟹の気配が濃い。'],['暗黒街道','🌑','空が暗くなってきた。'],['崩れた橋','🌉','橋が半分崩れている。'],['最終休憩所','🏕️','最後の休憩地点。'],['破壊神の塔','🗼','頂上から強大な気配。'],['最上階','👑','破壊神が待つ。']
-];
-const REST_STEPS=[21,27]; // 温泉・最終休憩所：着くと全員全回復（戦闘なし）
-const NO_FIELD=[0,5,9,10,11,12,21,27,29]; // ザコ敵・ランダムイベントが出ないマス（物語・町・休憩所）
+(function () {
+  'use strict';
+  var $ = function (i) { return document.getElementById(i); };
+  var rnd = function (n) { return Math.floor(Math.random() * n); };
+  var pick = function (a) { return a[rnd(a.length)]; };
 
-function log(t){S.log.push(t);if(S.log.length>100)S.log.shift();$('log').innerHTML=S.log.map(x=>'<p>› '+esc(x)+'</p>').join('');$('log').scrollTop=$('log').scrollHeight}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-// 選択肢つきの場面は、選ぶまで移動できない（ロックされる）。選択肢なしの場面で、ロックは解ける
-function scene(pic,txt,buttons=[]){S.lock=buttons.length>0;$('picture').textContent=pic;$('sceneText').textContent=txt;$('choices').innerHTML='';buttons.forEach(b=>{let x=document.createElement('button');x.textContent=b.label;x.onclick=()=>{S.lock=false;b.fn()};$('choices').appendChild(x)});renderActionButtons()}
-function setArea(){let z=zones[Math.min(S.step,zones.length-1)];$('areaName').textContent=z[0];$('progress').textContent=`${S.step+1} / ${zones.length}`;$('mapline').innerHTML=zones.map((z,i)=>`<span class="${i===S.step?'here':''}">${z[1]}</span>`).join('');}
-function aliveParty(){return S.party.filter(id=>S.chars[id]&&S.chars[id].hp>0)}
-function render(){setArea();$('money').textContent=S.money+'デュラ';$('partyLabel').textContent=S.party.map(id=>S.chars[id]?.emoji||'').join(' ');$('partyStats').innerHTML=S.party.map(id=>{let c=S.chars[id];if(!c)return '';return `<div class="stat"><b>${c.emoji} ${c.name}</b> <span class="muted">Lv${c.lv} ${c.role}</span><div>HP ${c.hp}/${c.maxHp}</div><div class="bar"><i style="width:${100*c.hp/c.maxHp}%"></i></div><div>MP ${c.mp}/${c.maxMp}</div><div class="bar mp"><i style="width:${c.maxMp?100*c.mp/c.maxMp:0}%"></i></div><div class="exp">EXP ${c.exp}/${need(c)}</div></div>`}).join('');$('items').innerHTML=Object.entries(S.items).filter(x=>x[1]>0).map(([n,v])=>`<span class="tag">${esc(n)} ×${v}</span>`).join('')||'<span class="muted">何も持っていない</span>';$('itemCount').textContent=Object.values(S.items).reduce((a,b)=>a+b,0)+'個';$('log').innerHTML=S.log.map(x=>'<p>› '+esc(x)+'</p>').join('');$('log').scrollTop=$('log').scrollHeight;$('battlePanel').classList.toggle('hidden',!S.battle);renderActionButtons();if(S.battle)renderBattle();}
+  // ===== データ（数値・文章は、ここで調整するよ。数値は仮調整だよ）=====
+  var TITLE = 'ガリゴンクエスト2', SUB = '〜絵文字と勢いで世界を救え〜';
+  var BASE = {   // 仲間の初期ステータス（勝つたびに、HP+4・攻撃+1・MP+1）
+    gari:    { n: 'ガリ',         e: '🐻', hp: 55, mp: 8,  atk: 8 },
+    kani:    { n: '質問の蟹',     e: '🦀', hp: 42, mp: 8,  atk: 9 },
+    yohei:   { n: '傭兵',         e: '🪖', hp: 62, mp: 6,  atk: 10 },
+    sandora: { n: 'サンドゥーラ', e: '😈', hp: 45, mp: 14, atk: 6 },
+    takashi: { n: 'たかし',       e: '🐄', hp: 85, mp: 6,  atk: 5 }
+  };
+  var SK = { gari: ['ガリ火', 3], kani: ['ていねいなハサミ', 3], yohei: ['お金の力', 3], sandora: ['しぶしぶ回復', 3], takashi: ['かばう', 2] };
+  var E = {      // 敵。sp＝3ターンごとの全体攻撃
+    sock:    { n: '片方だけの靴下', e: '🧦', hp: 28, atk: 6, line: 'ぬくもりを求めてさまよっている！' },
+    rat:     { n: 'ドブネズミ', e: '🐀', hp: 36, atk: 7, line: 'チューチュー言って見つめている！' },
+    sandora: { n: '魔王サンドゥーラ', e: '😈', hp: 170, atk: 13, sp: { n: '暗黒の大魔法', d: 11 }, line: '「よくぞ来たわね。まとめて消し飛ばしてあげる」' },
+    gator:   { n: '沼のヌシ', e: '🐊', hp: 75, atk: 11, line: 'ぬまぬまと近づいてくる！' },
+    cactus:  { n: '暴れサボテン', e: '🌵', hp: 85, atk: 12, line: 'トゲトゲしい態度だ！' },
+    ghost:   { n: '廃村の幽霊', e: '👻', hp: 90, atk: 13, line: '「うらめしや〜」と、あまり怖くない声で言っている！' },
+    eagle:   { n: '山道の鷲', e: '🦅', hp: 100, atk: 14, line: '上空から狙っている！' },
+    skel:    { n: '古戦場の亡霊', e: '💀', hp: 115, atk: 15, line: '昔の戦いを、まだ続けている！' },
+    kanigod: { n: '破壊神・質問の蟹', e: '🦀', hp: 330, atk: 19, sp: { n: '質問攻め', d: 14 }, line: '「ご質問を、よろしいでしょうか？」' }
+  };
+  // 物語の進行表。lines＝セリフ／party＝仲間の入れ替え／b＝戦闘／rest＝全回復／learn＝ガリプンテ習得
+  var STEPS = [
+    { ch: '第一章：姫の命令', ico: '👸', party: ['gari'], lines: [
+      '平和な国、なの王国。', 'ある日、姫「なの」は、勇者候補のクマ、ガリを呼び出した。',
+      '姫「魔王サンドゥーラが復活したなの。倒してくるなの」', 'ガリ「いや、急すぎない？」',
+      '姫「命令を受けなければ、体内に結石が発生する魔法をかけます」', 'こうして、ガリの冒険が始まった。'] },
+    { b: 'sock' },
+    { ch: '第二章：質問の蟹と傭兵', ico: '🦀', party: ['gari', 'kani', 'yohei'], lines: [
+      '旅の途中、ガリは質問の蟹と出会う。', '蟹「仲間に入れてくださいませ！」', '人懐っこく、礼儀正しい蟹。ガリは仲間として迎え入れた。',
+      'さらに、なの姫の資金援助によって、傭兵も加入。', 'ガリ、質問の蟹、傭兵の三人で、魔王城を目指す。',
+      'しかし、蟹には、誰にも言えない目的があった。', 'それは、なの姫に近づくことだった。'] },
+    { b: 'rat' },
+    { ch: '第三章：魔王サンドゥーラ討伐', ico: '🏰', lines: [
+      '長い道のりの末、ガリたちは魔王城に到着。', '魔王サンドゥーラとの決戦が始まる！'] },
+    { b: 'sandora' },
+    { lines: ['激闘の末、ついに魔王を撃破！', '世界に平和が戻った……はずだった。'] },
+    { ch: '第四章：裏切りの蟹', ico: '💥', lines: [
+      '魔王を倒した直後、質問の蟹が本性を現す。', '蟹「英雄は一人で十分なのでございます」',
+      '蟹の目的は、魔王を自ら復活させ、それを倒した英雄として姫に認めてもらうことだった。', 'そのために、ガリを利用していたのだ。',
+      '蟹はガリを襲撃。', 'ガリは死亡。', 'そして蟹は強大な力を手に入れ、破壊神へと変貌する。'], party: ['gari'], down: true },
+    { ch: '第五章：給湯ポットの奇跡', ico: '🫖', lines: [
+      '絶望の中、なの姫が現れる。', '姫「ガリ、復活するなの！」', '姫が手に取ったのは、伝説の聖水でも蘇生薬でもない。',
+      'コンビニに置いてある、カップ麺用の給湯ポットだった。', 'ガリに熱湯をぶっかける。', 'ガリ「熱っっ！！ 生き返ったぞ！！」',
+      'こうしてガリは、あまりにも雑な方法で復活した。'], revive: true },
+    { ch: '第六章：元魔王、仲間になる', ico: '😈', party: ['gari', 'sandora', 'takashi'], lines: [
+      'なの姫は、復活した魔王サンドゥーラをシバき倒す。', '姫「あなたも責任を取って、仲間になるなの」', 'サンドゥーラ「なんで私が回復係なのよ……」',
+      'こうして、元魔王サンドゥーラが仲間に加入。', 'さらに、手下のたかしも同行することになる。', 'たかし「盾役なら任せてください……！」',
+      '新しいパーティーが結成された。', '🐻 ガリ：勇者・攻撃魔法も使える', '😈 サンドゥーラ：魔法・回復担当', '🐄 たかし：盾役・敵の攻撃を引き受ける'] },
+    { ch: '第七章：破壊神への道', ico: '🗺️', lines: [
+      '三人は、破壊神となった蟹を倒すため、再び旅に出る。', '沼地、砂漠、廃村、山道、古戦場、温泉、謎の祠……。', '行く先々で、どうでもいい事件に巻き込まれる。'] },
+    { ico: '🐊', lines: ['【沼地】', '怪しい商人「このカップ麺、今なら2個で1個の値段だよ」', 'ガリ「それ、普通じゃん」', 'カップ麺を2個もらった。'], item: 2 },
+    { b: 'gator' },
+    { ico: '🌵', lines: ['【砂漠】', '暑い。とにかく暑い。', 'サンドゥーラ「回復係に、水筒を持たせないでよ」'] },
+    { b: 'cactus' },
+    { ico: '👻', lines: ['【廃村】', '喋る石「……ここは、廃村だ」', 'ガリ「見れば分かるよ」', '喋る石「……それだけだ」'] },
+    { b: 'ghost' },
+    { ico: '🦅', lines: ['【山道】', '迷子のスライムが、ついてきた。', 'たかし「ペットは……盾にできません……」'] },
+    { b: 'eagle' },
+    { ico: '💀', lines: ['【古戦場】', '昔の戦士たちの亡霊が、そこらじゅうに立っている。', 'ガリ「……静かにしてくれない？」'] },
+    { b: 'skel' },
+    { ico: '♨️', rest: true, item: 1, lines: ['【温泉】', 'ついに温泉！ みんなの体力と魔力が全回復した！', 'カップ麺を1個、見つけた。'] },
+    { ico: '⛩️', learn: true, lines: [
+      '【謎の祠】', '謎の老人「禁断の魔法を授けよう」', 'ガリは禁断のギャンブル魔法「ガリプンテ」を覚えた！',
+      '大当たりすれば、大金と経験値。', 'ハズレれば、爆発、隕石、落雷。', '味方の命すら賭ける、究極の魔法である。'] },
+    { ch: '最終章：破壊神・質問の蟹', ico: '🗼', lines: [
+      'ついに破壊神の塔へ到着した三人。', '待ち受けるのは、かつて仲間だった質問の蟹。', '蟹「なの姫を手に入れるため、全てを破壊するのでございます！」',
+      'ガリ「もうお前の質問には答えない！」', 'サンドゥーラ「元魔王の力、見せてあげるわ！」', 'たかし「攻撃を……ください……！」', '最後の戦いが始まる。'] },
+    { b: 'kanigod' },
+    { ch: 'エンディング', ico: '🎉', end: true, lines: [
+      '破壊神を倒し、世界に平和が戻った。', '姫「よくやったなの。報酬は検討するなの」', 'ガリ「そこは払えよ！！」', TITLE + ' 完！'] }
+  ];
+  var STEP_MS = 650, LOG_MAX = 8;
 
-// 動けるのは、冒険中で、戦闘中でも、選択肢待ちでもないとき
-function canMove(){return S.started&&!S.battle&&!S.done&&!S.lock&&(S.phase==='journey'||S.phase==='post')}
-function isTown(){return S.step===0||S.step===12}
-// 負けたあとに、町から「最前線」へ一気に戻れる場所（物語の戦闘や出来事の手前まで）
-function frontier(){if(!S.story.firstBoss)return Math.min(S.reach,8);if(!S.story.takashiJoined)return 0;return Math.min(Math.max(S.reach,13),28)}
-function renderActionButtons(){let a=$('actionButtons');if(!a)return;a.innerHTML='';let defs=[];
- if(!S.started||S.battle||S.done){$('actionPanel').classList.add('hidden');return}
- $('actionPanel').classList.remove('hidden');let mv=canMove();
- if(isTown()){defs.push(['🛏️ 宿屋',openInn],['🏪 お店',openShop],['🪦 墓地',openGraveyard]);if(mv){defs.push(['➡️ 進む',advance],['⚔️ 修行',train]);if(frontier()>S.step+1)defs.push(['🗺️ 最前線へ',warp])}}
- else if(mv){defs.push(['⬅️ 戻る',goBack],['➡️ 進む',advance],['⚔️ 修行',train])}
- defs.push(['✨ 魔法',()=>openMagic(false)],['🎒 道具',()=>openItems(false)]);
- defs.forEach(([label,fn])=>{let b=document.createElement('button');b.textContent=label;b.onclick=fn;a.appendChild(b)})}
+  // ===== 状態 =====
+  var S, L = [], gen = 0;
+  function el(tag, cls, text) { var d = document.createElement(tag); if (cls) d.className = cls; if (text !== undefined) d.textContent = text; return d; }
+  function addLog(t) { L.push(t); if (L.length > LOG_MAX) L.shift(); $('log').textContent = L.join('\n'); }
+  function mk(id) {
+    var b = BASE[id], lv = S.lv, hp = b.hp + 4 * lv, mp = b.mp + lv;
+    return { id: id, n: b.n, e: b.e, hp: hp, max: hp, mp: mp, mmax: mp, atk: b.atk + lv };
+  }
+  function alive() { return S.h.filter(function (x) { return x.hp > 0; }); }
+  function hurt(x, d, L2) { x.hp = Math.max(0, x.hp - d); if (L2) { L2.push(x.n + 'は' + d + 'のダメージ！'); if (x.hp <= 0) L2.push(x.n + 'は倒れた…'); } }
+  function healAll() { S.h.forEach(function (h) { h.hp = h.max; h.mp = h.mmax; }); }
 
-function begin(){S.started=true;S.phase='town';S.party=['gari'];log('ガリゴンクエスト2 開始！');scene('🏰 👸 🐻','姫「なの」：魔王サンドゥーラを倒してくるなの。命令を受けなければ体内に結石が発生する魔法かけます。',[{label:'😨 冒険に出る',fn:()=>{log('ガリは結石を恐れて旅立った。');S.phase='crab';scene('🐻 🌱 🦀','草原で質問の蟹が現れた。🦀「仲間に入れてくださいませ！」',[{label:'仲間にする',fn:joinCrab}])}}]);render()}
-function joinCrab(){if(!S.party.includes('crab'))S.party.push('crab');S.story.crabJoined=true;S.phase='merc';scene('🐻 🦀 🏘️','質問の蟹が仲間になった。まずは町で傭兵と回復アイテムを準備しよう。',[{label:'傭兵を雇う（無料）',fn:()=>{if(!S.party.includes('merc'))S.party.push('merc');S.story.mercJoined=true;log('なの姫の費用で傭兵を雇った。');scene('🗡️','傭兵「よろしくお願いします」',[{label:'出発',fn:()=>{S.phase='journey';S.step=1;S.reach=1;S.sinceBattle=0;log('冒険開始。');fieldStep();render()}}]);render()}}]);render()}
-function advance(){if(!S.started){begin();return}if(!canMove())return;S.step=Math.min(S.step+1,zones.length-1);S.reach=Math.max(S.reach,S.step);regen();storyAtStep()}
-function goBack(){if(!canMove())return;if(S.step>1&&S.step!==12){S.step--;log(zones[S.step][0]+'へ戻った。');afterStep()}else log('これ以上は戻れない。')}
-function warp(){if(!canMove())return;let t=frontier();if(t<=S.step)return;S.step=t;S.sinceBattle=0;log('最前線の'+zones[t][0]+'へ向かった。');afterStep()}
-// 1マス進むたびに、少しだけHP・MPが回復する
-function regen(){S.party.forEach(id=>{let c=S.chars[id];if(!c||c.hp<=0)return;c.hp=Math.min(c.maxHp,c.hp+Math.max(1,Math.round(c.maxHp*.03)));if(c.maxMp)c.mp=Math.min(c.maxMp,c.mp+1)})}
-function restoreAll(){S.party.forEach(id=>{let c=S.chars[id];if(c){c.hp=c.maxHp;c.mp=c.maxMp}})}
+  // 戦闘のメッセージを1行ずつ流して、終わったら then を呼ぶ（やり直しされたら、古い流れは捨てる）
+  function play(lines, then) {
+    var g = gen;
+    S.busy = true; renderAll();
+    lines.forEach(function (t, i) { setTimeout(function () { if (g === gen) { addLog(t); renderParty(); } }, i * STEP_MS); });
+    setTimeout(function () { if (g !== gen) return; S.busy = false; renderAll(); if (then) then(); }, lines.length * STEP_MS + 150);
+  }
 
-function storyAtStep(){let z=zones[S.step],s=S.step;log(z[1]+' '+z[0]+'に到着。');
- if(s===5&&S.party.includes('crab')){scene('🏪 🦀','🦀「少々コンビニに寄ってまいります」蟹は何かを買って戻ってきた。',[{label:'先へ進む',fn:()=>{log('蟹は何も説明しなかった。');afterStep()}}]);return}
- if(s===9&&!S.story.firstBoss){startBattle({name:'魔王サンドゥーラ',emoji:'😈',hp:190,atk:20,def:7,boss:'first'});return}
- if(s===10&&!S.story.crabGod){scene('🦀💥🐻','魔王を倒した直後、質問の蟹がガリに襲いかかった！🦀「英雄は一人で十分なのでございます」',[{label:'えっ',fn:()=>{let g=S.chars.gari;g.hp=0;log('ガリは質問の蟹に倒された……');S.story.crabGod=true;S.phase='revive';S.step=11;S.reach=11;scene('🏪 ♨️ 🐻','なの姫はコンビニのカップ麺用給湯ポットのお湯をガリにかけた！ 🐻「熱っっ！！ 生き返ったぞ！！」',[{label:'復活！',fn:()=>{g.hp=g.maxHp;g.mp=g.maxMp;S.party=['gari'];S.phase='rescue';log('給湯ポットでガリが雑に復活した。');scene('👸 😈','なの姫にシバかれたサンドゥーラが仲間になりたそうにこちらを見ている。',[{label:'サンドゥーラ加入',fn:joinSand}]);render()}}]);render()}}]);return}
- if(s===12&&!S.story.takashiJoined){scene('😈 🐄','サンドゥーラ「手下のたかしも連れていくわ」🐄「盾役なら任せてください……！」',[{label:'たかし加入',fn:joinTakashi}]);return}
- if(s===29){startBattle({name:'破壊神・質問の蟹',emoji:'🦀🔥',hp:520,atk:34,def:13,boss:'final'});return}
- if(REST_STEPS.includes(s)){restoreAll();log('ここで休んで、全員のHP・MPが全回復した！');scene(z[1],z[2]+'\n全員のHP・MPが全回復した。➡️で先へ進もう。');render();return}
- if(!NO_FIELD.includes(s))fieldStep();else afterStep()}
-function afterStep(){render();if(S.done){endingScene();return}scene(zones[S.step][1],zones[S.step][2]+(isTown()?' 準備ができたら➡️で先へ進もう。':' ➡️で先へ進もう。'))}
-function joinSand(){S.chars.sand.hp=S.chars.sand.maxHp;S.chars.sand.mp=S.chars.sand.maxMp;S.party=['gari','sand'];S.story.sandJoined=true;S.phase='post';log('サンドゥーラが仲間になった。');scene('🐻 😈','元魔王サンドゥーラが仲間になった。攻撃と回復の魔法を使える。',[{label:'進む',fn:()=>{S.step=12;S.reach=12;joinTakashi()}}]);render()}
-function joinTakashi(){S.chars.takashi.hp=S.chars.takashi.maxHp;S.chars.takashi.mp=S.chars.takashi.maxMp;S.party=['gari','sand','takashi'];S.story.takashiJoined=true;S.phase='post';S.step=12;S.reach=Math.max(S.reach,12);log('たかしが加入！盾役として敵の攻撃を引き受ける。');scene('🐻 😈 🐄','正式パーティー結成！ガリ・サンドゥーラ・たかし。たかしは攻撃を50%の確率で引き受ける。\nここは町。準備を整えてから出発しよう。',[{label:'準備して出発',fn:()=>afterStep()}]);render()}
+  // ===== 描画 =====
+  function renderParty() {
+    var p = $('party'); p.textContent = '';
+    S.h.forEach(function (h, i) {
+      var d = el('div', 'hero' + (h.hp <= 0 ? ' down' : '') + (S.b && S.b.menu && S.b.idx === i ? ' cur' : ''));
+      d.appendChild(el('b', '', h.e + ' ' + h.n));
+      var b1 = el('div', 'bar'), i1 = el('i'); i1.style.width = Math.round(h.hp / h.max * 100) + '%'; b1.appendChild(i1);
+      var b2 = el('div', 'bar mp'), i2 = el('i'); i2.style.width = Math.round(h.mp / h.mmax * 100) + '%'; b2.appendChild(i2);
+      d.append(b1, el('div', '', 'HP ' + h.hp + '/' + h.max), b2, el('div', '', 'MP ' + h.mp + '/' + h.mmax));
+      p.appendChild(d);
+    });
+  }
+  function renderStage() {
+    var st = $('stage'); st.textContent = '';
+    if (S.b) {
+      var f = el('div', 'foe'); f.appendChild(el('div', 'big', S.b.f.e)); f.appendChild(el('div', '', S.b.f.n));
+      var bar = el('div', 'bar'), i = el('i'); i.style.width = Math.max(0, Math.round(S.b.f.hp / S.b.f.max * 100)) + '%'; bar.appendChild(i);
+      f.appendChild(bar); st.appendChild(f);
+    } else {
+      var d = el('div'); d.appendChild(el('div', 'big', S.ico)); d.appendChild(el('div', 'ttl', S.title)); st.appendChild(d);
+    }
+  }
+  function button(text, fn, disabled, cls) { var b = el('button', cls || '', text); b.type = 'button'; b.disabled = !!disabled; b.onclick = fn; return b; }
+  function cmds(h) {
+    var c = [{ k: 'atk', t: 'たたかう' }], s = SK[h.id];
+    c.push({ k: 'sk', t: s[0] + '（MP' + s[1] + '）', cost: s[1] });
+    if (h.id === 'gari' && S.learn) c.push({ k: 'gp', t: 'ガリプンテ（MP4）', cost: 4 });
+    c.push({ k: 'item', t: '🍜カップ麺×' + S.item });
+    return c;
+  }
+  function renderCmd() {
+    var c = $('cmd'); c.textContent = '';
+    if (S.busy) return;
+    if (S.over) { c.appendChild(button('🎉 もう一度あそぶ', newGame)); return; }
+    if (S.q) {
+      c.appendChild(button('▶ つぎへ', nextLine));
+      if (S.q.length > 1) c.appendChild(button('⏩ この場面を、まとめて読む', skipLines, false, 'sub'));
+      return;
+    }
+    if (!S.b || !S.b.menu) return;
+    var h = S.h[S.b.idx];
+    c.appendChild(el('p', '', h.e + ' ' + h.n + ' は、どうする？'));
+    var row = el('div', 'row');
+    cmds(h).forEach(function (m, i) {
+      row.appendChild(button((i + 1) + ' ' + m.t, function () { act(i); }, (m.cost && h.mp < m.cost) || (m.k === 'item' && S.item <= 0)));
+    });
+    c.appendChild(row);
+  }
+  function renderAll() { renderParty(); renderStage(); renderCmd(); }
 
-// ---- ザコ敵との遭遇（マスに進むたびに、戦闘 → なければランダムイベント）----
-function encounterRate(){return Math.min(.85,.4+.15*S.sinceBattle)}
-function fieldStep(){if(Math.random()<encounterRate()){S.sinceBattle=0;startBattle(makeEnemy(S.step));return}S.sinceBattle++;randomEventMaybe()}
-const ENEMIES=[
-{name:'スライム',emoji:'🔵',hp:34,atk:8,def:2,min:1,max:12},
-{name:'たかしの親戚',emoji:'🐮',hp:52,atk:10,def:4,min:1,max:14},
-{name:'野良ニワトリ',emoji:'🐓',hp:40,atk:11,def:2,min:1,max:14},
-{name:'質問の蟹（幻）',emoji:'🦀',hp:62,atk:13,def:5,min:4,max:24},
-{name:'謎の老人',emoji:'🧙',hp:66,atk:12,def:4,min:4,max:24},
-{name:'闇の石',emoji:'🪨',hp:78,atk:14,def:7,min:6,max:26},
-{name:'自販機モンスター',emoji:'🥤',hp:72,atk:13,def:6,min:6,max:26},
-{name:'沼のヘドロ',emoji:'🟢',hp:92,atk:16,def:6,min:13,max:29},
-{name:'砂漠のサボテン',emoji:'🌵',hp:84,atk:18,def:8,min:13,max:29},
-{name:'古戦場の亡霊',emoji:'💀',hp:100,atk:17,def:7,min:15,max:29},
-{name:'蟹の分身',emoji:'🦀',hp:110,atk:19,def:9,min:18,max:29},
-{name:'暗黒のたまご',emoji:'🥚',hp:118,atk:20,def:8,min:20,max:29}
-];
-// 進んだ場所に合わせて、敵が少しずつ強く（＋経験値・お金も多く）なる
-function makeEnemy(step){let pool=ENEMIES.filter(e=>step>=e.min&&step<=e.max);if(!pool.length)pool=ENEMIES;let b=pool[rand(0,pool.length-1)];return {name:b.name,emoji:b.emoji,hp:Math.round(b.hp*(1+step*.03)),atk:Math.round(b.atk*(1+step*.02)),def:b.def+Math.floor(step/8),exp:Math.round(8+step*.8)+rand(0,4),gold:rand(4,10)+Math.floor(step/2)}}
-function trainStep(){return S.step===0?1:S.step===12?13:S.step}
-function train(){if(!canMove())return;S.sinceBattle=0;log('周りを探して、敵を探した。');startBattle(makeEnemy(trainStep()))}
+  // ===== 物語の進行 =====
+  function newGame() {
+    gen++; L = []; $('log').textContent = '';
+    S = { lv: 0, h: [], item: 3, step: 0, cp: 0, b: null, busy: false, over: false, q: null, ico: '🐻', title: TITLE, learn: false };
+    runStep();
+  }
+  function runStep() {
+    var st = STEPS[S.step];
+    if (st.b) { S.cp = S.step; return startBattle(E[st.b], !!E[st.b].sp); }
+    if (st.party) S.h = st.party.map(mk);
+    if (st.down) S.h.forEach(function (h) { h.hp = 0; });
+    if (st.revive) S.h.forEach(function (h) { h.hp = h.max; h.mp = h.mmax; });
+    if (st.rest) healAll();
+    if (st.learn) S.learn = true;
+    if (st.item) S.item += st.item;
+    if (st.ico) S.ico = st.ico;
+    if (st.ch) { S.title = st.ch; addLog('── ' + st.ch + ' ──'); }
+    S.q = st.lines.slice();
+    S.b = null;
+    nextLine(true);
+  }
+  function nextLine(first) {
+    if (S.busy) return;
+    if (S.q && S.q.length) { addLog(S.q.shift()); renderAll(); if (S.q.length) return; }
+    else if (first !== true) { /* 最後の行のあとで、もう一度押された */ }
+    if (S.q && !S.q.length && first !== true) return afterLines();
+    renderAll();
+  }
+  function skipLines() { while (S.q && S.q.length > 1) addLog(S.q.shift()); nextLine(); }
+  function afterLines() {
+    var st = STEPS[S.step];
+    S.q = null;
+    if (st.end) { S.over = true; return renderAll(); }
+    S.step++; runStep();
+  }
 
-function randomEventMaybe(){if(Math.random()<.55){let e=pickEvent();if(e){S.eventSeen.push(e.id);scene(e.pic,e.text,e.opts.map(o=>({label:o[0],fn:()=>{o[1]();if(!S.battle&&!S.lock)afterStep()}})));return}}afterStep()}
-function pickEvent(){let ok=events.filter(e=>!e.cond||e.cond());if(!ok.length)return null;let pool=ok.filter(e=>!S.eventSeen.includes(e.id));if(!pool.length){S.eventSeen=S.eventSeen.filter(id=>!ok.some(e=>e.id===id));pool=ok}return pool[rand(0,pool.length-1)]}
-// cond：その場面にふさわしいときだけ出るイベント（まだ仲間になっていない人の話は出ない）
-const events=[
-{id:'stone',pic:'🪨',text:'道端に石が落ちている。「私はただの石です」',opts:[['持ち上げる',()=>{hurt('gari',5);log('腰を痛めた。HP-5');}],['話しかける',()=>log('石「……」')]]},
-{id:'merchant',pic:'🧔📦',text:'怪しい商人「伝説の剣を100デュラで！」',opts:[['買う（100デュラ）',()=>{if(S.money>=100){S.money-=100;S.items['木の棒']=(S.items['木の棒']||0)+1;log('木の棒を買った。装備できない。')}else log('お金が足りない。') }],['断る',()=>log('商人は舌打ちした。')]]},
-{id:'slime',pic:'🔵',text:'迷子のスライム「ここはどこですか？」',opts:[['道を教える',()=>{gainExp(3);log('経験値を3もらった。') }],['適当に指差す',()=>{gainExp(6);log('なぜか経験値を6もらった。') }]]},
-{id:'toilet',pic:'🚽',text:'トイレに先客がいる。ノックする？',opts:[['ノックする',()=>log('中から「たかしです」')],['待つ',()=>log('誰も出てこなかった。')]]},
-{id:'vending',pic:'🥤',text:'自動販売機。「売り切れ」の表示。',opts:[['蹴る',()=>{if(Math.random()<.45){S.money+=10;log('10デュラが落ちてきた！')}else{hurt('gari',3);log('自販機に反撃された。HP-3')}}],['諦める',()=>log('大人の対応をした。')]]},
-{id:'chicken',pic:'🐓',text:'ニワトリがガリを追いかけてきた！',opts:[['全力で逃げる',()=>log('ガリは逃げ切った。息切れした。')],['戦う',()=>{startBattle(makeEnemy(Math.max(1,S.step)));}]]},
-{id:'oldman',pic:'🧙',text:'怪しい老人「若いうちは何でもできる」',opts:[['話を聞く',()=>log('老人は同じ話を3回した。')],['立ち去る',()=>log('老人は満足そうにうなずいた。')]]},
-{id:'poop',pic:'💩',text:'道端に何か落ちている。',opts:[['調べる',()=>{hurt('gari',1);log('HPが1減った。') }],['見なかったことにする',()=>log('賢明な判断だ。')]]},
-{id:'bird',pic:'🐦',text:'鳥が何かを落としていった。',opts:[['拾う',()=>{S.money+=7;log('7デュラを拾った。') }],['避ける',()=>log('何も起きなかった。')]]},
-{id:'rockman',pic:'🗿',text:'石像が話しかけてきた。「右に行け」一本道だ。',opts:[['右に行く',()=>log('一本道なのでそのまま進んだ。')],['左に行く',()=>log('壁だった。')]]},
-{id:'takashi',pic:'🐄',text:'たかし「攻撃を受けられるなんて……！」',cond:()=>S.party.includes('takashi'),opts:[['褒める',()=>{S.chars.takashi.def+=1;log('たかしの防御力が1上がった！')}],['放っておく',()=>log('たかしは少し寂しそうだ。')]]},
-{id:'sand',pic:'😈',text:'サンドゥーラ「元魔王を回復係にするなんて……」',cond:()=>S.party.includes('sand'),opts:[['頼りにしてる',()=>{S.chars.sand.mp=Math.min(S.chars.sand.maxMp,S.chars.sand.mp+5);log('サンドゥーラのMPが5回復。')}],['聞かなかったことにする',()=>log('何も起きない。')]]},
-{id:'coin',pic:'💰',text:'草むらで小銭を見つけた。',opts:[['拾う',()=>{S.money+=15;log('15デュラを手に入れた。')}],['見逃す',()=>log('誰かの落とし物かもしれない。')]]},
-{id:'nap',pic:'💤',text:'急に眠気が襲ってきた。',opts:[['少し寝る',()=>{S.chars.gari.hp=Math.min(S.chars.gari.maxHp,S.chars.gari.hp+12);log('ガリのHPが12回復。')}],['我慢する',()=>log('眠い。')]]},
-{id:'crabwhisper',pic:'🦀',text:'質問の蟹が小声で「姫様……」とつぶやいた。',cond:()=>S.party.includes('crab'),opts:[['聞き返す',()=>log('蟹「何でもございません」')],['そっとしておく',()=>log('蟹はニヤリと笑った。')]]},
-{id:'sign',pic:'📜',text:'看板に「この先、特に何もありません」と書いてある。',opts:[['進む',()=>log('本当に何もなかった。')],['写真を撮る',()=>log('スマホは持っていなかった。')]]},
-{id:'chest',pic:'🧰',text:'宝箱がぽつんと置いてある。……動いたような。',opts:[['開ける',()=>{if(Math.random()<.35){let e=makeEnemy(Math.max(1,S.step));e.name='ミミック';e.emoji='🧰';e.hp=Math.round(e.hp*1.2);e.exp+=6;e.gold+=15;startBattle(e)}else{let n=rand(20,45)+S.step;S.money+=n;log('宝箱から'+n+'デュラ出てきた！')}}],['見なかったことにする',()=>log('賢明な判断……かもしれない。')]]},
-{id:'camp',pic:'🔥',text:'誰かが使った焚き火の跡がある。まだ温かい。',opts:[['少し休む',()=>{S.party.forEach(id=>{let c=S.chars[id];if(c&&c.hp>0){c.hp=Math.min(c.maxHp,c.hp+Math.round(c.maxHp*.2))}});log('焚き火で少し休んで、全員のHPが回復した。')}],['先を急ぐ',()=>log('急ぐ旅でもない気がする。')]]}
-];
-// ダメージ。kill が true のときだけ、戦闘不能にできる（イベントのダメージで、全滅はしない）
-function hurt(id,n,kill){let c=S.chars[id];if(!c)return;c.hp=kill?Math.max(0,c.hp-n):Math.max(1,c.hp-n);if(c.hp<=0)log(c.name+'は倒れた！');checkWipe()}
-// 経験値は、戦える仲間全員がもらう。レベルアップでHP・MPは全回復
-function gainExp(n){S.party.forEach(id=>{let c=S.chars[id];if(!c||c.hp<=0)return;c.exp+=n;while(c.exp>=need(c)){c.exp-=need(c);c.lv++;let g=GROW[id]||{hp:8,mp:1,atk:2,def:1};c.maxHp+=g.hp;c.maxMp+=g.mp;c.atk+=g.atk;c.def+=g.def;c.hp=c.maxHp;c.mp=c.maxMp;log(c.name+'はレベルアップ！ Lv'+c.lv)}})}
+  // ===== 戦闘 =====
+  function startBattle(f, boss) {
+    S.q = null;
+    S.b = { f: { n: f.n, e: f.e, hp: f.hp, max: f.hp, atk: f.atk, sp: f.sp }, boss: boss, turn: 0, idx: 0, menu: false, taunt: 0 };
+    play([f.e + ' ' + f.n + 'が現れた！', f.line], nextActor);
+  }
+  function nextActor() {
+    while (S.b.idx < S.h.length && S.h[S.b.idx].hp <= 0) S.b.idx++;
+    if (S.b.idx >= S.h.length) return enemyTurn();
+    S.b.menu = true; renderAll();
+  }
 
-// ---- バトル ----
-function startBattle(e){S.battle={enemy:e,maxHp:e.hp,turn:0};$('battlePanel').classList.remove('hidden');log(e.name+'が現れた！');render();battleButtons()}
-function renderBattle(){let b=S.battle;if(!b)return;$('enemyEmoji').textContent=b.enemy.emoji;$('enemyName').textContent=b.enemy.name;$('enemyInfo').textContent='敵HP '+b.enemy.hp+'/'+b.maxHp;$('enemyHp').textContent=b.enemy.hp+' / '+b.maxHp;$('enemyBar').style.width=Math.max(0,100*b.enemy.hp/b.maxHp)+'%'}
-function battleButtons(){let a=$('battleActions');a.innerHTML='';[['⚔️ 戦う','attack'],['✨ 魔法','magic'],['🎒 道具','item'],['🏃 逃げる','run']].forEach(([t,k])=>{let b=document.createElement('button');b.textContent=t;b.onclick=()=>battleAction(k);a.appendChild(b)})}
-// 攻撃するのは、ガリ。ガリが倒れているときは、戦える仲間の中で、いちばん攻撃力が高い人
-function attacker(){let al=aliveParty();if(!al.length)return null;if(al.includes('gari'))return S.chars.gari;return S.chars[al.reduce((a,b)=>S.chars[b].atk>S.chars[a].atk?b:a)]}
-function battleAction(k){if(!S.battle)return;if(k==='attack'){let c=attacker();if(!c){checkWipe();return}log(c.name+'の攻撃！');damageEnemy(Math.max(1,c.atk+rand(0,7)-S.battle.enemy.def))}else if(k==='magic'){openMagic(true);return}else if(k==='item'){openItems(true);return}else if(k==='run'){if(S.battle.enemy.boss){log('ボス戦からは逃げられない！')}else if(Math.random()<.65){log('逃げ切った！');S.battle=null;render();scene('💨','うまく逃げ切った。➡️で先へ進もう。');return}else log('逃げられない！')}enemyTurn();}
-function damageEnemy(n){let b=S.battle;if(!b)return;b.enemy.hp=Math.max(0,b.enemy.hp-n);log('敵に'+n+'ダメージ！');if(b.enemy.hp<=0)winBattle();else renderBattle()}
-function enemyTurn(){let b=S.battle;if(!b)return;let targets=aliveParty();if(!targets.length){checkWipe();return}let id;if(S.story.takashiJoined&&targets.includes('takashi')){let r=Math.random();id=r<.5?'takashi':r<.8?'gari':'sand';if(!targets.includes(id))id=targets[Math.floor(Math.random()*targets.length)]}else{id=targets[Math.floor(Math.random()*targets.length)]}let c=S.chars[id];let d=Math.max(1,b.enemy.atk+rand(-3,4)-c.def);c.hp=Math.max(0,c.hp-d);log(b.enemy.name+'の攻撃！ '+c.name+'に'+d+'ダメージ！');if(c.hp<=0)log(c.name+'は倒れた！');if(!aliveParty().length){checkWipe();return}render()}
-function endingScene(){scene('🎉🏰🎉','ガリゴンクエスト2 完！\nご協力ありがとうございました。',[{label:'最初から',fn:()=>{S=fresh();begin();render()}}])}
-function winBattle(){let b=S.battle,e=b.enemy;log(e.name+'を倒した！');
- if(e.boss==='first'){S.story.firstBoss=true;S.money+=80;gainExp(45);S.battle=null;render();storyAtStep();return}
- if(e.boss==='final'){S.battle=null;S.done=true;S.lock=false;render();saveGame();log('GAME CLEAR！');scene('🐻 😈 🐄 🦀💥','破壊神・質問の蟹を倒した！世界に平和が戻った……たぶん。\n姫「よくやったなの。報酬は検討するなの」',[{label:'エンディング',fn:endingScene}]);return}
- let exp=e.exp||10,gold=e.gold||rand(5,18);S.money+=gold;log('経験値'+exp+'と'+gold+'デュラを手に入れた。');gainExp(exp);if(Math.random()<.25){S.items['やくそう']=(S.items['やくそう']||0)+1;log('やくそうを手に入れた。')}S.battle=null;render();scene('🎉',e.name+'に勝利！'+(isTown()?'':' ➡️で先へ進もう。'))}
+  function act(i) {
+    if (S.busy || !S.b || !S.b.menu) return;
+    var h = S.h[S.b.idx], f = S.b.f, m = cmds(h)[i], L2 = [];
+    if (!m || (m.cost && h.mp < m.cost) || (m.k === 'item' && S.item <= 0)) return;
+    S.b.menu = false;
+    if (m.k === 'atk') {
+      var d = h.atk + rnd(4); f.hp -= d;
+      L2.push(h.e + h.n + 'の攻撃！ ' + f.n + 'に' + d + 'のダメージ！');
+    } else if (m.k === 'item') {
+      var t = alive().sort(function (a, b) { return a.hp / a.max - b.hp / b.max; })[0];
+      S.item--; t.hp = Math.min(t.max, t.hp + 30);
+      L2.push(h.e + h.n + 'はカップ麺を食べさせた！ ' + t.n + 'のHPが30回復！');
+    } else {
+      h.mp -= m.cost;
+      if (m.k === 'gp') gamble(h, f, L2); else skill(h, f, L2);
+    }
+    if (f.hp <= 0) { f.hp = 0; return win(L2); }
+    if (!alive().length) return lose(L2);
+    S.b.idx++;
+    play(L2, nextActor);
+  }
 
-// ---- 魔法・道具 ----
-function spellData(){return {'ホイミョ':{cost:4,type:'heal',power:30},'ベホイミョ':{cost:10,type:'heal',power:70},'ベホマョ':{cost:20,type:'heal',power:999},'ザオリョ':{cost:18,type:'revive'},'メリャ':{cost:3,type:'attack',power:20},'メラリャ':{cost:7,type:'attack',power:45},'メラギリャ':{cost:13,type:'attack',power:85},'ギリャ':{cost:6,type:'allattack',power:15},'ベギリャ':{cost:15,type:'allattack',power:45},'スカリョ':{cost:5,type:'def'},'バイキリョ':{cost:7,type:'atk'},'ベホミョズン':{cost:35,type:'allheal'},'ガリプンテ':{cost:12,type:'special'},'ガリデイン':{cost:25,type:'allattack',power:125}}}
-function casterFor(name){return ['ホイミョ','ベホイミョ','ベホマョ','ザオリョ','メリャ','メラリャ','メラギリャ','ギリャ','ベギリャ','スカリョ','バイキリョ'].includes(name)&&S.party.includes('sand')?'sand':'gari'}
-function cast(name,targetId){let sp=spellData()[name];if(!sp)return false;let caster=casterFor(name),c=S.chars[caster];if(c.hp<=0){log(c.name+'は倒れていて、魔法を唱えられない！');return false}if(c.mp<sp.cost){log(c.name+'のMPが足りない！');return false}if(['heal','revive','def','atk'].includes(sp.type)&&!targetId){log('対象を選んでください。');return false}if(sp.type==='revive'&&S.chars[targetId]?.hp>0){log('その仲間は倒れていない。');return false}if(sp.type==='heal'&&S.chars[targetId]?.hp<=0){log('倒れている仲間にはザオリョが必要だ。');return false}c.mp-=sp.cost;log(c.name+'は'+name+'を唱えた！');if(sp.type==='heal')heal(targetId,sp.power);else if(sp.type==='revive'){let t=S.chars[targetId];t.hp=Math.max(1,Math.floor(t.maxHp*.25));log(t.name+'が復活！')}else if(sp.type==='allheal')S.party.forEach(id=>heal(id,999));else if(sp.type==='attack')spellDamage(sp.power,false);else if(sp.type==='allattack')spellDamage(sp.power,true);else if(sp.type==='special')gariPunte();else if(sp.type==='atk'||sp.type==='def')buff(sp.type,targetId);return true}
-function heal(id,n){let c=S.chars[id];if(!c)return;if(c.hp<=0&&n<999)return;c.hp=Math.min(c.maxHp,c.hp+n);log(c.name+'のHPが回復！')}
-function spellDamage(n,all){if(!S.battle){log('魔法が空に飛んでいった。');return}let dmg=n+rand(-5,8);if(all){dmg=Math.max(1,Math.floor(dmg*.75));}damageEnemy(dmg)}
-function buff(k,id){let c=S.chars[id];if(c){c[k]+=Math.ceil(c[k]*.5);log(c.name+'の'+(k==='atk'?'攻撃':'防御')+'力が上がった！（戦闘終了まで）')}}
-function gariPunte(){let r=Math.random()*100;if(r<18){hurt('gari',999,true);log('💥 ガリは爆発した！');}else if(r<32){hurt('gari',65,true);log('☄️ 隕石がガリに直撃！');}else if(r<44){hurt('gari',45,true);log('⚡ 雷がガリに落ちた！');}else if(r<54){hurt('gari',35,true);log('🪨 岩が降ってきた！');}else if(r<62){if(S.battle)S.battle.enemy.atk+=8;log('😡 敵がガリに激怒！敵の攻撃力アップ。');}else if(r<70){S.party.forEach(id=>{S.chars[id].hp=Math.max(0,S.chars[id].hp-15)});log('💥 大爆発！味方全員に15ダメージ！');checkWipe();}else if(r<79){let n=rand(80,180);S.money+=n;log('💰 お金が降ってきた！'+n+'デュラ獲得！');}else if(r<88){gainExp(90);log('⭐ 経験値大量獲得！');}else if(r<94){if(S.battle)damageEnemy(100);else S.items['やくそう']=(S.items['やくそう']||0)+3;log('🌟 奇跡！');}else if(r<98){S.party.forEach(id=>{heal(id,999);S.chars[id].mp=Math.min(S.chars[id].maxMp,S.chars[id].mp+15)});log('🌈 全員のHP・MPが大回復！');}else{let n=rand(250,500);S.money+=n;gainExp(150);log('👑 超大当たり！！'+n+'デュラと経験値大量獲得！')} }
-function openMagic(inBattle=false){let names=S.story.sandJoined?Object.keys(spellData()):['ホイミョ','メリャ','ガリプンテ','ガリデイン'];let body='<h2>✨ 魔法</h2><p class="muted">使う魔法を選択。</p>';names.forEach(n=>{let sp=spellData()[n];body+=`<div class="shoprow"><span>${n} <small class="muted">MP${sp.cost}</small></span><button onclick="chooseSpellTarget('${n}',${inBattle})">選ぶ</button></div>`});body+='<button onclick="closeModal()">閉じる</button>';openModal(body)}
-function chooseSpellTarget(n,inBattle){let sp=spellData()[n];if(!sp)return; if(['heal','revive','def','atk'].includes(sp.type)){let body=`<h2>${n}：対象を選択</h2>`;S.party.forEach(id=>{let c=S.chars[id];body+=`<div class="shoprow"><span>${c.emoji} ${c.name} HP${c.hp}/${c.maxHp} MP${c.mp}/${c.maxMp}</span><button onclick="useSpell('${n}',${inBattle},'${id}')">この仲間に使う</button></div>`});body+='<button onclick="openMagic('+inBattle+')">戻る</button>';openModal(body)}else useSpell(n,inBattle,null)}
-function useSpell(n,inBattle,targetId){let ok=cast(n,targetId);render();if(ok){closeModal();if(inBattle&&S.battle)enemyTurn();else if(!inBattle&&!S.lock)scene('✨','魔法を使った。')}}
-function openItems(inBattle=false){let body='<h2>🎒 道具</h2><p class="muted">使う道具を選択。</p>';Object.entries(S.items).filter(x=>x[1]>0).forEach(([n,v])=>body+=`<div class="shoprow"><span>${esc(n)} ×${v}</span><button onclick="chooseItemTarget('${n}',${inBattle})">選ぶ</button></div>`);body+='<button onclick="closeModal()">閉じる</button>';openModal(body)}
-function chooseItemTarget(n,inBattle){if(n==='やくそう'||n==='まほうの水'){let body=`<h2>${esc(n)}：対象を選択</h2>`;S.party.forEach(id=>{let c=S.chars[id];body+=`<div class="shoprow"><span>${c.emoji} ${c.name} HP${c.hp}/${c.maxHp} MP${c.mp}/${c.maxMp}</span><button onclick="useItem('${n}',${inBattle},'${id}')">この仲間に使う</button></div>`});body+='<button onclick="openItems('+inBattle+')">戻る</button>';openModal(body)}else useItem(n,inBattle,'gari')}
-function useItem(n,inBattle,targetId='gari'){if(!S.items[n])return;let c=S.chars[targetId]||S.chars.gari;if(n==='やくそう'){if(c.hp<=0){log('倒れている仲間には使えない。');return}S.items[n]--;heal(targetId,45)}else if(n==='まほうの水'){if(c.maxMp<=0){log(c.name+'はMPを使わない。');return}S.items[n]--;c.mp=Math.min(c.maxMp,c.mp+20);log(c.name+'のMPが20回復。')}else{S.items[n]--;log('木の棒を眺めた。')}render();closeModal();if(inBattle&&S.battle)enemyTurn()}
+  function skill(h, f, L2) {
+    var d;
+    if (h.id === 'gari') { d = Math.round(h.atk * 1.8) + rnd(5); f.hp -= d; L2.push('🔥 ガリ火！ ' + f.n + 'に' + d + 'のダメージ！'); }
+    else if (h.id === 'kani') { var a = Math.round(h.atk * 0.9) + rnd(3), b = Math.round(h.atk * 0.9) + rnd(3); f.hp -= a + b; L2.push('🦀 ていねいなハサミ！ 「失礼いたします」 ' + a + '＋' + b + 'のダメージ！'); }
+    else if (h.id === 'yohei') { d = Math.round(h.atk * 2) + rnd(4); f.hp -= d; L2.push('💰 お金の力で殴った！ ' + f.n + 'に' + d + 'のダメージ！'); }
+    else if (h.id === 'sandora') { alive().forEach(function (x) { x.hp = Math.min(x.max, x.hp + 20); }); L2.push('😈 サンドゥーラ「しぶしぶ回復よ……」 みんなのHPが20回復した！'); }
+    else { S.b.taunt = 2; L2.push('🐄 たかし「攻撃を……ください……！」 敵の攻撃を引き受ける！'); }
+  }
+  function gamble(h, f, L2) {   // ガリプンテ：大当たり〜大ハズレ
+    var r = rnd(100), d;
+    L2.push('🎰 ガリプンテ！！ ……さあ、どうなる！？');
+    if (r < 20) { d = Math.round(h.atk * 4.5) + rnd(8); f.hp -= d; S.item += 2; L2.push('大当たり！！ ' + f.n + 'に' + d + 'のダメージ！ カップ麺も2個ゲット！'); }
+    else if (r < 50) { d = Math.round(h.atk * 2.5) + rnd(6); f.hp -= d; L2.push('当たり！ ' + f.n + 'に' + d + 'のダメージ！'); }
+    else if (r < 65) { d = Math.round(h.atk * 1.5); f.hp -= d; L2.push('💥 爆発！ ' + f.n + 'に' + d + 'のダメージ！ ……でも、みんなも巻き込まれた！'); alive().forEach(function (x) { hurt(x, 10, L2); }); }
+    else if (r < 82) { d = Math.round(h.atk * 3); f.hp -= d; L2.push('☄️ 隕石が落ちてきた！ ' + f.n + 'に' + d + 'のダメージ！ ……味方にも当たった！'); hurt(pick(alive()), 28, L2); }
+    else { L2.push('⚡ 落雷！ 敵には当たらず、味方に落ちた！'); alive().forEach(function (x) { hurt(x, 10, L2); }); }
+  }
 
-// ---- 町の施設 ----
-function openShop(){let body='<h2>🏪 道具屋</h2><p>なの姫の補助で傭兵は無料。武器・防具は売っていない。</p>';if(S.started&&!S.story.sandJoined&&S.party.includes('crab')&&!S.party.includes('merc'))body+='<div class="shoprow"><span>🗡️ 傭兵（無料）</span><button onclick="hireMerc()">雇う</button></div>'; [['やくそう',12,'HPを45回復'],['まほうの水',25,'MPを20回復'],['ガリプンテ券',40,'買っても特に意味はない']].forEach(([n,p,d])=>body+=`<div class="shoprow"><span>${n} <small class="muted">${d}</small></span><button onclick="buy('${n}',${p})">${p}デュラ</button></div>`);body+='<button onclick="closeModal()">閉じる</button>';openModal(body)}
-function hireMerc(){if(S.party.includes('merc')||S.story.sandJoined)return;let c=clone(baseChars.merc);c.maxHp+=Math.min(70,S.wipes*10);c.hp=c.maxHp;c.atk+=Math.min(12,S.wipes*2);c.def+=Math.min(10,S.wipes*2);S.chars.merc=c;S.party.push('merc');log('なの姫の費用で新しい傭兵を雇った。全滅回数に応じて少し強くなっている。');render();openShop()}
-function buy(n,p){if(S.money<p){log('デュラが足りない。');return}S.money-=p;S.items[n]=(S.items[n]||0)+1;log(n+'を購入。');render()}
-function openInn(){if(S.money<10){log('宿代10デュラが足りない。');return}S.money-=10;restoreAll();log('宿屋で全員回復。10デュラ。');render();if(!S.lock)scene('🛏️','ぐっすり休んだ。HP・MP全回復。')}
-function openGraveyard(){let body='<h2>🪦 傭兵墓地</h2><p>ここには帰らなかった傭兵たちが眠っている。</p>';body+=S.grave.length?S.grave.map((g,i)=>`<p>🪦 ${esc(g)}の墓</p>`).join(''):'<p>まだ墓はない。</p>';body+='<p>お供え物を盗む？（罰は当たるかもしれない）</p><button onclick="stealOffering()">🎁 盗む</button> <button onclick="closeModal()">閉じる</button>';openModal(body)}
-function stealOffering(){if(Math.random()<.65){let n=rand(5,25);S.money+=n;log('お供え物から'+n+'デュラを盗んだ。');}else{hurt('gari',8);log('バチが当たった！HP-8')}render();closeModal()}
-// 全滅：なの城（町）に運ばれる。物語の戦闘や出来事は、飛ばされない
-function checkWipe(){if(aliveParty().length)return;S.wipes++;if(S.party.includes('merc')){S.mercDeaths++;S.grave.push('傭兵'+S.mercDeaths);delete S.chars.merc;S.party=S.party.filter(x=>x!=='merc')}S.party=S.party.filter(id=>S.chars[id]);restoreAll();S.money+=5;S.battle=null;S.phase='post';S.sinceBattle=0;S.step=S.story.takashiJoined?12:0;log('全滅！なの城に運ばれた。傭兵は帰らぬ人となった。');scene('🏰 👸','なの姫「また全滅したなの？ 反省文を提出するなの。……はい、立て直し費用5デュラなの」\n町で準備して、また出発しよう。',[{label:'再出発',fn:()=>{render();afterStep()}}]);render()}
+  function enemyTurn() {
+    var b = S.b, f = b.f, L2 = [], a = alive();
+    b.turn++;
+    if (f.sp && b.turn % 3 === 0) {
+      L2.push(f.e + '「' + f.sp.n + '」！ みんなに襲いかかる！');
+      a.forEach(function (x) { hurt(x, f.sp.d + rnd(4), L2); });
+    } else {
+      var tk = S.h.filter(function (x) { return x.id === 'takashi' && x.hp > 0; })[0];
+      var x = tk && (b.taunt > 0 || rnd(100) < 60) ? tk : pick(a);
+      var d = f.atk + rnd(3);
+      if (x === tk && b.taunt > 0) d = Math.round(d * 0.6);
+      L2.push(f.e + f.n + 'の攻撃！ ' + x.n + 'に' + d + 'のダメージ！');
+      hurt(x, d); if (x.hp <= 0) L2.push(x.n + 'は倒れた…');
+    }
+    if (b.taunt > 0) b.taunt--;
+    if (!alive().length) return lose(L2);
+    b.idx = 0;
+    play(L2, nextActor);
+  }
 
-// ---- セーブ・ロード（戦闘中・物語の選択肢待ちは、セーブできない）----
-function saveGame(){if(!S.started||S.battle||S.lock||!(S.phase==='journey'||S.phase==='post')){log('今はセーブできない。（戦闘中や、物語の途中では保存できない）');return}try{localStorage.setItem('gari_quest2_save',JSON.stringify(S));log('セーブした。');render()}catch(e){log('セーブできなかった。')}}
-function loadGame(){try{let x=localStorage.getItem('gari_quest2_save');if(!x){log('セーブデータがない。');return}let d=JSON.parse(x),n=Object.assign(fresh(),d);n.story=Object.assign(fresh().story,d.story||{});if(!n.started||n.battle||!(n.phase==='journey'||n.phase==='post')){log('このセーブは読み込めない。（戦闘中や、物語の途中のデータ）');return}S=n;S.lock=false;log('ロードした。');render();afterStep()}catch(e){log('ロードに失敗。')}}
-function openModal(html){$('modalBody').innerHTML=html;$('modal').classList.remove('hidden')}function closeModal(){$('modal').classList.add('hidden')}function showHelp(){openModal('<h2>🕹️ 操作方法</h2><p>➡️ すすむ：一本道を進行。進むたびに、ザコ敵が出たり、イベントが起きたりする。</p><p>⚔️ 修行：その場所の敵と戦う。レベル上げ・お金かせぎに。</p><p>🗺️ 最前線へ：町から、進めた所まで一気に戻る（全滅したあとなどに便利）。</p><p>⚔️ 戦闘：たたかう・魔法・道具・逃げる。勝つと、仲間全員が経験値をもらう。</p><p>♨️ 温泉・最終休憩所では、全員が全回復する。</p><p>💾 セーブ：ブラウザ内に保存（戦闘中・物語の途中は不可）。</p><p>ガリプンテは悲惨な結果多め。たまに大当たり。</p><p>画像なし・絵文字だけの雑RPGです。</p><button onclick="closeModal()">閉じる</button>')}
-function clearLog(){S.log=[];render()}
-document.addEventListener('keydown',e=>{if(!$('modal').classList.contains('hidden')){if(e.key==='Escape')closeModal();return}if((e.key==='ArrowRight'||e.key==='Enter'||e.key.toLowerCase()==='z')&&!e.repeat){e.preventDefault();if(S.battle)battleAction('attack');else advance()}if(e.key==='ArrowLeft'&&!e.repeat){e.preventDefault();goBack()}if(e.key.toLowerCase()==='t'&&!e.repeat){train()}if(e.key==='Escape'||e.key.toLowerCase()==='x')openMagic()});
-// 起動時はタイトル画面。保存データがあればロード可能。
-scene('🏰 👸 🐻','姫「なの」の命令で、ガリの新たな冒険が始まる。\n前作のだいたい2倍、雑さも2倍。',[{label:'▶ はじめから',fn:()=>{S=fresh();begin();render()}},{label:'📂 セーブから再開',fn:()=>loadGame()}]);render();
-</script></body></html>
+  function win(L2) {
+    L2.push(S.b.f.e + S.b.f.n + 'を倒した！');
+    S.b = null; S.lv++;
+    S.h.forEach(function (h) {   // 成長：HP+4・攻撃+1・MP+1。倒れた仲間も起き上がる
+      h.max += 4; h.atk += 1; h.mmax += 1;
+      h.hp = h.hp <= 0 ? Math.ceil(h.max * 0.3) : Math.min(h.max, h.hp + 12);
+      h.mp = Math.min(h.mmax, h.mp + 2);
+    });
+    L2.push('みんなが少し成長した！（倒れた仲間も、起き上がったよ）');
+    if (rnd(100) < 25) { S.item++; L2.push('カップ麺を拾った！（×' + S.item + '）'); }
+    play(L2, function () { S.step++; runStep(); });
+  }
+  function lose(L2) {
+    L2.push('全滅してしまった…', 'なの姫の魔法で、さっきの場所に戻された。（もう一度、挑戦しよう）');
+    play(L2, function () { healAll(); S.b = null; S.step = S.cp; runStep(); });
+  }
+
+  // ===== 入力（キーボード）=====
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (['Enter', ' ', 'ArrowRight', '1', '2', '3', '4'].indexOf(k) < 0) return;
+    e.preventDefault();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if (S.busy) return;
+    if (S.over) return newGame();
+    if (S.q) { if (k === 'Enter' || k === ' ' || k === 'ArrowRight') nextLine(); return; }
+    if (S.b && S.b.menu && /^[1-4]$/.test(k)) act(+k - 1);
+  });
+  $('restart').addEventListener('click', function () { if (confirm('最初からやり直すよ。いいかな？')) newGame(); });
+  $('h1').textContent = TITLE; $('h1').appendChild(el('small', '', SUB));
+
+  newGame();
+})();
+</script>
+</body>
+</html>
