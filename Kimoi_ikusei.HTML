@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>キモいやつら育成ゲーム</title>
+<style>
+  :root { --bg:#1f1f23; --card:#2b2b31; --card2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --mint:#8fd9b0; --red:#f87171; --sky:#cfe3f5; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif; font-size: 15px; line-height: 1.6; color: var(--ink); background: var(--bg); -webkit-tap-highlight-color: transparent;
+         padding: calc(10px + env(safe-area-inset-top, 0px)) 10px calc(14px + env(safe-area-inset-bottom, 0px)); }
+  #app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  h1 { font-size: 17px; color: #ffbf93; }
+  header div { display: flex; gap: 6px; }
+  header button, header a { font: inherit; font-size: 12px; color: var(--ink); background: var(--card2); border: 2px solid var(--line); border-radius: 99px; padding: 2px 12px; text-decoration: none; cursor: pointer; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 12px 14px; }
+  .card h2 { font-size: 16px; color: var(--orange); margin-bottom: 4px; }
+  .big { font-size: 56px; line-height: 1.15; text-align: center; }
+  .name { text-align: center; font-size: 18px; font-weight: 700; color: #ffd7b8; }
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px 12px; font-size: 13px; margin: 8px 0; }
+  .bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin: 4px 0 2px; }
+  .bar i { display: block; height: 100%; background: var(--mint); }
+  .tr { font-size: 12px; color: var(--sky); }
+  .grid { display: grid; gap: 8px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(2, 1fr); }
+  button.b, select { font: inherit; font-weight: 700; min-height: 46px; padding: 6px 8px; border-radius: 14px; border: 2px solid #c4824f; background: var(--orange); color: var(--on); cursor: pointer; touch-action: manipulation; }
+  button.b.sub { background: var(--card2); color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 13px; }
+  button.b:disabled { opacity: .4; cursor: not-allowed; }
+  button.b small { display: block; font-weight: 400; font-size: 11px; }
+  select { width: 100%; background: #232327; color: var(--ink); border-color: var(--line); font-weight: 500; }
+  label { font-size: 12px; color: var(--soft); display: block; margin-top: 6px; }
+  .lead { font-size: 13px; color: var(--soft); margin-bottom: 6px; }
+  #log { white-space: pre-wrap; font-size: 13px; min-height: 9em; }
+  .timer { text-align: center; font-size: 22px; color: var(--sky); font-weight: 700; }
+  button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>🪱 キモいやつら育成ゲーム</h1>
+    <div><button id="restart" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
+  </header>
+  <div id="main"></div>
+  <div id="log" class="card" role="log" aria-live="polite"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (i) { return document.getElementById(i); };
+  var rnd = function (n) { return Math.floor(Math.random() * n); };
+  var pick = function (a) { return a[rnd(a.length)]; };
+  var SAVE = 'kimoi_ikusei_v1';
+
+  // ===== データ（数値・文章は、ここで調整するよ。仮調整だよ）=====
+  var TR = { dodge: 'すばしこい（回避20%）', slimy: 'ぬるぬる（被ダメ−15%）', poison: 'どくどく（与ダメ＋3）', crit: 'ぎょろぎょろ（会心15%）', regen: 'うねうね（毎ターンHP＋4）' };
+  var SP = [   // キモいやつら10種。h＝名前の頭、t＝名前の尻尾、s＝[HP,こうげき,ぼうぎょ,すばやさ]
+    { e: '🪱', n: 'ミミズ',   h: 'ミミ', t: 'ミミズ',   s: [32, 6, 6, 8],  tr: 'regen' },
+    { e: '🐛', n: 'イモムシ', h: 'イモ', t: 'イモムシ', s: [38, 6, 7, 5],  tr: 'slimy' },
+    { e: '🕷️', n: 'クモ',     h: 'クモ', t: 'クモ',     s: [28, 9, 5, 9],  tr: 'poison' },
+    { e: '🪳', n: 'ゴキブリ', h: 'ゴキ', t: 'ゴキブリ', s: [30, 7, 5, 12], tr: 'dodge' },
+    { e: '🐌', n: 'ナメクジ', h: 'ナメ', t: 'ナメクジ', s: [40, 5, 8, 3],  tr: 'slimy' },
+    { e: '🦂', n: 'サソリ',   h: 'サソ', t: 'サソリ',   s: [30, 10, 6, 7], tr: 'poison' },
+    { e: '🐙', n: 'タコ',     h: 'タコ', t: 'タコ',     s: [36, 8, 5, 7],  tr: 'crit' },
+    { e: '🦑', n: 'イカ',     h: 'イカ', t: 'イカ',     s: [32, 9, 4, 10], tr: 'crit' },
+    { e: '🐸', n: 'カエル',   h: 'カエ', t: 'カエル',   s: [34, 7, 5, 9],  tr: 'regen' },
+    { e: '🪰', n: 'ハエ',     h: 'ハエ', t: 'ハエ',     s: [24, 6, 3, 14], tr: 'dodge' }
+  ];
+  var DG = [   // ダンジョン：sec＝かかる時間（秒）／fl＝階の数／p＝敵の強さ／gain＝1階ごとの成長量の目安
+    { n: '浅いダンジョン',   sec: 15, fl: 3, p: 1.0, g: 1, food: 1 },
+    { n: 'ふつうのダンジョン', sec: 40, fl: 5, p: 1.7, g: 2, food: 2 },
+    { n: '深いダンジョン',   sec: 90, fl: 7, p: 2.5, g: 3, food: 3 }
+  ];
+  var OPP = [  // 育成大会の相手（最後が、チャンピオンのガリ）
+    { e: '🪱', n: 'ぬるぬる新人',   hp: 45,  atk: 12, def: 8,  spd: 9,  tr: [] },
+    { e: '🐛', n: 'ねばねば中堅',   hp: 75,  atk: 19, def: 13, spd: 11, tr: ['slimy'] },
+    { e: '🪳', n: 'ぞわぞわ準優勝', hp: 110, atk: 27, def: 17, spd: 16, tr: ['dodge'] },
+    { e: '🐻', n: 'チャンピオン ガリ', hp: 170, atk: 36, def: 23, spd: 19, tr: ['slimy', 'crit'] }
+  ];
+  var DEATH_RATE = 0.55, TRAIN_COST = 1, TOUR_COST = 2, START_FOOD = 5, STEP_MS = 450;
+  var STAT = { hp: ['HP', 8], atk: ['こうげき', 3], def: ['ぼうぎょ', 3], spd: ['すばやさ', 3] };   // 鍛える：[名前, 上がる量]
+
+  // ===== 状態 =====
+  var S, gen = 0, T = 0;
+  function newState() { return { phase: 'fuse', m: null, food: START_FOOD, dg: null, log: [], busy: false }; }
+  function save() { try { var c = JSON.parse(JSON.stringify(S)); c.busy = false; localStorage.setItem(SAVE, JSON.stringify(c)); } catch (e) {} }
+  function load() {
+    try { var s = JSON.parse(localStorage.getItem(SAVE)); if (s && s.phase) { s.busy = false; return s; } } catch (e) {}
+    return newState();
+  }
+  function say(t) { S.log.push(t); if (S.log.length > 60) S.log.shift(); }
+  function now() { return Date.now(); }
+
+  // ===== 戦闘（ダンジョンも育成大会も、これを使う）=====
+  function hit(a, d) {
+    if (d.tr.indexOf('dodge') >= 0 && Math.random() < 0.2) return -1;
+    var x = a.atk * (0.85 + Math.random() * 0.3) - d.def * 0.5;
+    if (a.tr.indexOf('crit') >= 0 && Math.random() < 0.15) x *= 2;
+    if (a.tr.indexOf('poison') >= 0) x += 3;
+    if (d.tr.indexOf('slimy') >= 0) x *= 0.85;
+    return Math.max(1, Math.round(x));
+  }
+  function fight(m0, e0) {
+    var m = { hp: m0.hp, max: m0.max, atk: m0.atk, def: m0.def, spd: m0.spd, tr: m0.tr, n: m0.n },
+        e = { hp: e0.hp, max: e0.hp, atk: e0.atk, def: e0.def, spd: e0.spd, tr: e0.tr, n: e0.n }, lines = [];
+    for (var t = 1; t <= 40 && m.hp > 0 && e.hp > 0; t++) {
+      var order = (m.spd > e.spd || (m.spd === e.spd && Math.random() < 0.5)) ? [[m, e], [e, m]] : [[e, m], [m, e]], parts = [];
+      order.forEach(function (p) {
+        if (p[0].hp <= 0 || p[1].hp <= 0) return;
+        var d = hit(p[0], p[1]);
+        if (d < 0) parts.push(p[1].n + 'は避けた'); else { p[1].hp -= d; parts.push(p[0].n + '→' + d); }
+      });
+      [m, e].forEach(function (x) { if (x.hp > 0 && x.tr.indexOf('regen') >= 0) x.hp = Math.min(x.max, x.hp + 4); });
+      lines.push('T' + t + '：' + parts.join('／') + '（' + m.n + ' ' + Math.max(0, m.hp) + '・' + e.n + ' ' + Math.max(0, e.hp) + '）');
+    }
+    return { win: e.hp <= 0 && m.hp > 0, hp: Math.max(0, m.hp), lines: lines };
+  }
+
+  // ===== 悪魔合体 =====
+  function fuse(a, b) {
+    var A = SP[a], B = SP[b], v = [0, 1, 2, 3].map(function (i) { return Math.round((A.s[i] + B.s[i]) / 2 * 1.15) + rnd(3); });
+    var tr = A.tr === B.tr ? [A.tr] : [A.tr, B.tr];
+    S.m = { name: a === b ? '超' + A.n : A.h + B.t, e: A.e + (a === b ? '' : B.e), max: v[0], hp: v[0], atk: v[1], def: v[2], spd: v[3], tr: tr };
+    S.food = START_FOOD; S.dg = null; S.phase = 'home'; S.log = [];
+    say('👿 悪魔合体！！ ' + A.e + A.n + ' ＋ ' + B.e + B.n + ' → ' + S.m.e + ' ' + S.m.name + ' が生まれた！');
+    save();
+  }
+  function mon() { var m = S.m; return { n: m.name, hp: m.hp, max: m.max, atk: m.atk, def: m.def, spd: m.spd, tr: m.tr }; }
+
+  // ===== 育成 =====
+  function train(k) {
+    if (S.food < TRAIN_COST) return;
+    var m = S.m, s = STAT[k]; S.food -= TRAIN_COST;
+    if (k === 'hp') { m.max += s[1]; m.hp += s[1]; } else m[k] += s[1];
+    say('💪 ' + m.name + 'の' + s[0] + 'が' + s[1] + '上がった！（🍖−' + TRAIN_COST + '）');
+  }
+  function rest() { S.m.hp = S.m.max; say('😴 ぐっすり休んで、HPが全回復した！'); }
+
+  // ===== ダンジョン（時間がたつと帰ってくる。ページを閉じていてもOK）=====
+  function startDg(i) { S.dg = { i: i, end: now() + DG[i].sec * 1000 }; say('🕳️ ' + S.m.name + 'は、' + DG[i].n + 'に旅立った……'); save(); }
+  function resolveDg() {
+    var d = DG[S.dg.i], m = S.m, cur = mon(), won = 0, fail = false, add = { hp: 0, atk: 0, def: 0, spd: 0 };
+    S.dg = null;
+    for (var f = 0; f < d.fl; f++) {
+      var sc = d.p * (1 + f * 0.1), foe = { n: pick(['ぬるぬる', 'ぞわぞわ', 'ねちょねちょ', 'うにょうにょ']) + 'ザコ', hp: Math.round(24 * sc), atk: Math.round(7 * sc), def: Math.round(4 * sc), spd: Math.round(8 * sc), tr: [] };
+      var r = fight(cur, foe);
+      cur.hp = r.hp;
+      if (!r.win) { fail = true; break; }
+      won++;
+      var k = pick(['hp', 'atk', 'def', 'spd']); add[k] += (k === 'hp' ? 3 : 1) * d.g;
+    }
+    var cleared = !fail, food = won * (d.g > 1 ? 1 : 0) + (cleared ? d.food : 0) + (won > 0 ? 1 : 0);
+    if (fail && Math.random() < DEATH_RATE) {
+      S.phase = 'dead';
+      say('💀 ' + m.name + 'は、' + (won + 1) + '階で力尽きて、帰ってこなかった……');
+      return save();
+    }
+    m.max += add.hp; m.atk += add.atk; m.def += add.def; m.spd += add.spd; S.food += food;
+    m.hp = fail ? 1 : Math.max(1, Math.min(m.max, cur.hp + add.hp));
+    say((cleared ? '🎉 ' + m.name + 'が、' + d.n + 'を踏破して帰ってきた！' : '😰 ' + m.name + 'は、' + (won + 1) + '階でやられかけて、ボロボロで逃げ帰った……') +
+        '\n　成長：HP+' + add.hp + ' こうげき+' + add.atk + ' ぼうぎょ+' + add.def + ' すばやさ+' + add.spd + '／🍖+' + food);
+    save();
+  }
+
+  // ===== 育成大会 =====
+  function play(lines, then) {
+    var g = gen; S.busy = true; render();
+    lines.forEach(function (t, i) { setTimeout(function () { if (g === gen) { say(t); renderLog(); } }, i * STEP_MS); });
+    setTimeout(function () { if (g !== gen) return; S.busy = false; if (then) then(); save(); render(); }, lines.length * STEP_MS + 200);
+  }
+  function tour() {
+    if (S.busy || S.dg || S.food < TOUR_COST) return;
+    S.food -= TOUR_COST;
+    var cur = mon(), lines = ['🏟️ 育成大会が始まった！（参加費 🍖−' + TOUR_COST + '）'], ok = true;
+    OPP.forEach(function (o, i) {
+      if (!ok) return;
+      lines.push('━ 第' + (i + 1) + '試合：' + o.e + o.n + ' ━');
+      var r = fight(cur, { n: o.n, hp: o.hp, atk: o.atk, def: o.def, spd: o.spd, tr: o.tr });
+      lines = lines.concat(r.lines.length > 9 ? r.lines.slice(0, 7).concat(['……（激しい攻防が続く）', r.lines[r.lines.length - 1]]) : r.lines);
+      if (!r.win) { ok = false; lines.push('💥 ' + cur.n + 'は、' + o.n + 'に負けてしまった……'); return; }
+      lines.push('✨ 勝った！'); cur.hp = Math.min(cur.max, r.hp + Math.round(cur.max * 0.35));
+    });
+    play(lines, function () {
+      if (ok) { S.phase = 'clear'; say('🏆 チャンピオンのガリに勝った！ ' + S.m.name + 'は、新しいチャンピオンだ！'); }
+      else { S.m.hp = 1; say('また鍛えて、挑戦しよう。（HPが1になった。休ませてあげてね）'); }
+    });
+  }
+
+  // ===== 描画 =====
+  function monHtml() {
+    var m = S.m;
+    return '<div class="big">' + m.e + '</div><div class="name">' + m.name + '</div>' +
+      '<div class="bar"><i style="width:' + Math.round(m.hp / m.max * 100) + '%"></i></div>' +
+      '<div class="stats"><span>HP ' + m.hp + '/' + m.max + '</span><span>🍖 えさ ' + S.food + '</span><span>こうげき ' + m.atk + '</span><span>ぼうぎょ ' + m.def + '</span><span>すばやさ ' + m.spd + '</span></div>' +
+      '<div class="tr">' + m.tr.map(function (t) { return '✦ ' + TR[t]; }).join('<br>') + '</div>';
+  }
+  function opts(sel) { return SP.map(function (p, i) { return '<option value="' + i + '"' + (i === sel ? ' selected' : '') + '>' + p.e + ' ' + p.n + '</option>'; }).join(''); }
+  function btn(a, t, sm, dis) { return '<button class="b" type="button" data-a="' + a + '"' + (dis ? ' disabled' : '') + '>' + t + (sm ? '<small>' + sm + '</small>' : '') + '</button>'; }
+  function render() {
+    var h = '', m = S.m;
+    if (S.phase === 'fuse') {
+      h = '<div class="card"><h2>👿 悪魔合体</h2><p class="lead">キモいやつを2匹えらんで、合体させよう。組み合わせで、名前も見た目も、ちがうやつが生まれるよ。合体したら、育てて、ダンジョンに送って、育成大会でチャンピオンのガリを倒そう！</p>' +
+        '<label for="fa">モンスターA</label><select id="fa">' + opts(0) + '</select><label for="fb">モンスターB</label><select id="fb">' + opts(4) + '</select>' +
+        '<div class="grid g2" style="margin-top:12px"><button class="b sub" type="button" data-a="random">🎲 おまかせ</button><button class="b" type="button" data-a="fuse">👿 悪魔合体！</button></div></div>';
+    } else if (S.phase === 'dead') {
+      h = '<div class="card"><div class="big">💀</div><div class="name">' + m.name + 'は、帰ってこなかった……</div><p class="lead" style="text-align:center;margin-top:8px">死んでしまったので、最初からやり直しだよ。</p>' + btn('again', '最初からやり直す') + '</div>';
+    } else if (S.phase === 'clear') {
+      h = '<div class="card"><div class="big">🏆</div><div class="name">クリア！ ' + m.e + ' ' + m.name + '</div><p class="lead" style="text-align:center;margin-top:8px">チャンピオンのガリに勝った！ 新しいチャンピオンの誕生だ！</p>' + btn('again', 'もう一度あそぶ') + '</div>';
+    } else {
+      h = '<div class="card">' + monHtml() + '</div>';
+      if (S.dg) {
+        h += '<div class="card"><h2>🕳️ ' + DG[S.dg.i].n + 'に挑戦中</h2><div class="timer" id="timer"></div><p class="lead" style="text-align:center">ページを閉じても大丈夫。時間がたつと、帰ってくるよ。</p></div>';
+      } else {
+        var off = S.busy;
+        h += '<div class="card"><h2>💪 鍛える（🍖−' + TRAIN_COST + '）</h2><div class="grid g4">' +
+          ['hp', 'atk', 'def', 'spd'].map(function (k) { return btn('train:' + k, STAT[k][0], '＋' + STAT[k][1], off || S.food < TRAIN_COST); }).join('') + '</div></div>' +
+          '<div class="card"><h2>🕳️ ダンジョンに送る</h2><p class="lead">負けると、死んでしまうかも。HPを満タンにして行こう。</p><div class="grid g3">' +
+          DG.map(function (d, i) { return btn('dg:' + i, d.n.replace('ダンジョン', ''), d.sec + '秒・' + d.fl + '階', off); }).join('') + '</div></div>' +
+          '<div class="card"><div class="grid g2">' + btn('rest', '😴 休ませる', 'HP全回復', off || m.hp >= m.max) + btn('tour', '🏟️ 育成大会', '参加費 🍖' + TOUR_COST, off || S.food < TOUR_COST) + '</div></div>';
+      }
+    }
+    $('main').innerHTML = h;
+    renderLog(); tickTimer();
+  }
+  function renderLog() { var l = $('log'); l.textContent = S.log.slice(-10).join('\n') || 'ここに、できごとが表示されるよ。'; }
+  function tickTimer() {
+    if (!S.dg) return;
+    var t = $('timer'); if (!t) return;
+    var s = Math.max(0, Math.ceil((S.dg.end - now()) / 1000));
+    t.textContent = '帰還まで ' + Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  // ===== 操作 =====
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-a]') : null;
+    if (!el || S.busy) return;
+    var a = el.getAttribute('data-a').split(':');
+    if (a[0] === 'fuse') fuse(+$('fa').value, +$('fb').value);
+    else if (a[0] === 'random') { $('fa').value = rnd(10); $('fb').value = rnd(10); return; }
+    else if (a[0] === 'again') { S = newState(); save(); }
+    else if (a[0] === 'train') train(a[1]);
+    else if (a[0] === 'rest') rest();
+    else if (a[0] === 'dg') startDg(+a[1]);
+    else if (a[0] === 'tour') return tour();
+    save(); render();
+  });
+  $('restart').addEventListener('click', function () { if (confirm('最初からやり直すよ。育てたモンスターは消えちゃうけど、いいかな？')) { gen++; S = newState(); save(); render(); } });
+
+  // 1秒ごとに、帰還の時間を見る（ページを閉じている間に過ぎた分は、次に開いたときに、まとめて処理する）
+  setInterval(function () {
+    if (S.dg && now() >= S.dg.end) { resolveDg(); render(); } else tickTimer();
+  }, 500);
+
+  S = load();
+  if (S.dg && now() >= S.dg.end) resolveDg();
+  render();
+})();
+</script>
+</body>
+</html>
