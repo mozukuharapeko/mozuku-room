@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ガリゴンクエスト 破 </title>
+<title>ガリゴンクエスト</title>
 <style>
   :root { --bg:#1f1f23; --panel:#2b2b31; --panel2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --sky:#cfe3f5; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,8 +13,8 @@
   h1 { font-size: 16px; color: #ffbf93; }
   a.home { font-size: 12px; color: var(--ink); background: var(--panel2); border: 2px solid var(--line); border-radius: 99px; padding: 2px 12px; text-decoration: none; white-space: nowrap; }
   .panel { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 12px; }
-  #status { font-size: 13px; color: var(--sky); margin-bottom: 8px; }
-  #view { height: 120px; display: flex; align-items: center; justify-content: center; background: #17171a; border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+  #status { font-size: 12px; color: var(--sky); margin-bottom: 8px; }
+  #view { min-height: 120px; display: flex; align-items: center; justify-content: center; background: #17171a; border-radius: 12px; margin-bottom: 8px; overflow: hidden; padding: 8px 0; }
   .strip { display: flex; gap: 2px; }
   .strip span { width: 32px; text-align: center; font-size: 24px; }
   .foe { text-align: center; }
@@ -44,7 +44,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>🐻 ガリゴンクエスト 破 </h1>
+    <h1>🐻 ガリゴンクエスト</h1>
     <a class="home" href="./index.html">🏠 もずべや</a>
   </header>
   <div class="panel">
@@ -65,37 +65,32 @@
       </div>
     </div>
   </div>
-  <p class="note">キーボード：矢印キー＝移動・選択／Enter・Zキー＝決定／Esc・Xキー＝キャンセル。進行は、このブラウザの中に自動で記録されるよ。</p>
+  <p class="note">キーボード：矢印キー＝移動・選択／Enter・Zキー＝決定／Esc・Xキー＝キャンセル。おうち（🏠）でOK＝街のメニュー。進行は、このブラウザの中に自動で記録されるよ。</p>
 </div>
 
 <script>
 (function () {
   'use strict';
-  var LAST = 40, SAVE = 'gari_rpg_v1';
+  var LAST = 40, SAVE = 'gari_rpg_v1', LV_MAX = 99;
 
-  // 敵（z は出現する場所：0=序盤 1=中盤 2=終盤手前 3=終盤）。数値は仮調整だよ
   var MON = [
-    // --- zone 0：序盤（🌾） ---
     { n: '質問の蟹', e: '🦀', hp: 1, atk: 1, exp: 10, z: 0, line: 'ぬくもりを求めてさまよっている！' },
     { n: 'たかし', e: '👴', hp: 1, atk: 1, exp: 10, z: 0, line: '「ホーケー牧場」と叫んでいる！' },
     { n: 'スライム', e: '🫠', hp: 13, atk: 5, exp: 15, z: 0, line: 'ぷるんぷるん揺れながら見つめている！' },
     { n: '二日酔い', e: '🤢', hp: 18, atk: 6, exp: 18, z: 0, line: '頭がガンガンして視界がグラグラしている！' },
 
-    // --- zone 1：中盤（🌲） ---
     { n: 'しつこいクリップ', e: '📎', hp: 30, atk: 4, exp: 20, z: 1, line: '何にでも挟まろうとしてくる！' },
     { n: '長すぎるレシート', e: '🧾', hp: 34, atk: 8, exp: 30, z: 1, line: '「ぺいぺいはお持ちですか？」と迫る！' },
     { n: '未読通知99+', e: '📱', hp: 32, atk: 10, exp: 40, z: 1, line: 'ピコピコ鳴って落ち着かない！' },
     { n: '既読スルー', e: '💬', hp: 36, atk: 9, exp: 35, z: 1, line: '既読が付いたまま、3日が経過している！' },
     { n: '営業電話', e: '📞', hp: 33, atk: 11, exp: 38, z: 1, line: '非通知からの電話が鳴りやまない！' },
 
-    // --- zone 2：終盤手前（🌋） ---
     { n: '終電の幻', e: '🚃', hp: 55, atk: 14, exp: 80, z: 2, line: '目の前で扉が閉まりそうだ！' },
     { n: '月曜日の朝', e: '🏢', hp: 60, atk: 13, exp: 90, z: 2, line: '全員の気分をどんより重くしている！' },
     { n: 'あすか', e: '👵', hp: 58, atk: 15, exp: 100, z: 2, line: '「男なんて…」と語りはじめた！' },
     { n: '上司の説教', e: '🗣️', hp: 62, atk: 16, exp: 95, z: 2, line: '「俺の若い頃は」が止まらない！' },
     { n: '住宅ローン', e: '🏦', hp: 65, atk: 14, exp: 105, z: 2, line: '35年後まで、ガリを見張っている！' },
 
-    // --- zone 3：終盤（🌃） ---
     { n: '結婚式の二次会', e: '💒', hp: 75, atk: 17, exp: 130, z: 3, line: '「次はガリくんの番だね」と笑っている！' },
     { n: '同窓会のマウント', e: '🎓', hp: 78, atk: 18, exp: 140, z: 3, line: '「年収いくら？」と無邪気に聞いてくる！' },
     { n: '婚活パーティーの沈黙', e: '💔', hp: 72, atk: 17, exp: 135, z: 3, line: '会話が続かず、気まずい空気が流れている！' },
@@ -106,10 +101,36 @@
   var ATK_LINES = ['今夜、一杯どうだい？', '君の瞳に、ハイボール', 'とりあえず生で！', '孤独な夜に、ちょうどいい男さ', '連絡先、交換しない？', '俺、お酒とタバコ以外にも、取り柄があるんだ…'];
   var LV_LINES = ['酒の強さが少し上がった気がする。', '孤独への耐性が上がった。', '肺活量が増えた気がする。', '口説き文句の精度が上がった。'];
 
-  // エリアごとの見た目（マップに表示する絵文字）
   var ZONE_TILE = ['🌾', '🌲', '🌋', '🌃'];
 
-  var p = { lv: 1, exp: 0, hp: 30, items: 3, pos: 0, far: 0, money: 0 };
+  var CHAR_DEFS = {
+    kani:      { name: '質問の蟹', emoji: '🦀', role: '村人・とにかく弱い',         hpMult: 0.30, atkMult: 0.15 },
+    takashi:   { name: 'たかし',   emoji: '👴', role: '雑魚',                        hpMult: 0.30, atkMult: 0.15 },
+    yuuna:     { name: 'ゆうな',   emoji: '👧', role: '村娘・平均的に強い',          hpMult: 1.00, atkMult: 1.00 },
+    sakashita: { name: '坂下',     emoji: '🕴️', role: '万能職・女性にだらしない',    hpMult: 1.00, atkMult: 1.00 },
+    nasuchin:  { name: 'なすちん', emoji: '🛡️', role: '戦士・前衛が強い',            hpMult: 1.20, atkMult: 1.15 },
+    miruku:    { name: 'みるく',   emoji: '👊', role: '武道家・ワンパンが強い',      hpMult: 0.90, atkMult: 1.00 },
+    yanitan:   { name: 'やにたん', emoji: '🧙‍♀️', role: '魔法使い・魔法のエキスパート', hpMult: 0.80, atkMult: 1.15 },
+    zenchin:   { name: 'ぜんちん', emoji: '👨‍👩‍👧', role: '子持ちの不倫大好き男',       hpMult: 0.90, atkMult: 0.90 },
+    nano:      { name: 'なの',     emoji: '👸', role: '姫様・回復と魔法そこそこ強い', hpMult: 0.90, atkMult: 0.90 },
+    umi:       { name: '海蘊',     emoji: '🙏', role: '僧侶・作中最強',              hpMult: 1.30, atkMult: 1.30 }
+  };
+
+  var RECRUIT_AT = { 3: 'kani', 7: 'takashi', 11: 'yuuna', 15: 'sakashita', 21: 'nasuchin', 25: 'miruku', 28: 'yanitan', 32: 'zenchin', 36: 'nano', 39: 'umi' };
+  var RECRUIT_INTRO = {
+    kani: ['また質問の蟹が現れた。「お供させてくださいませ」'],
+    takashi: ['たかしが現れた。「ホーケー牧場、一緒に行くぞ」'],
+    yuuna: ['村娘のゆうなが声をかけてきた。「わたしも連れて行ってください！」'],
+    sakashita: ['坂下が現れた。「君みたいな子、好きだなあ……あ、仲間になるよ」'],
+    nasuchin: ['戦士なすちんが現れた。「前に出て戦うのは得意だ」'],
+    miruku: ['武道家のみるくが現れた。「一発、重いのを入れるのが得意でね」'],
+    yanitan: ['魔法使いのやにたんが現れた。「魔法なら任せて」'],
+    zenchin: ['ぜんちんが現れた。「二股……いや、仲間に入れてくれ」'],
+    nano: ['姫のなのが現れた。「わたしも一緒に戦うなの」'],
+    umi: ['僧侶の海蘊が現れた。「……手伝ってあげてもいいけど？」']
+  };
+
+  var p = { lv: 1, exp: 0, hp: 30, items: 3, pos: 0, far: 0, money: 0, party: [], roster: {}, allyHp: {}, seenRecruit: {} };
   var st = 'map', q = [], after = null, cur = 0, b = null, yn = null;
   var menuItems = [], menuCancel = null;
 
@@ -119,21 +140,27 @@
   function need() { return 10 + p.lv * 8; }
   function rnd(n) { return Math.floor(Math.random() * n); }
   function pick(a) { return a[rnd(a.length)]; }
-  // 4つのエリアに、ほぼ均等に区切る（0〜9 / 10〜19 / 20〜29 / 30〜）
   function zone(i) { return i <= 9 ? 0 : i <= 19 ? 1 : i <= 29 ? 2 : 3; }
   function tile(i) { return i === 0 ? '🏠' : i === LAST ? '🏰' : ZONE_TILE[zone(i)]; }
+
+  function allyMaxHp(id) { return Math.max(1, Math.round(maxHp() * CHAR_DEFS[id].hpMult)); }
+  function allyAtk(id) { return Math.max(1, Math.round(atk() * CHAR_DEFS[id].atkMult)); }
+  function aliveAllies() { return p.party.filter(function (id) { return (p.allyHp[id] || 0) > 0; }); }
 
   function save() { try { localStorage.setItem(SAVE, JSON.stringify(p)); } catch (e) {} }
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(SAVE));
       if (s && [s.lv, s.exp, s.hp, s.items, s.pos].every(Number.isFinite)) {
-        s.lv = Math.max(1, Math.min(20, s.lv));
+        s.lv = Math.max(1, Math.min(LV_MAX, s.lv));
         s.pos = Math.max(0, Math.min(LAST - 1, s.pos));
         s.items = Math.max(0, Math.min(9, s.items));
-        // 古いセーブには無い項目（所持金・最遠到達地点）。無ければ、ちょうどいい初期値をあてる
         s.money = Number.isFinite(s.money) ? Math.max(0, s.money) : 30;
         s.far = Number.isFinite(s.far) ? Math.max(0, Math.min(LAST, s.far)) : s.pos;
+        s.party = Array.isArray(s.party) ? s.party.filter(function (id) { return CHAR_DEFS[id]; }).slice(0, 3) : [];
+        s.roster = (s.roster && typeof s.roster === 'object') ? s.roster : {};
+        s.allyHp = (s.allyHp && typeof s.allyHp === 'object') ? s.allyHp : {};
+        s.seenRecruit = (s.seenRecruit && typeof s.seenRecruit === 'object') ? s.seenRecruit : {};
         return s;
       }
     } catch (e) {}
@@ -148,7 +175,8 @@
   }
 
   function render() {
-    $('status').textContent = 'Lv' + p.lv + '　HP ' + p.hp + '/' + maxHp() + '　EXP ' + p.exp + '/' + need() + '　🧪×' + p.items + '　🪙' + p.money;
+    var partyEmoji = p.party.map(function (id) { return CHAR_DEFS[id].emoji; }).join('');
+    $('status').textContent = 'Lv' + p.lv + '　HP ' + p.hp + '/' + maxHp() + '　EXP ' + p.exp + '/' + need() + '　🧪×' + p.items + '　🪙' + p.money + (partyEmoji ? '　👥' + partyEmoji : '');
     var v = $('view'); v.textContent = '';
     if (b) {
       var f = el('div', 'foe');
@@ -156,7 +184,11 @@
       f.appendChild(el('div', 'nm', b.m.n));
       var bar = el('div', 'bar'), i = el('i');
       i.style.width = Math.round(b.m.hp / b.m.max * 100) + '%';
-      bar.appendChild(i); f.appendChild(bar); v.appendChild(f);
+      bar.appendChild(i); f.appendChild(bar);
+      var hpLine = 'ガリHP' + p.hp;
+      p.party.forEach(function (id) { hpLine += '　' + CHAR_DEFS[id].emoji + (p.allyHp[id] || 0); });
+      f.appendChild(el('div', 'nm', hpLine));
+      v.appendChild(f);
     } else {
       var s = el('div', 'strip');
       for (var k = -4; k <= 4; k++) {
@@ -179,7 +211,6 @@
     }
   }
 
-  // 汎用メニュー（街のメニュー・闘技場・カジノ・買い物・娼館で使い回すよ）
   function openMenu(items, cancelFn) {
     menuItems = items; cur = 0; menuCancel = cancelFn || toMap; st = 'menu'; render();
   }
@@ -199,10 +230,11 @@
   function yesNo(text, y, n) { st = 'yn'; yn = { y: y, n: n }; $('msg').textContent = text; render(); }
 
   function newGame() {
-    p = { lv: 1, exp: 0, hp: 30, items: 5, pos: 0, far: 0, money: 30 };
+    p = { lv: 1, exp: 0, hp: 30, items: 5, pos: 0, far: 0, money: 30, party: [], roster: {}, allyHp: {}, seenRecruit: {} };
     say(['ガリ（酒とタバコと石が友）は、大魔王サンドゥーラを口説き（討伐し）に旅立った！',
          '持ち物：ガンギマリンα×5　所持金🪙30',
-         'おうち（🏠）では、OKボタンで闘技場・カジノ・買い物・娼館に行けるよ。'], toMap);
+         'おうち（🏠）では、OKボタンで闘技場・カジノ・買い物・仲間・娼館に行けるよ。',
+         '旅の途中で、心強い仲間に出会えるかも……？'], toMap);
   }
 
   function move(d) {
@@ -211,6 +243,10 @@
     p.pos = np;
     if (p.pos > p.far) p.far = p.pos;
     render();
+
+    var rid = RECRUIT_AT[p.pos];
+    if (rid && !p.seenRecruit[rid]) { triggerRecruit(rid); return; }
+
     if (p.pos === LAST) {
       yesNo('大魔王サンドゥーラの城だ…… 口説き（討伐）に挑む？', function () { startBattle(BOSS, true); }, function () { p.pos--; toMap(); });
     } else if (p.pos > 0 && rnd(100) < 22) {
@@ -219,40 +255,143 @@
     }
   }
 
+  function triggerRecruit(id) {
+    p.seenRecruit[id] = true;
+    save();
+    say(RECRUIT_INTRO[id], function () {
+      yesNo('仲間にする？', function () { joinAlly(id); }, function () { toMap(); });
+    });
+  }
+  function joinAlly(id) {
+    p.roster[id] = true;
+    p.allyHp[id] = allyMaxHp(id);
+    var added = false;
+    if (p.party.length < 3) { p.party.push(id); added = true; }
+    var c = CHAR_DEFS[id];
+    say([c.name + 'が仲間になった！' + (added ? '（自動で編成に加わったよ）' : '（おうちの「仲間」メニューから編成できるよ）')], toMap);
+  }
+
   function startBattle(m, boss) {
     b = { m: { n: m.n, e: m.e, hp: m.hp, max: m.hp, atk: m.atk, exp: m.exp, line: m.line }, boss: boss };
     say([m.e + ' ' + m.n + 'が現れた！', m.line], battleMenu);
   }
   function battleMenu() { st = 'battle'; cur = 0; $('msg').textContent = 'どうする？'; render(); }
 
+  function pickMostHurtTarget() {
+    var cands = [{ id: 'gari', pct: p.hp / maxHp() }];
+    p.party.forEach(function (id) {
+      if ((p.allyHp[id] || 0) > 0) cands.push({ id: id, pct: (p.allyHp[id] || 0) / allyMaxHp(id) });
+    });
+    cands.sort(function (a, b2) { return a.pct - b2.pct; });
+    return (cands[0] && cands[0].pct < 0.9) ? cands[0].id : null;
+  }
+
+  function allyDamage(id) {
+    var c = CHAR_DEFS[id];
+    var dmg = allyAtk(id) + rnd(4);
+    var flavor = c.name + 'の一撃！';
+
+    if (id === 'kani' || id === 'takashi') {
+      flavor = c.name + 'のよわよわな一撃……';
+    } else if (id === 'zenchin' && rnd(100) < 30) {
+      dmg = Math.round(dmg * 1.8);
+      flavor = c.name + '「二股は得意でね」二連撃！';
+    } else if (id === 'miruku') {
+      var r = rnd(100);
+      if (r < 20) { dmg = Math.round(dmg * 2.5); flavor = c.name + '「ワンパンだ」会心の一撃！！'; }
+      else if (r < 35) { dmg = Math.max(1, Math.round(dmg * 0.3)); flavor = c.name + 'の一撃は、かすっただけだった…'; }
+    } else if (id === 'nano' && rnd(100) < 40) {
+      var healTarget = pickMostHurtTarget();
+      if (healTarget) {
+        var healAmt = Math.max(5, Math.round(allyMaxHp('nano') * 0.3));
+        if (healTarget === 'gari') p.hp = Math.min(maxHp(), p.hp + healAmt);
+        else p.allyHp[healTarget] = Math.min(allyMaxHp(healTarget), (p.allyHp[healTarget] || 0) + healAmt);
+        flavor = c.name + 'は魔法で攻撃しつつ、' + (healTarget === 'gari' ? 'ガリ' : CHAR_DEFS[healTarget].name) + 'を少し回復した！';
+      } else {
+        flavor = c.name + 'の魔法攻撃！';
+      }
+    } else if (id === 'umi') {
+      flavor = c.name + 'の一撃！（さすがの強さ）';
+    } else if (id === 'yanitan') {
+      flavor = c.name + 'の魔法が炸裂！';
+    } else if (id === 'nasuchin') {
+      flavor = c.name + 'の鋭い斬撃！';
+    }
+    return { dmg: Math.max(1, dmg), line: flavor + ' ' + b.m.n + 'に' + Math.max(1, dmg) + 'ダメージ！' };
+  }
+
   function enemyAttack(lines) {
+    var targets = ['gari'].concat(aliveAllies());
+    var target = targets[rnd(targets.length)];
     var d = Math.max(1, b.m.atk - Math.floor(p.lv / 2) + rnd(3));
-    p.hp = Math.max(0, p.hp - d);
-    lines.push(b.m.n + 'の攻撃！ ガリは' + d + 'のダメージを受けた！');
+    if (target === 'gari') {
+      p.hp = Math.max(0, p.hp - d);
+      lines.push(b.m.n + 'の攻撃！ ガリは' + d + 'のダメージを受けた！');
+    } else {
+      p.allyHp[target] = Math.max(0, (p.allyHp[target] || 0) - d);
+      lines.push(b.m.n + 'の攻撃！ ' + CHAR_DEFS[target].name + 'は' + d + 'のダメージを受けた！');
+      if (p.allyHp[target] === 0) lines.push(CHAR_DEFS[target].name + 'は倒れてしまった…');
+    }
   }
   function endTurn(lines) {
     if (p.hp <= 0) {
       lines.push('ガリは力尽きた…', '目が覚めると、居酒屋の座敷で寝ていた。（もう一度、旅立とう）');
-      say(lines, function () { p.hp = maxHp(); p.pos = 0; toMap(); });
+      say(lines, function () {
+        p.hp = maxHp(); p.pos = 0;
+        p.party.forEach(function (id) { p.allyHp[id] = allyMaxHp(id); });
+        toMap();
+      });
     } else {
       say(lines, battleMenu);
     }
   }
 
   function doAttack() {
+    var lines = [];
     var d = atk() + rnd(4);
     b.m.hp = Math.max(0, b.m.hp - d);
-    var lines = ['ガリ「' + pick(ATK_LINES) + '」！ ' + b.m.n + 'に' + d + 'のダメージ！'];
+    lines.push('ガリ「' + pick(ATK_LINES) + '」！ ' + b.m.n + 'に' + d + 'のダメージ！');
     if (b.m.hp <= 0) return win(lines);
+
+    for (var idx = 0; idx < p.party.length; idx++) {
+      var id = p.party[idx];
+      if (b.m.hp <= 0) break;
+      if ((p.allyHp[id] || 0) <= 0) { lines.push(CHAR_DEFS[id].name + 'は倒れていて動けない…'); continue; }
+      var hit = allyDamage(id);
+      b.m.hp = Math.max(0, b.m.hp - hit.dmg);
+      lines.push(hit.line);
+      if (b.m.hp <= 0) return win(lines);
+    }
+
     enemyAttack(lines); endTurn(lines);
   }
+
   function useItem() {
     if (p.items <= 0) { say(['ガンギマリンαが ない！'], battleMenu); return; }
+    var opts = [{ id: 'gari', label: 'ガリ', hp: p.hp, max: maxHp() }];
+    p.party.forEach(function (id) { opts.push({ id: id, label: CHAR_DEFS[id].name, hp: (p.allyHp[id] || 0), max: allyMaxHp(id) }); });
+    var items = opts.map(function (o) {
+      return { label: o.label + '（HP' + o.hp + '/' + o.max + '）', fn: function () { itemHealTarget(o.id); } };
+    });
+    items.push({ label: 'やめる', fn: battleMenu });
+    $('msg').textContent = '🧪 誰に使う？';
+    openMenu(items, battleMenu);
+  }
+  function itemHealTarget(id) {
     p.items--;
-    var h = Math.min(40, maxHp() - p.hp); p.hp += h;
-    var lines = ['ガリはガンギマリンαを飲んだ！ 目がガンギマリして HPが' + h + '回復した！'];
+    var lines;
+    if (id === 'gari') {
+      var h = Math.min(40, maxHp() - p.hp); p.hp += h;
+      lines = ['ガリはガンギマリンαを飲んだ！ 目がガンギマリして HPが' + h + '回復した！'];
+    } else {
+      var max = allyMaxHp(id);
+      var h2 = Math.min(40, max - (p.allyHp[id] || 0));
+      p.allyHp[id] = Math.min(max, (p.allyHp[id] || 0) + h2);
+      lines = [CHAR_DEFS[id].name + 'はガンギマリンαを飲んだ！ HPが' + h2 + '回復した！'];
+    }
     enemyAttack(lines); endTurn(lines);
   }
+
   function flee() {
     if (b.boss) { say(['大魔王サンドゥーラからは逃げられない！（口説きたいので）'], battleMenu); return; }
     if (rnd(100) < 60) { say(['ガリは逃げ出した！（格好悪い）'], toMap); return; }
@@ -270,27 +409,27 @@
     var gold = Math.max(1, Math.ceil(b.m.exp * 0.3));
     p.money += gold;
     lines.push(b.m.n + 'を倒した！ 経験値' + b.m.exp + 'と、🪙' + gold + 'を得た！');
-    while (p.lv < 20 && p.exp >= need()) {
+    while (p.lv < LV_MAX && p.exp >= need()) {
       p.exp -= need(); p.lv++; p.hp = Math.min(maxHp(), p.hp + 10);
+      p.party.forEach(function (id) { p.allyHp[id] = Math.min(allyMaxHp(id), (p.allyHp[id] || 0) + 10); });
       lines.push('ガリはレベル' + p.lv + 'になった！' + pick(LV_LINES));
     }
     if (rnd(100) < 30 && p.items < 9) { p.items++; lines.push('ガンギマリンαを拾った！（×' + p.items + '）'); }
     say(lines, toMap);
   }
 
-  // ---- 街のメニュー（おうちでOKを押すと開く）----
   function openTown() {
     $('msg').textContent = '🏠 おうちだ。何をする？';
     openMenu([
       { label: '⚔️ 闘技場', fn: openArena },
       { label: '🎰 カジノ', fn: openCasino },
       { label: '🛍️ 買い物', fn: openShop },
+      { label: '👥 仲間', fn: openParty },
       { label: '💰 娼館（高額）', fn: openBrothel },
       { label: '🚪 旅にもどる', fn: toMap }
     ], toMap);
   }
 
-  // ---- 闘技場：これまでに辿り着いたエリアの中から、相手を選んで何度でも挑める ----
   var ARENA_TAGS = ['よわめ', 'ふつう', 'つよめ', 'かなりつよい'];
   function openArena() {
     $('msg').textContent = '⚔️ 闘技場：腕試しの相手を選んでね。（経験値とお金が少し多めにもらえるよ）';
@@ -311,7 +450,6 @@
     say(['【闘技場】' + m.e + ' ' + m.n + 'が、挑戦者として現れた！', m.line], battleMenu);
   }
 
-  // ---- カジノ：賭けて増やす（当然、負けることもある）----
   function openCasino() {
     $('msg').textContent = '🎰 カジノ：所持金🪙' + p.money + '。いくら賭ける？';
     openMenu([
@@ -333,7 +471,6 @@
     }
   }
 
-  // ---- 買い物：宿屋で休む／道具を買う ----
   function openShop() {
     $('msg').textContent = '🛍️ 買い物：所持金🪙' + p.money;
     openMenu([
@@ -345,7 +482,8 @@
   function restAtInn() {
     if (p.money < 20) { say(['お金が足りないよ…（🪙' + p.money + '）'], openShop); return; }
     p.money -= 20; p.hp = maxHp();
-    say(['宿屋でぐっすり休んだ。HPが全回復した！'], openShop);
+    p.party.forEach(function (id) { p.allyHp[id] = allyMaxHp(id); });
+    say(['宿屋でぐっすり休んだ。みんなのHPが全回復した！'], openShop);
   }
   function buyItem() {
     if (p.money < 15) { say(['お金が足りないよ…（🪙' + p.money + '）'], openShop); return; }
@@ -354,7 +492,30 @@
     say(['ガンギマリンαを買った！（🧪×' + p.items + '）'], openShop);
   }
 
-  // ---- 娼館：高いお金を払うと、レベルが1上がる（あからさまな描写はしないよ）----
+  function openParty() {
+    var ids = Object.keys(p.roster).filter(function (id) { return p.roster[id]; });
+    if (!ids.length) { say(['まだ誰も仲間になっていないみたい。旅の途中で出会えるかも。'], openTown); return; }
+    var items = ids.map(function (id) {
+      var c = CHAR_DEFS[id];
+      var active = p.party.indexOf(id) >= 0;
+      return { label: (active ? '✅ ' : '　　') + c.emoji + ' ' + c.name + '（' + c.role + '）', fn: function () { toggleParty(id); } };
+    });
+    items.push({ label: 'やめる', fn: openTown });
+    $('msg').textContent = '👥 仲間：編成に入れる人を選んでね（ガリ＋最大3人）。✅＝編成中';
+    openMenu(items, openTown);
+  }
+  function toggleParty(id) {
+    var idx = p.party.indexOf(id);
+    if (idx >= 0) {
+      p.party.splice(idx, 1);
+    } else {
+      if (p.party.length >= 3) { openParty(); return; }
+      p.party.push(id);
+      if (!Number.isFinite(p.allyHp[id])) p.allyHp[id] = allyMaxHp(id);
+    }
+    openParty();
+  }
+
   var BROTHEL_LINES = [
     'ガリは有り金をはたいて、暖簾をくぐった……',
     '一晩、誰かに話を聞いてもらっただけで、なぜか心が軽くなった……',
@@ -362,7 +523,7 @@
   ];
   function brothelCost() { return 150 + (p.lv - 1) * 20; }
   function openBrothel() {
-    if (p.lv >= 20) { say(['もうこれ以上は、強くなれないみたい。'], openTown); return; }
+    if (p.lv >= LV_MAX) { say(['もうこれ以上は、強くなれないみたい。'], openTown); return; }
     var cost = brothelCost();
     $('msg').textContent = '💰 娼館：利用すると、レベルが1上がるよ。（🪙' + cost + '／所持金🪙' + p.money + '）';
     openMenu([
@@ -375,11 +536,13 @@
     if (p.money < cost) { say(['お金が足りないみたい…（🪙' + p.money + '／必要🪙' + cost + '）'], openBrothel); return; }
     p.money -= cost;
     p.lv++; p.hp = maxHp();
+    p.party.forEach(function (id) { p.allyHp[id] = allyMaxHp(id); });
     say([pick(BROTHEL_LINES), '一夜明けて、妙に自信がついた気がする！ ガリはレベル' + p.lv + 'になった！' + pick(LV_LINES)], openTown);
   }
 
   function press(k) {
     if (st === 'map') {
+      if (k === 'ok' && p.pos === 0) { openTown(); return; }
       if (k === 'up' || k === 'right') move(1);
       else if (k === 'down' || k === 'left') move(-1);
     } else if (st === 'msg') {
@@ -388,6 +551,12 @@
       if (k === 'up' || k === 'left') { cur = (cur + 2) % 3; render(); }
       else if (k === 'down' || k === 'right') { cur = (cur + 1) % 3; render(); }
       else if (k === 'ok') [doAttack, useItem, flee][cur]();
+    } else if (st === 'menu') {
+      if (!menuItems.length) return;
+      if (k === 'up' || k === 'left') { cur = (cur + menuItems.length - 1) % menuItems.length; render(); }
+      else if (k === 'down' || k === 'right') { cur = (cur + 1) % menuItems.length; render(); }
+      else if (k === 'ok') { var it = menuItems[cur]; if (it) it.fn(); }
+      else if (k === 'no') { (menuCancel || toMap)(); }
     } else if (st === 'yn') {
       if (k === 'ok') { var f = yn.y; yn = null; f(); }
       else if (k === 'no') { var g = yn.n; yn = null; g(); }
@@ -401,14 +570,13 @@
     var k = KEYS[e.key];
     if (!k) return;
     e.preventDefault();
-    if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); // ボタンが二重に反応しないように
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     press(k);
   });
   Array.prototype.forEach.call(document.querySelectorAll('[data-k]'), function (btn) {
     btn.addEventListener('click', function () { press(btn.getAttribute('data-k')); });
   });
 
-  // 起動：前回の記録があれば、続きから遊べる
   var s = load();
   if (s) {
     yesNo('前回の続きから始める？（はい＝つづき／いいえ＝はじめから）',
