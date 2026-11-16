@@ -31,6 +31,11 @@
   select { width: 100%; background: #232327; color: var(--ink); border-color: var(--line); font-weight: 500; }
   label { font-size: 12px; color: var(--soft); display: block; margin-top: 6px; }
   .lead { font-size: 13px; color: var(--soft); margin-bottom: 6px; }
+  details { margin: 6px 0; font-size: 13px; }
+  summary { cursor: pointer; font-weight: 700; color: var(--orange); padding: 4px 0; }
+  details p, details li { margin: 2px 0 2px 4px; color: var(--ink); }
+  details ul { margin-left: 18px; }
+  #help[hidden] { display: none; }
   #log { white-space: pre-wrap; font-size: 13px; min-height: 9em; }
   .timer { text-align: center; font-size: 22px; color: var(--sky); font-weight: 700; }
   button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
@@ -40,8 +45,9 @@
 <div id="app">
   <header>
     <h1>🪱 キモいやつら育成ゲーム 鬱</h1>
-    <div><button id="restart" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
+    <div><button id="help-btn" type="button">📖 説明書</button><button id="restart" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
   </header>
+  <div id="help" class="card" hidden></div>
   <div id="main"></div>
   <div id="log" class="card" role="log" aria-live="polite"></div>
 </div>
@@ -289,6 +295,31 @@
     t.textContent = '帰還まで ' + Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
   }
 
+  // ===== 説明書（数字は、ゲームの設定から自動で入る）=====
+  function helpHtml() {
+    var d = function (title, body, open) { return '<details' + (open ? ' open' : '') + '><summary>' + title + '</summary>' + body + '</details>'; };
+    var dg = DG.map(function (x) { return '<li>' + x.n + '：' + x.sec + '秒・' + x.fl + '階・目安 強さ' + x.rec + '以上</li>'; }).join('');
+    var tr = Object.keys(TR).map(function (k) { return '<li>' + TR[k] + '</li>'; }).join('');
+    return '<h2>📖 説明書</h2>' +
+      d('🎯 ゲームの目的', '<p>' + SP.length + '種類のキモいやつから2匹を選んで「悪魔合体」させ、育てて、進化させて、<b>育成大会でチャンピオンのガリに勝てばクリア</b>だよ。ダンジョンで死んでしまうと、最初からやり直しになるよ。</p>', true) +
+      d('🔁 ゲームの流れ', '<p>①悪魔合体 → ②鍛える／ダンジョンで育てる → ③強くなったら進化 → ④育成大会に挑戦、の順番だよ。ダンジョンの帰りを待っている間に、ページを閉じても大丈夫。</p>', true) +
+      d('👿 悪魔合体', '<p>最初にモンスターA・Bを選んで合体するよ。名前は「Aの頭＋Bの尻尾」（例：ナメ＋ゴキブリ）で、A・Bの順番を変えると、別の名前になるよ。ステータスは2匹の平均を少し上げたもの＋ランダムで、特性は2匹ぶん引き継ぐよ。🎲おまかせで、ランダムに決められるよ。</p>') +
+      d('📊 ステータスと「強さ」', '<p>HP・こうげき・ぼうぎょ・すばやさの4つだよ。「⭐強さ」は、HP÷3＋ほかの3つを足した数字で、ダンジョンや大会に行けるかの目安になるよ。🍖えさは、鍛えたり、進化したり、大会に出たりするときに使うよ。</p>') +
+      d('💪 鍛える', '<p>🍖' + TRAIN_COST + 'を使って、HPが' + STAT.hp[1] + '、ほかが' + STAT[ 'atk' ][1] + '上がるよ。えさは、ダンジョンから帰ってくると手に入るよ。</p>') +
+      d('🕳️ ダンジョン', '<ul>' + dg + '</ul><p>階ごとに敵と戦って、HPは次の階に持ち越しだよ。勝つたびにステータスが上がって、帰ってくるとえさももらえるよ。途中で負けると、<b>' + Math.round(DEATH_RATE * 100) + '%の確率で死んでしまう</b>よ（生き残っても、HP1でボロボロで逃げ帰るよ）。目安の強さより弱いうちは、深いところに行かないほうがいいよ。出発前に、HPを満タンにしてね。</p>') +
+      d('😴 休ませる', '<p>HPが全回復するよ。何回でも、無料でできるよ（ダンジョンに行っている間は、できないよ）。</p>') +
+      d('✨ 進化', '<p>強さ' + EVO[0].pow + '以上・🍖' + EVO[0].food + 'で1回目、強さ' + EVO[1].pow + '以上・🍖' + EVO[1].food + 'で2回目（最終形態）の進化ができるよ。かわいい動物（🐶🐱🐰など）の姿になって、ステータスが×' + EVO[0].mul + '・×' + EVO[1].mul + 'になって、HPも全回復するよ。姿は、いちばん高いステータスと特性の組み合わせで、28種類のどれかに決まるよ。</p>') +
+      d('🏟️ 育成大会', '<p>参加費🍖' + TOUR_COST + 'で、4人と連続で戦うよ。ぬるぬる新人 → ねばねば中堅 → ぞわぞわ準優勝 → <b>チャンピオン ガリ</b>の順番で、試合の間にHPが少し回復するよ。目安の強さは' + TOUR_REC + '以上だよ。負けても死なないけど、HPが1になるよ（休ませて、また挑戦しよう）。</p>') +
+      d('✦ 特性', '<ul>' + tr + '</ul>') +
+      d('💾 保存', '<p>育てた状態は、このブラウザに自動で保存されるよ。ほかのスマホやPCには引き継がれなくて、ブラウザの記録を消すと、消えちゃうよ。</p>') +
+      d('💡 コツ', '<ul><li>最初は浅いダンジョンで、安全に強くしよう</li><li>えさが貯まったら、強さ' + EVO[0].pow + 'で進化させよう</li><li>HPが減ったら、必ず休ませてから出発しよう</li><li>大会は、目安の強さまで育ててから挑戦しよう</li></ul>') +
+      '<div class="grid" style="margin-top:8px"><button class="b" type="button" id="help-close">とじる</button></div>';
+  }
+  function toggleHelp() {
+    var h = $('help');
+    if (h.hasAttribute('hidden')) { h.innerHTML = helpHtml(); h.removeAttribute('hidden'); } else h.setAttribute('hidden', '');
+  }
+
   // ===== 操作 =====
   document.addEventListener('click', function (e) {
     var el = e.target.closest ? e.target.closest('[data-a]') : null;
@@ -304,6 +335,8 @@
     else if (a[0] === 'tour') return tour();
     save(); render();
   });
+  $('help-btn').addEventListener('click', toggleHelp);
+  $('help').addEventListener('click', function (e) { if (e.target && e.target.id === 'help-close') toggleHelp(); });
   $('restart').addEventListener('click', function () { if (confirm('最初からやり直すよ。育てたモンスターは消えちゃうけど、いいかな？')) { gen++; S = newState(); save(); render(); } });
 
   // 1秒ごとに、帰還の時間を見る（ページを閉じている間に過ぎた分は、次に開いたときに、まとめて処理する）
