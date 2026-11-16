@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>キモいやつら育成ゲーム</title>
+<title>キモいやつら育成ゲーム 鬱</title>
 <style>
   :root { --bg:#1f1f23; --card:#2b2b31; --card2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --mint:#8fd9b0; --red:#f87171; --sky:#cfe3f5; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,7 +39,7 @@
 <body>
 <div id="app">
   <header>
-    <h1>🪱 キモいやつら育成ゲーム</h1>
+    <h1>🪱 キモいやつら育成ゲーム 鬱</h1>
     <div><button id="restart" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
   </header>
   <div id="main"></div>
@@ -98,12 +98,12 @@
     { n: '深いダンジョン',   sec: 100, fl: 7, p: 2.1, g: 5, food: 3, rec: 125 }
   ];
   var OPP = [  // 育成大会の相手（最後が、チャンピオンのガリ）
-    { e: '🪱', n: 'ぬるぬる新人',   hp: 45,  atk: 12, def: 8,  spd: 9,  tr: [] },
-    { e: '🐛', n: 'ねばねば中堅',   hp: 75,  atk: 19, def: 13, spd: 11, tr: ['slimy'] },
-    { e: '🪳', n: 'ぞわぞわ準優勝', hp: 110, atk: 27, def: 17, spd: 16, tr: ['dodge'] },
-    { e: '🐻', n: 'チャンピオン ガリ', hp: 190, atk: 40, def: 26, spd: 21, tr: ['slimy', 'crit'] }
+    { e: '🪱', n: 'ぬるぬる新人',   hp: 54,  atk: 14, def: 10, spd: 11, tr: [] },
+    { e: '🐛', n: 'ねばねば中堅',   hp: 90,  atk: 23, def: 16, spd: 13, tr: ['slimy'] },
+    { e: '🪳', n: 'ぞわぞわ準優勝', hp: 132, atk: 32, def: 20, spd: 19, tr: ['dodge'] },
+    { e: '🐻', n: 'チャンピオン ガリ', hp: 228, atk: 48, def: 31, spd: 25, tr: ['slimy', 'crit'] }
   ];
-  var TOUR_REC = 185, DEATH_RATE = 0.55, TRAIN_COST = 1, TOUR_COST = 2, START_FOOD = 5, STEP_MS = 450;
+  var TOUR_REC = 215, DEATH_RATE = 0.55, TRAIN_COST = 1, TOUR_COST = 2, START_FOOD = 5, STEP_MS = 450;
   var STAT = { hp: ['HP', 8], atk: ['こうげき', 3], def: ['ぼうぎょ', 3], spd: ['すばやさ', 3] };   // 鍛える：[名前, 上がる量]
 
   // ===== 状態 =====
