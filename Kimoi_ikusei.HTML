@@ -55,8 +55,9 @@
   var SAVE = 'kimoi_ikusei_v1';
 
   // ===== データ（数値・文章は、ここで調整するよ。仮調整だよ）=====
-  var TR = { dodge: 'すばしこい（回避20%）', slimy: 'ぬるぬる（被ダメ−15%）', poison: 'どくどく（与ダメ＋3）', crit: 'ぎょろぎょろ（会心15%）', regen: 'うねうね（毎ターンHP＋4）' };
-  var SP = [   // キモいやつら10種。h＝名前の頭、t＝名前の尻尾、s＝[HP,こうげき,ぼうぎょ,すばやさ]
+  var TR = { dodge: 'すばしこい（回避20%）', slimy: 'ぬるぬる（被ダメ−15%）', poison: 'どくどく（与ダメ＋3）', crit: 'ぎょろぎょろ（会心15%）', regen: 'うねうね（毎ターンHP＋4）',
+         thorn: 'とげとげ（受けたダメージの20%を反撃）', drain: 'ちゅうちゅう（与ダメの25%を吸収）' };
+  var SP = [   // キモいやつら24種。h＝名前の頭、t＝名前の尻尾、s＝[HP,こうげき,ぼうぎょ,すばやさ]
     { e: '🪱', n: 'ミミズ',   h: 'ミミ', t: 'ミミズ',   s: [32, 6, 6, 8],  tr: 'regen' },
     { e: '🐛', n: 'イモムシ', h: 'イモ', t: 'イモムシ', s: [38, 6, 7, 5],  tr: 'slimy' },
     { e: '🕷️', n: 'クモ',     h: 'クモ', t: 'クモ',     s: [28, 9, 5, 9],  tr: 'poison' },
@@ -66,20 +67,43 @@
     { e: '🐙', n: 'タコ',     h: 'タコ', t: 'タコ',     s: [36, 8, 5, 7],  tr: 'crit' },
     { e: '🦑', n: 'イカ',     h: 'イカ', t: 'イカ',     s: [32, 9, 4, 10], tr: 'crit' },
     { e: '🐸', n: 'カエル',   h: 'カエ', t: 'カエル',   s: [34, 7, 5, 9],  tr: 'regen' },
-    { e: '🪰', n: 'ハエ',     h: 'ハエ', t: 'ハエ',     s: [24, 6, 3, 14], tr: 'dodge' }
+    { e: '🪰', n: 'ハエ',     h: 'ハエ', t: 'ハエ',     s: [24, 6, 3, 14], tr: 'dodge' },
+    { e: '🐍', n: 'ヘビ',       h: 'ヘビ', t: 'ヘビ',       s: [32, 9, 5, 10], tr: 'poison' },
+    { e: '🐀', n: 'ドブネズミ', h: 'ドブ', t: 'ネズミ',     s: [30, 7, 4, 13], tr: 'drain' },
+    { e: '🦇', n: 'コウモリ',   h: 'コウ', t: 'コウモリ',   s: [26, 8, 4, 13], tr: 'drain' },
+    { e: '🪼', n: 'クラゲ',     h: 'クラ', t: 'クラゲ',     s: [42, 7, 5, 6],  tr: 'slimy' },
+    { e: '🦠', n: 'ばいきん',   h: 'バイ', t: 'バイキン',   s: [22, 8, 3, 12], tr: 'regen' },
+    { e: '🐜', n: 'アリ',       h: 'アリ', t: 'アリ',       s: [26, 8, 6, 10], tr: 'crit' },
+    { e: '🐝', n: 'ハチ',       h: 'ハチ', t: 'ハチ',       s: [24, 10, 3, 12], tr: 'poison' },
+    { e: '🦟', n: 'ヤブ蚊',     h: 'ヤブ', t: 'ヤブカ',     s: [20, 7, 2, 14], tr: 'drain' },
+    { e: '🪲', n: 'カブトムシ', h: 'カブ', t: 'カブトムシ', s: [36, 8, 9, 4],  tr: 'thorn' },
+    { e: '🦐', n: 'エビ',       h: 'エビ', t: 'エビ',       s: [30, 8, 7, 7],  tr: 'thorn' },
+    { e: '🦀', n: 'カニ',       h: 'カニ', t: 'カニ',       s: [34, 9, 8, 5],  tr: 'crit' },
+    { e: '🐡', n: 'フグ',       h: 'フグ', t: 'フグ',       s: [38, 6, 6, 6],  tr: 'thorn' },
+    { e: '🐊', n: 'ワニ',       h: 'ワニ', t: 'ワニ',       s: [44, 10, 7, 4], tr: 'crit' },
+    { e: '🍄', n: 'キノコ',     h: 'キノ', t: 'キノコ',     s: [38, 5, 6, 4],  tr: 'regen' }
   ];
+  var TRL = ['dodge', 'slimy', 'poison', 'crit', 'regen', 'thorn', 'drain'];   // 特性の並び（かわいい姿の表と、同じ順番）
+  var CUTE = {   // 進化先：いちばん高いステータス × 特性 で決まる、かわいい姿28種類［絵文字, 名前］
+    hp:  [['🐹', 'ハム'], ['🐼', 'パンダ'], ['🐷', 'ブタ'], ['🐮', 'モー'], ['🐨', 'コアラ'], ['🦔', 'ハリネ'], ['🐘', 'ゾウ']],
+    atk: [['🐯', 'トラ'], ['🦁', 'ライオ'], ['🦊', 'コン'], ['🐺', 'ウルフ'], ['🐲', 'ドラ'], ['🐗', 'ウリ'], ['🦝', 'アライ']],
+    def: [['🐰', 'ウサ'], ['🐢', 'カメ'], ['🐑', 'メェ'], ['🐧', 'ペン'], ['🦙', 'ラマ'], ['🦫', 'ビーバ'], ['🦦', 'カワウソ']],
+    spd: [['🐱', 'ニャン'], ['🐬', 'イルカ'], ['🐿️', 'リス'], ['🐶', 'ワン'], ['🐥', 'ピヨ'], ['🦜', 'オウム'], ['🐦', 'トリ']]
+  };
+  var DECO = { hp: ['🍰', 'マシュマロ'], atk: ['🔥', 'ファイター'], def: ['🛡️', 'ナイト'], spd: ['⚡', 'ランナー'] };   // 最終進化の飾り
+  var EVO = [ { pow: 70, food: 3, mul: 1.12 }, { pow: 140, food: 5, mul: 1.15 } ];   // 進化の条件：必要な強さ・えさ・ステータスの倍率
   var DG = [   // ダンジョン：sec＝かかる時間（秒）／fl＝階の数／p＝敵の強さ／gain＝1階ごとの成長量の目安
-    { n: '浅いダンジョン',   sec: 15, fl: 3, p: 1.0, g: 1, food: 1 },
-    { n: 'ふつうのダンジョン', sec: 40, fl: 5, p: 1.7, g: 2, food: 2 },
-    { n: '深いダンジョン',   sec: 90, fl: 7, p: 2.5, g: 3, food: 3 }
+    { n: '浅いダンジョン',   sec: 20,  fl: 3, p: 0.8, g: 2, food: 1, rec: 40 },
+    { n: 'ふつうのダンジョン', sec: 50,  fl: 5, p: 1.4, g: 3, food: 2, rec: 75 },
+    { n: '深いダンジョン',   sec: 100, fl: 7, p: 2.1, g: 5, food: 3, rec: 125 }
   ];
   var OPP = [  // 育成大会の相手（最後が、チャンピオンのガリ）
     { e: '🪱', n: 'ぬるぬる新人',   hp: 45,  atk: 12, def: 8,  spd: 9,  tr: [] },
     { e: '🐛', n: 'ねばねば中堅',   hp: 75,  atk: 19, def: 13, spd: 11, tr: ['slimy'] },
     { e: '🪳', n: 'ぞわぞわ準優勝', hp: 110, atk: 27, def: 17, spd: 16, tr: ['dodge'] },
-    { e: '🐻', n: 'チャンピオン ガリ', hp: 170, atk: 36, def: 23, spd: 19, tr: ['slimy', 'crit'] }
+    { e: '🐻', n: 'チャンピオン ガリ', hp: 190, atk: 40, def: 26, spd: 21, tr: ['slimy', 'crit'] }
   ];
-  var DEATH_RATE = 0.55, TRAIN_COST = 1, TOUR_COST = 2, START_FOOD = 5, STEP_MS = 450;
+  var TOUR_REC = 185, DEATH_RATE = 0.55, TRAIN_COST = 1, TOUR_COST = 2, START_FOOD = 5, STEP_MS = 450;
   var STAT = { hp: ['HP', 8], atk: ['こうげき', 3], def: ['ぼうぎょ', 3], spd: ['すばやさ', 3] };   // 鍛える：[名前, 上がる量]
 
   // ===== 状態 =====
@@ -87,7 +111,7 @@
   function newState() { return { phase: 'fuse', m: null, food: START_FOOD, dg: null, log: [], busy: false }; }
   function save() { try { var c = JSON.parse(JSON.stringify(S)); c.busy = false; localStorage.setItem(SAVE, JSON.stringify(c)); } catch (e) {} }
   function load() {
-    try { var s = JSON.parse(localStorage.getItem(SAVE)); if (s && s.phase) { s.busy = false; return s; } } catch (e) {}
+    try { var s = JSON.parse(localStorage.getItem(SAVE)); if (s && s.phase) { s.busy = false; if (s.m && s.m.stage === undefined) { s.m.stage = 0; s.m.head = s.m.name.slice(0, 2); s.m.orig = s.m.e; } return s; } } catch (e) {}
     return newState();
   }
   function say(t) { S.log.push(t); if (S.log.length > 60) S.log.shift(); }
@@ -110,7 +134,12 @@
       order.forEach(function (p) {
         if (p[0].hp <= 0 || p[1].hp <= 0) return;
         var d = hit(p[0], p[1]);
-        if (d < 0) parts.push(p[1].n + 'は避けた'); else { p[1].hp -= d; parts.push(p[0].n + '→' + d); }
+        if (d < 0) parts.push(p[1].n + 'は避けた');
+        else {
+          p[1].hp -= d; parts.push(p[0].n + '→' + d);
+          if (p[0].tr.indexOf('drain') >= 0) p[0].hp = Math.min(p[0].max, p[0].hp + Math.round(d * 0.25));   // 吸収
+          if (p[1].tr.indexOf('thorn') >= 0) p[0].hp -= Math.round(d * 0.2);                                 // 反撃
+        }
       });
       [m, e].forEach(function (x) { if (x.hp > 0 && x.tr.indexOf('regen') >= 0) x.hp = Math.min(x.max, x.hp + 4); });
       lines.push('T' + t + '：' + parts.join('／') + '（' + m.n + ' ' + Math.max(0, m.hp) + '・' + e.n + ' ' + Math.max(0, e.hp) + '）');
@@ -122,11 +151,12 @@
   function fuse(a, b) {
     var A = SP[a], B = SP[b], v = [0, 1, 2, 3].map(function (i) { return Math.round((A.s[i] + B.s[i]) / 2 * 1.15) + rnd(3); });
     var tr = A.tr === B.tr ? [A.tr] : [A.tr, B.tr];
-    S.m = { name: a === b ? '超' + A.n : A.h + B.t, e: A.e + (a === b ? '' : B.e), max: v[0], hp: v[0], atk: v[1], def: v[2], spd: v[3], tr: tr };
+    S.m = { name: a === b ? '超' + A.n : A.h + B.t, e: A.e + (a === b ? '' : B.e), max: v[0], hp: v[0], atk: v[1], def: v[2], spd: v[3], tr: tr, head: A.h, stage: 0, orig: A.e + (a === b ? '' : B.e) };
     S.food = START_FOOD; S.dg = null; S.phase = 'home'; S.log = [];
     say('👿 悪魔合体！！ ' + A.e + A.n + ' ＋ ' + B.e + B.n + ' → ' + S.m.e + ' ' + S.m.name + ' が生まれた！');
     save();
   }
+  function power(m) { return Math.round(m.max / 3 + m.atk + m.def + m.spd); }   // 強さ：HPは3で割って、4つのステータスを足したもの
   function mon() { var m = S.m; return { n: m.name, hp: m.hp, max: m.max, atk: m.atk, def: m.def, spd: m.spd, tr: m.tr }; }
 
   // ===== 育成 =====
@@ -136,6 +166,25 @@
     if (k === 'hp') { m.max += s[1]; m.hp += s[1]; } else m[k] += s[1];
     say('💪 ' + m.name + 'の' + s[0] + 'が' + s[1] + '上がった！（🍖−' + TRAIN_COST + '）');
   }
+  function dominant(m) {
+    var v = { hp: m.max / 3, atk: m.atk, def: m.def, spd: m.spd }, best = 'hp';
+    ['atk', 'def', 'spd'].forEach(function (k) { if (v[k] > v[best]) best = k; });
+    return best;
+  }
+  function canEvo() { var m = S.m; return !!m && m.stage < 2 && power(m) >= EVO[m.stage].pow && S.food >= EVO[m.stage].food; }
+  function evolve() {
+    if (!canEvo() || S.dg) return;
+    var m = S.m, c = EVO[m.stage];
+    S.food -= c.food;
+    if (m.stage === 0) { m.dom = dominant(m); m.cute = CUTE[m.dom][TRL.indexOf(pick(m.tr))]; }
+    m.stage++;
+    ['max', 'atk', 'def', 'spd'].forEach(function (k) { m[k] = Math.round(m[k] * c.mul); });
+    m.hp = m.max;
+    var f = m.cute, before = m.e + ' ' + m.name;
+    if (m.stage === 1) { m.e = f[0]; m.name = m.head + f[1] + 'ちゃん'; }
+    else { m.e = f[0] + DECO[m.dom][0]; m.name = '超' + m.head + f[1] + DECO[m.dom][1]; }
+    say('✨✨ 進化！！ ' + before + ' → ' + m.e + ' ' + m.name + ' になった！（ステータス×' + c.mul + '・HP全回復）');
+  }
   function rest() { S.m.hp = S.m.max; say('😴 ぐっすり休んで、HPが全回復した！'); }
 
   // ===== ダンジョン（時間がたつと帰ってくる。ページを閉じていてもOK）=====
@@ -144,14 +193,14 @@
     var d = DG[S.dg.i], m = S.m, cur = mon(), won = 0, fail = false, add = { hp: 0, atk: 0, def: 0, spd: 0 };
     S.dg = null;
     for (var f = 0; f < d.fl; f++) {
-      var sc = d.p * (1 + f * 0.1), foe = { n: pick(['ぬるぬる', 'ぞわぞわ', 'ねちょねちょ', 'うにょうにょ']) + 'ザコ', hp: Math.round(24 * sc), atk: Math.round(7 * sc), def: Math.round(4 * sc), spd: Math.round(8 * sc), tr: [] };
+      var sc = d.p * (1 + f * 0.1), foe = { n: pick(['ぬるぬる', 'ぞわぞわ', 'ねちょねちょ', 'うにょうにょ']) + 'ザコ', hp: Math.round(22 * sc), atk: Math.round(6 * sc), def: Math.round(3 * sc), spd: Math.round(7 * sc), tr: [] };
       var r = fight(cur, foe);
       cur.hp = r.hp;
       if (!r.win) { fail = true; break; }
       won++;
       var k = pick(['hp', 'atk', 'def', 'spd']); add[k] += (k === 'hp' ? 3 : 1) * d.g;
     }
-    var cleared = !fail, food = won * (d.g > 1 ? 1 : 0) + (cleared ? d.food : 0) + (won > 0 ? 1 : 0);
+    var cleared = !fail, food = Math.floor(won / 2) + (cleared ? d.food : 0);
     if (fail && Math.random() < DEATH_RATE) {
       S.phase = 'dead';
       say('💀 ' + m.name + 'は、' + (won + 1) + '階で力尽きて、帰ってこなかった……');
@@ -191,17 +240,24 @@
   // ===== 描画 =====
   function monHtml() {
     var m = S.m;
-    return '<div class="big">' + m.e + '</div><div class="name">' + m.name + '</div>' +
+    return '<div class="big">' + m.e + '</div><div class="name">' + m.name + '</div>' + (m.stage ? '<div class="tr" style="text-align:center">もとの姿：' + m.orig + '　進化 ' + m.stage + '/2</div>' : '') +
       '<div class="bar"><i style="width:' + Math.round(m.hp / m.max * 100) + '%"></i></div>' +
-      '<div class="stats"><span>HP ' + m.hp + '/' + m.max + '</span><span>🍖 えさ ' + S.food + '</span><span>こうげき ' + m.atk + '</span><span>ぼうぎょ ' + m.def + '</span><span>すばやさ ' + m.spd + '</span></div>' +
+      '<div class="stats"><span>HP ' + m.hp + '/' + m.max + '</span><span>🍖 えさ ' + S.food + '</span><span>⭐ 強さ ' + power(m) + '</span><span>こうげき ' + m.atk + '</span><span>ぼうぎょ ' + m.def + '</span><span>すばやさ ' + m.spd + '</span></div>' +
       '<div class="tr">' + m.tr.map(function (t) { return '✦ ' + TR[t]; }).join('<br>') + '</div>';
+  }
+  function evoHtml() {
+    var m = S.m;
+    if (m.stage >= 2) return '<div class="card"><h2>✨ 進化</h2><p class="lead">これ以上は進化できないよ。最終形態だ！</p></div>';
+    var c = EVO[m.stage];
+    return '<div class="card"><h2>✨ 進化（' + m.stage + '/2）</h2><p class="lead">強さ' + c.pow + '以上・🍖' + c.food + 'で、かわいい姿に進化するよ！（いまの強さ ' + power(m) + '）</p>' +
+      btn('evo', '✨ 進化する', '強さ' + c.pow + '・🍖' + c.food, S.busy || !canEvo()) + '</div>';
   }
   function opts(sel) { return SP.map(function (p, i) { return '<option value="' + i + '"' + (i === sel ? ' selected' : '') + '>' + p.e + ' ' + p.n + '</option>'; }).join(''); }
   function btn(a, t, sm, dis) { return '<button class="b" type="button" data-a="' + a + '"' + (dis ? ' disabled' : '') + '>' + t + (sm ? '<small>' + sm + '</small>' : '') + '</button>'; }
   function render() {
     var h = '', m = S.m;
     if (S.phase === 'fuse') {
-      h = '<div class="card"><h2>👿 悪魔合体</h2><p class="lead">キモいやつを2匹えらんで、合体させよう。組み合わせで、名前も見た目も、ちがうやつが生まれるよ。合体したら、育てて、ダンジョンに送って、育成大会でチャンピオンのガリを倒そう！</p>' +
+      h = '<div class="card"><h2>👿 悪魔合体</h2><p class="lead">24種類のキモいやつから2匹をえらんで、合体させよう。組み合わせで、名前も見た目も、ちがうやつが生まれるよ。合体したら、育てて、進化させて、ダンジョンに送って、育成大会でチャンピオンのガリを倒そう！</p>' +
         '<label for="fa">モンスターA</label><select id="fa">' + opts(0) + '</select><label for="fb">モンスターB</label><select id="fb">' + opts(4) + '</select>' +
         '<div class="grid g2" style="margin-top:12px"><button class="b sub" type="button" data-a="random">🎲 おまかせ</button><button class="b" type="button" data-a="fuse">👿 悪魔合体！</button></div></div>';
     } else if (S.phase === 'dead') {
@@ -214,11 +270,12 @@
         h += '<div class="card"><h2>🕳️ ' + DG[S.dg.i].n + 'に挑戦中</h2><div class="timer" id="timer"></div><p class="lead" style="text-align:center">ページを閉じても大丈夫。時間がたつと、帰ってくるよ。</p></div>';
       } else {
         var off = S.busy;
+        h += evoHtml();
         h += '<div class="card"><h2>💪 鍛える（🍖−' + TRAIN_COST + '）</h2><div class="grid g4">' +
           ['hp', 'atk', 'def', 'spd'].map(function (k) { return btn('train:' + k, STAT[k][0], '＋' + STAT[k][1], off || S.food < TRAIN_COST); }).join('') + '</div></div>' +
           '<div class="card"><h2>🕳️ ダンジョンに送る</h2><p class="lead">負けると、死んでしまうかも。HPを満タンにして行こう。</p><div class="grid g3">' +
-          DG.map(function (d, i) { return btn('dg:' + i, d.n.replace('ダンジョン', ''), d.sec + '秒・' + d.fl + '階', off); }).join('') + '</div></div>' +
-          '<div class="card"><div class="grid g2">' + btn('rest', '😴 休ませる', 'HP全回復', off || m.hp >= m.max) + btn('tour', '🏟️ 育成大会', '参加費 🍖' + TOUR_COST, off || S.food < TOUR_COST) + '</div></div>';
+          DG.map(function (d, i) { return btn('dg:' + i, d.n.replace('ダンジョン', ''), d.sec + '秒・' + d.fl + '階｜目安 強さ' + d.rec + '〜', off); }).join('') + '</div></div>' +
+          '<div class="card"><div class="grid g2">' + btn('rest', '😴 休ませる', 'HP全回復', off || m.hp >= m.max) + btn('tour', '🏟️ 育成大会', '参加費 🍖' + TOUR_COST + '｜目安 強さ' + TOUR_REC + '〜', off || S.food < TOUR_COST) + '</div></div>';
       }
     }
     $('main').innerHTML = h;
@@ -238,10 +295,11 @@
     if (!el || S.busy) return;
     var a = el.getAttribute('data-a').split(':');
     if (a[0] === 'fuse') fuse(+$('fa').value, +$('fb').value);
-    else if (a[0] === 'random') { $('fa').value = rnd(10); $('fb').value = rnd(10); return; }
+    else if (a[0] === 'random') { $('fa').value = rnd(SP.length); $('fb').value = rnd(SP.length); return; }
     else if (a[0] === 'again') { S = newState(); save(); }
     else if (a[0] === 'train') train(a[1]);
     else if (a[0] === 'rest') rest();
+    else if (a[0] === 'evo') evolve();
     else if (a[0] === 'dg') startDg(+a[1]);
     else if (a[0] === 'tour') return tour();
     save(); render();
