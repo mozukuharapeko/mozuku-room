@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>真・ガリゴンクエスト</title>
+<title>真・ガリゴンクエスト 10倍ver</title>
 <style>
   :root { --bg:#1f1f23; --panel:#2b2b31; --panel2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --sky:#cfe3f5; --hp:#f87171; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { touch-action: manipulation; }
   body { font-family: "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif; font-size: 15px; line-height: 1.6; background: var(--bg); color: var(--ink); padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px)); user-select: none; }
   .wrap { max-width: 460px; margin: 0 auto; }
   header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -20,10 +21,10 @@
   .foe { text-align: center; }
   .foe .big { font-size: 56px; line-height: 1.1; }
   .foe .nm { font-size: 13px; }
-  .bar { width: 140px; height: 8px; background: var(--line); border-radius: 4px; margin: 4px auto 0; overflow: hidden; }
+  .bar { width: 160px; height: 8px; background: var(--line); border-radius: 4px; margin: 4px auto 0; overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--hp); transition: width 0.3s; }
   #msg { min-height: 4.8em; background: var(--panel2); border: 2px solid var(--line); border-radius: 12px; padding: 8px 12px; font-size: 14px; }
-  #menu { min-height: 1.6em; margin-top: 6px; font-size: 14px; color: var(--soft); max-height: 150px; overflow-y: auto; }
+  #menu { min-height: 1.6em; margin-top: 6px; font-size: 14px; color: var(--soft); max-height: 160px; overflow-y: auto; }
   #menu div { color: var(--ink); padding: 2px 0; }
   #menu .sel { color: var(--orange); font-weight: 700; background: rgba(255,255,255,0.05); }
   .ctrl { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
@@ -44,7 +45,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>🐻 真・ガリゴンクエスト</h1>
+    <h1>🐻 真・ガリゴンクエスト 10倍</h1>
     <a class="home" href="./index.html">🏠 もずべや</a>
   </header>
   <div class="panel">
@@ -65,103 +66,203 @@
       </div>
     </div>
   </div>
-  <p class="note">キーボード：矢印キー＝移動・選択／Enter・Zキー＝決定／Esc・Xキー＝キャンセル。<br>おうち（🏠）や街（🏘️）でOK＝街のメニュー。ストックした仲間は裏路地で合体できるよ。</p>
+  <p class="note">矢印キー＝移動・選択／Enter・Z＝決定／Esc・X＝キャンセル。<br>100歩ごとの街（🏘️）でOK＝街メニュー（ルーラ・合体あり）。</p>
 </div>
 
 <script>
 (function () {
   'use strict';
-  // スケールアップ設定
-  var LAST = 400, SAVE = 'gari_rpg_v2', LV_MAX = 99;
+  // ==========================================
+  // 1. 基本スケール設定（すべて10倍化）
+  // ==========================================
+  var LAST = 4000;          // マップ全長10倍（400 → 4000）
+  var SAVE = 'gari_rpg_10x';
+  var LV_MAX = 999;         // レベル上限も10倍基準
+
+  // ==========================================
+  // 2. 街データ（10倍の40都市！100歩ごとに配置）
+  // ==========================================
   var TOWNS = {
-    0: { name: '実家', e: '🏠', line: 'おうちだ。休んでいこう。' },
-    100: { name: 'ネオ・新橋', e: '🏘️', line: '酔っ払いとサラリーマンの聖地、ネオ・新橋だ。' },
-    200: { name: 'メンヘラ・シティ', e: '🏘️', line: '空気が重いメンヘラ・シティだ。' },
-    300: { name: 'タワマン・ビレッジ', e: '🏘️', line: '見上げると首が痛くなるタワマン・ビレッジだ。' }
+    0:    { name: '実家', e: '🏠', line: 'おうちだ。休んでいこう。' },
+    100:  { name: 'ネオ・新橋', e: '🏘️', line: '酔っ払いとサラリーマンの聖地だ。' },
+    200:  { name: 'メンヘラ・シティ', e: '🏘️', line: '空気が重く、通知音が鳴り止まない街だ。' },
+    300:  { name: 'タワマン・ビレッジ', e: '🏘️', line: '見上げると首が痛くなる高層ビル群だ。' },
+    400:  { name: '歌舞伎町サイバー', e: '🏘️', line: 'ネオンとキャッチが渦巻く眠らない街だ。' },
+    500:  { name: '渋谷スクランブル迷宮', e: '🏘️', line: '人が多すぎて真っ直ぐ歩けない！' },
+    600:  { name: '秋葉原ジャンク街', e: '🏘️', line: 'メイドとパーツ屋が並ぶ電脳の街だ。' },
+    700:  { name: '六本木ヒルズ族の里', e: '🏘️', line: '横文字を話すIT社長たちが集う街だ。' },
+    800:  { name: '霞が関ダンジョン', e: '🏘️', line: '深夜まで明かりが消えない不夜城だ。' },
+    900:  { name: '永田町コロシアム', e: '🏘️', line: '日々熱い討論（居眠り）が繰り広げられている。' },
+    1000: { name: '横浜みなとみらい港', e: '🏘️', line: '潮風と観覧車がロマンチックな港町だ。' },
+    1100: { name: '大宮ソニック荒野', e: '🏘️', line: '北の玄関口。乗り換えが複雑な街だ。' },
+    1200: { name: '千葉ネズミー王国', e: '🏘️', line: '夢と魔法と大行列のテーマパークの街だ。' },
+    1300: { name: '埼玉翔んで村', e: '🏘️', line: '海はないがショッピングモールは無限にある。' },
+    1400: { name: '川崎インダストリアル', e: '🏘️', line: '工場夜景と鉄の匂いが漂う熱い街だ。' },
+    1500: { name: '吉祥寺住みたい街', e: '🏘️', line: '公園とオシャレ雑貨屋が並ぶ人気の街だ。' },
+    1600: { name: '下北沢サブカル村', e: '🏘️', line: '古着屋とカレー屋とバンドマンだらけだ。' },
+    1700: { name: '高円寺ガード下通り', e: '🏘️', line: '安い居酒屋の赤提灯がどこまでも続いている。' },
+    1800: { name: '中野ブロード迷宮', e: '🏘️', line: 'ディープな趣味の品が眠る魔窟だ。' },
+    1900: { name: '池袋乙女ロード', e: '🏘️', line: '推し活の熱気が凄まじい巨大ターミナルだ。' },
+    2000: { name: '上野アメ横市場', e: '🏘️', line: '威勢のいい掛け声が飛び交う活気ある街だ。' },
+    2100: { name: '浅草雷門の里', e: '🏘️', line: '人力車と観光客で賑わう下町の中心だ。' },
+    2200: { name: 'お台場巨大人型基地', e: '🏘️', line: '実物大の立像がそびえ立つベイエリアだ。' },
+    2300: { name: '豊洲マグロ市場', e: '🏘️', line: '新鮮な海鮮とターレが行き交う街だ。' },
+    2400: { name: '丸の内エリート街', e: '🏘️', line: 'ピシッとしたスーツ姿の戦士たちが歩く街だ。' },
+    2500: { name: '銀座高級クラブ街', e: '🏘️', line: 'お会計の桁が1つ違う大人の社交場だ。' },
+    2600: { name: '赤坂見附の宿', e: '🏘️', line: '料亭とテレビ局が並ぶ華やかな街だ。' },
+    2700: { name: '恵比寿ガーデンプレイス', e: '🏘️', line: '時計広場での待ち合わせが定番の街だ。' },
+    2800: { name: '代官山オシャレ村', e: '🏘️', line: '犬の散歩をするセレブが優雅に歩いている。' },
+    2900: { name: '中目黒キラキラ川', e: '🏘️', line: 'カフェとアパレルショップが並ぶ川沿いの街だ。' },
+    3000: { name: '三軒茶屋ディープ街', e: '🏘️', line: '迷路のような飲み屋街が広がる街だ。' },
+    3100: { name: '二子玉川マダムの里', e: '🏘️', line: 'ベビーカーと高級外車が走る洗練された街だ。' },
+    3200: { name: '自由が丘スイーツ村', e: '🏘️', line: '甘い香りとヨーロッパ風の街並みが広がる。' },
+    3300: { name: '町田ほぼ神奈川', e: '🏘️', line: '東京か神奈川かでいつも議論になる街だ。' },
+    3400: { name: '八王子秘境の里', e: '🏘️', line: '都心から遠く離れた自然豊かな大都市だ。' },
+    3500: { name: '箱根温泉郷', e: '🏘️', line: '湯けむりが立ち込める癒やしの温泉街だ。' },
+    3600: { name: '熱海昭和リゾート', e: '🏘️', line: 'レトロな商店街と海が見渡せる観光地だ。' },
+    3700: { name: '富士樹海キャンプ場', e: '🏘️', line: 'コンパスが狂いそうな深い森の入口だ。' },
+    3800: { name: '京都マウント古都', e: '🏘️', line: '「ぶぶ漬けでもどうどす？」と声が聞こえる。' },
+    3900: { name: '最終関門・予備校の聖地', e: '🏘️', line: '大魔王の城は目前だ！偏差値を高めて挑もう！' }
   };
   var ZONE_TILE = ['🌾', '🌲', '🌋', '🌃', '🏢', '🌧️', '🗼', '🛸', '🌌', '😈'];
 
-  // モンスターデータ
+  // ==========================================
+  // 3. モンスターデータ（ステータス10倍 + 新規敵10体追加）
+  // ※あとから追加したい時は、この配列に1行コピペするだけ！
+  //   recruit: 'キャラID' をつけると倒した時に確率で仲間になります。
+  // ==========================================
   var MON = [
-    // 序盤 (Zone 0-2)
-    { n: '質問の蟹', e: '🦀', hp: 15, atk: 5, exp: 10, z: 0, line: 'ぬくもりを求めている！' },
-    { n: 'たかし', e: '👴', hp: 20, atk: 7, exp: 15, z: 0, line: '「ホーケー牧場」と叫んでいる！', recruit: 'takashi' },
-    { n: '二日酔い', e: '🤢', hp: 25, atk: 9, exp: 18, z: 0, line: '視界がグラグラしている！' },
-    { n: 'ゆうな', e: '👧', hp: 30, atk: 12, exp: 25, z: 1, line: '「お兄さん、遊んでかない？」', recruit: 'yuuna' },
-    { n: 'しつこいクリップ', e: '📎', hp: 35, atk: 15, exp: 30, z: 1, line: '何にでも挟まろうとしてくる！' },
-    { n: '坂下', e: '🕴️', hp: 45, atk: 20, exp: 45, z: 2, line: '「君みたいな子、好きだなあ」', recruit: 'sakashita' },
-    { n: '未読通知99+', e: '📱', hp: 40, atk: 22, exp: 40, z: 2, line: 'ピコピコ鳴って落ち着かない！' },
-    // 中盤 (Zone 3-6)
-    { n: 'なすちん', e: '🛡️', hp: 70, atk: 35, exp: 80, z: 3, line: '前に出て盾になろうとしている！', recruit: 'nasuchin' },
-    { n: '長すぎるレシート', e: '🧾', hp: 60, atk: 40, exp: 70, z: 3, line: '「ぺいぺいはお持ちですか？」' },
-    { n: 'みるく', e: '👊', hp: 90, atk: 55, exp: 120, z: 4, line: 'ワンパンを狙っている！', recruit: 'miruku' },
-    { n: '上司の説教', e: '🗣️', hp: 120, atk: 50, exp: 150, z: 4, line: '「俺の若い頃は」が止まらない！' },
-    { n: 'やにたん', e: '🧙‍♀️', hp: 110, atk: 70, exp: 180, z: 5, line: '魔法の詠唱を始めた！', recruit: 'yanitan' },
-    { n: '確定申告の鬼', e: '👿', hp: 150, atk: 80, exp: 200, z: 5, line: '領収書の不備を指摘してきた！' },
-    { n: 'ぜんちん', e: '👨‍👩‍👧', hp: 180, atk: 90, exp: 250, z: 6, line: '「二股……いや、仲間に入れてくれ」', recruit: 'zenchin' },
-    { n: 'マウント親戚', e: '👵', hp: 200, atk: 85, exp: 240, z: 6, line: '「で、年収いくらなの？」' },
-    // 終盤 (Zone 7-9)
-    { n: 'なの', e: '👸', hp: 250, atk: 120, exp: 400, z: 7, line: '「わたしも一緒に戦うなの」', recruit: 'nano' },
-    { n: '意識高い系インターン', e: '💻', hp: 220, atk: 130, exp: 380, z: 7, line: '「海老ダンスです。シナジーがー」' },
-    { n: '海蘊', e: '🙏', hp: 350, atk: 180, exp: 9999, z: 8, line: '「……手伝ってあげてもいいけど？」', recruit: 'umi' },
-    { n: '老後資金2000万の壁', e: '🏦', hp: 800, atk: 200, exp: 1000, z: 8, line: 'とてつもない重圧を放っている！' },
-    { n: '健康診断D判定', e: '🩺', hp: 500, atk: 250, exp: 1200, z: 9, line: '再検査の通知が突き刺さる！' }
-  ];
-  
-  // はぐれメタル枠
-  var METAL = { n: 'プレミアムフライデーの亡霊', e: '👻', hp: 5, atk: 50, exp: 9999, z: -1, line: '「早く帰ろうよぉ…」と震えている！すぐ逃げそうだ！', metal: true };
+    // --- 既存モンスター（すべてHP/ATK/EXP 10倍化） ---
+    { n: '質問の蟹', e: '🦀', hp: 150, atk: 50, exp: 100, z: 0, line: 'ぬくもりを求めている！' },
+    { n: 'たかし', e: '👴', hp: 200, atk: 70, exp: 150, z: 0, line: '「ホーケー牧場」と叫んでいる！', recruit: 'takashi' },
+    { n: '二日酔い', e: '🤢', hp: 250, atk: 90, exp: 180, z: 0, line: '視界がグラグラしている！' },
+    { n: 'ゆうな', e: '👧', hp: 300, atk: 120, exp: 250, z: 1, line: '「お兄さん、遊んでかない？」', recruit: 'yuuna' },
+    { n: 'しつこいクリップ', e: '📎', hp: 350, atk: 150, exp: 300, z: 1, line: '何にでも挟まろうとしてくる！' },
+    { n: '坂下', e: '🕴️', hp: 450, atk: 200, exp: 450, z: 2, line: '「君みたいな子、好きだなあ」', recruit: 'sakashita' },
+    { n: '未読通知99+', e: '📱', hp: 400, atk: 220, exp: 400, z: 2, line: 'ピコピコ鳴って落ち着かない！' },
+    { n: 'なすちん', e: '🛡️', hp: 700, atk: 350, exp: 800, z: 3, line: '前に出て盾になろうとしている！', recruit: 'nasuchin' },
+    { n: '長すぎるレシート', e: '🧾', hp: 600, atk: 400, exp: 700, z: 3, line: '「ぺいぺいはお持ちですか？」' },
+    { n: 'みるく', e: '👊', hp: 900, atk: 550, exp: 1200, z: 4, line: 'ワンパンを狙っている！', recruit: 'miruku' },
+    { n: '上司の説教', e: '🗣️', hp: 1200, atk: 500, exp: 1500, z: 4, line: '「俺の若い頃は」が止まらない！' },
+    { n: 'やにたん', e: '🧙‍♀️', hp: 1100, atk: 700, exp: 1800, z: 5, line: '魔法の詠唱を始めた！', recruit: 'yanitan' },
+    { n: '確定申告の鬼', e: '👿', hp: 1500, atk: 800, exp: 2000, z: 5, line: '領収書の不備を指摘してきた！' },
+    { n: 'ぜんちん', e: '👨‍👩‍👧', hp: 1800, atk: 900, exp: 2500, z: 6, line: '「二股……いや、仲間に入れてくれ」', recruit: 'zenchin' },
+    { n: 'マウント親戚', e: '👵', hp: 2000, atk: 850, exp: 2400, z: 6, line: '「で、年収いくらなの？」' },
+    { n: 'なの', e: '👸', hp: 2500, atk: 1200, exp: 4000, z: 7, line: '「わたしも一緒に戦うなの」', recruit: 'nano' },
+    { n: '意識高い系インターン', e: '💻', hp: 2200, atk: 1300, exp: 3800, z: 7, line: '「海老ダンスです。シナジーがー」' },
+    { n: '海蘊', e: '🙏', hp: 3500, atk: 1800, exp: 99990, z: 8, line: '「……手伝ってあげてもいいけど？」', recruit: 'umi' },
+    { n: '老後資金2000万の壁', e: '🏦', hp: 8000, atk: 2000, exp: 10000, z: 8, line: 'とてつもない重圧を放っている！' },
+    { n: '健康診断D判定', e: '🩺', hp: 5000, atk: 2500, exp: 12000, z: 9, line: '再検査の通知が突き刺さる！' },
 
-  // 大魔王 (HP 13000)
-  var BOSS = { n: '大魔王サンドゥーラ', e: '😈', hp: 33000, atk: 350, exp: 0, line: '「年収1000万以上、身長180cm以上、次男じゃないと無理よ」' };
-  
+    // --- 【追加枠：新規の敵10体（★は仲間になるキャラ）】 ---
+    { n: 'やにうさ', e: '🐰', hp: 320, atk: 140, exp: 280, z: 1, line: '紫煙をくゆらせながら跳ねている！', recruit: 'yaniusa' },
+    { n: '終電逃しリーマン', e: '🏃', hp: 280, atk: 130, exp: 260, z: 1, line: '「タクシー代が……！」と絶望している！' },
+    { n: 'ぴえん系女子', e: '🥺', hp: 480, atk: 210, exp: 480, z: 2, line: '「ぴえん超えてぱおんなんだけど…」', recruit: 'pien' },
+    { n: 'リボ払いリボーン', e: '💳', hp: 750, atk: 380, exp: 850, z: 3, line: '「毎月のお支払いは定額で安心♪」' },
+    { n: '筋トレガチ勢', e: '💪', hp: 1100, atk: 520, exp: 1300, z: 4, line: '「プロテインは飲み物です！」', recruit: 'kintore' },
+    { n: 'サブスク解約忘れ', e: '📅', hp: 1300, atk: 750, exp: 1900, z: 5, line: '使っていないのに毎月引き落としてくる！' },
+    { n: '投資家インフルエンサー', e: '📈', hp: 1900, atk: 950, exp: 2700, z: 6, line: '「今なら無料サロンに招待するよ！」', recruit: 'toushika' },
+    { n: '納期直前のデスマーチ', e: '💀', hp: 2600, atk: 1350, exp: 4200, z: 7, line: '「仕様変更が入りました（笑顔）」' },
+    { n: '港区女子', e: '🥂', hp: 3200, atk: 1700, exp: 8500, z: 8, line: '「ギャラ飲みなら行ってあげてもいいよ？」', recruit: 'minatoku' },
+    { n: 'AIに仕事を奪われた男', e: '🤖', hp: 5500, atk: 2700, exp: 14000, z: 9, line: '「シンギュラリティが憎い……！」' }
+  ];
+
+  // はぐれメタル枠（EXP10倍）
+  var METAL = { n: 'プレミアムフライデーの亡霊', e: '👻', hp: 5, atk: 500, exp: 99990, z: -1, line: '「早く帰ろうよぉ…」と震えている！すぐ逃げそうだ！', metal: true };
+
+  // ==========================================
+  // 4. 大魔王データ（強さ10倍 ＋ 2段階目変身）
+  // ==========================================
+  var BOSS_1 = {
+    n: '大魔王サンドゥーラ',
+    e: '😈',
+    hp: 330000,   // 元の33,000の10倍
+    atk: 3500,    // 元の350の10倍
+    exp: 0,
+    line: '「年収1000万以上、身長180cm以上、次男じゃないと無理よ」'
+  };
+  var BOSS_2 = {
+    n: '学歴神サンドゥーラ',
+    e: '🎓',
+    hp: 3300000,  // 第1形態のさらに10倍！
+    atk: 35000,   // 第1形態のさらに10倍！
+    exp: 0,
+    line: '「偏差値80未満は人権なし！学歴フィルターの極みを見せてあげるわ！！」'
+  };
+
   var ATK_LINES = ['今夜、一杯どうだい？', '君の瞳に、ハイボール', 'とりあえず生で！', '孤独な夜に、ちょうどいい男さ'];
   var LV_LINES = ['酒の強さが上がった。', '孤独への耐性が上がった。', '肺活量が増えた。', '口説き文句の精度が上がった。'];
 
-  // キャラクター定義
+  // ==========================================
+  // 5. キャラクター定義（基本キャラ ＋ 合体専用キャラ10体）
+  // ※あとから仲間を追加したい時は、ここに行を追加して FUSION_RECIPES に登録！
+  // ==========================================
   var CHAR_DEFS = {
-    takashi:   { name: 'たかし',   emoji: '👴', role: '雑魚', hpMult: 0.3, atkMult: 0.2 },
-    yuuna:     { name: 'ゆうな',   emoji: '👧', role: '村娘', hpMult: 0.8, atkMult: 0.7 },
-    sakashita: { name: '坂下',     emoji: '🕴️', role: '万能', hpMult: 1.0, atkMult: 1.0 },
-    nasuchin:  { name: 'なすちん', emoji: '🛡️', role: '戦士', hpMult: 1.5, atkMult: 1.2 },
-    miruku:    { name: 'みるく',   emoji: '👊', role: '武道', hpMult: 0.9, atkMult: 1.6 },
-    yanitan:   { name: 'やにたん', emoji: '🧙‍♀️', role: '魔法', hpMult: 1.0, atkMult: 3.0 },
-    zenchin:   { name: 'ぜんちん', emoji: '👨‍👩‍👧', role: '不倫', hpMult: 1.2, atkMult: 1.2 },
-    nano:      { name: 'なの',     emoji: '👸', role: '姫様', hpMult: 1.1, atkMult: 1.3 },
-    umi:       { name: '海蘊',     emoji: '🙏', role: '僧侶', hpMult: 2.0, atkMult: 2.0 },
-    // 合体専用（進化）キャラ
-    supertakashi: { name: 'ｽｰﾊﾟｰたかし', emoji: '🦸‍♂️', role: '覚醒', hpMult: 1.5, atkMult: 1.5 },
-    shuraba:      { name: '修羅場',      emoji: '🌋', role: '混沌', hpMult: 2.5, atkMult: 3.0 },
-    Tenshiusagi:   { name: '天使うさぎ', emoji: '🐰', role: '魔道', hpMult: 14.0, atkMult: 14.0 },
-    kami:         { name: '神・海蘊',    emoji: '👼', role: '創造', hpMult: 15.0, atkMult: 15.0 }
+    // --- 基本仲間キャラ ---
+    takashi:   { name: 'たかし',     emoji: '👴', role: '雑魚', hpMult: 0.3, atkMult: 0.2 },
+    yuuna:     { name: 'ゆうな',     emoji: '👧', role: '村娘', hpMult: 0.8, atkMult: 0.7 },
+    yaniusa:   { name: 'やにうさ',   emoji: '🐰', role: '喫煙', hpMult: 0.9, atkMult: 1.0 },
+    sakashita: { name: '坂下',       emoji: '🕴️', role: '万能', hpMult: 1.0, atkMult: 1.0 },
+    pien:      { name: 'ぴえん女子', emoji: '🥺', role: '地雷', hpMult: 0.9, atkMult: 1.2 },
+    nasuchin:  { name: 'なすちん',   emoji: '🛡️', role: '戦士', hpMult: 1.5, atkMult: 1.2 },
+    kintore:   { name: '筋トレ勢',   emoji: '💪', role: '筋肉', hpMult: 1.6, atkMult: 1.5 },
+    miruku:    { name: 'みるく',     emoji: '👊', role: '武道', hpMult: 0.9, atkMult: 1.6 },
+    yanitan:   { name: 'やにたん',   emoji: '🧙‍♀️', role: '魔法', hpMult: 1.0, atkMult: 3.0 },
+    zenchin:   { name: 'ぜんちん',   emoji: '👨‍👩‍👧', role: '不倫', hpMult: 1.2, atkMult: 1.2 },
+    toushika:  { name: '投資家',     emoji: '📈', role: '成金', hpMult: 1.3, atkMult: 1.8 },
+    nano:      { name: 'なの',       emoji: '👸', role: '姫様', hpMult: 1.1, atkMult: 1.3 },
+    minatoku:  { name: '港区女子',   emoji: '🥂', role: '貴族', hpMult: 1.5, atkMult: 2.2 },
+    umi:       { name: '海蘊',       emoji: '🙏', role: '僧侶', hpMult: 2.0, atkMult: 2.0 },
+
+    // --- 【合体専用（進化）キャラ 10体】 ---
+    usagigami:    { name: '兎神',           emoji: '🐇', role: '兎神', hpMult: 16.0, atkMult: 16.0 }, // ご要望：やにうさ+やにうさ
+    supertakashi: { name: 'ｽｰﾊﾟｰたかし',   emoji: '🦸‍♂️', role: '覚醒', hpMult: 1.5,  atkMult: 1.5 },
+    shuraba:      { name: '修羅場',         emoji: '🌋', role: '混沌', hpMult: 2.5,  atkMult: 3.0 },
+    Tenshiusagi:  { name: '天使うさぎ',     emoji: '👼', role: '魔道', hpMult: 14.0, atkMult: 14.0 },
+    kami:         { name: '神・海蘊',       emoji: '✨', role: '創造', hpMult: 15.0, atkMult: 15.0 },
+    jiraiqueen:   { name: '地雷系クイーン', emoji: '🖤', role: '呪縛', hpMult: 4.5,  atkMult: 6.0 },
+    machogod:     { name: '超人マッチョ神', emoji: '🦍', role: '剛力', hpMult: 8.0,  atkMult: 7.5 },
+    okuribito:    { name: '億り人ゴッド',   emoji: '💰', role: '財閥', hpMult: 9.0,  atkMult: 10.0 },
+    empress:      { name: '港区の女帝',     emoji: '👑', role: '覇王', hpMult: 12.0, atkMult: 13.0 },
+    darkgari:     { name: '破壊神ガリ',     emoji: '👹', role: '終焉', hpMult: 20.0, atkMult: 20.0 }
   };
 
-  // 合体レシピ
+  // ==========================================
+  // 6. 合体レシピ定義（'キャラA+キャラB': '進化後キャラID'）
+  // ==========================================
   var FUSION_RECIPES = {
-    'takashi+takashi': 'supertakashi',
-    'yuuna+zenchin': 'shuraba',
-    'zenchin+yuuna': 'shuraba',
-    'umi+umi': 'kami'
+    'yaniusa+yaniusa':           'usagigami',    // やにうさ ＋ やにうさ ＝ 兎神
+    'takashi+takashi':           'supertakashi', // たかし ＋ たかし ＝ ｽｰﾊﾟｰたかし
+    'yuuna+zenchin':             'shuraba',      // ゆうな ＋ ぜんちん ＝ 修羅場
+    'yanitan+yaniusa':           'Tenshiusagi',  // やにたん ＋ やにうさ ＝ 天使うさぎ
+    'umi+umi':                   'kami',         // 海蘊 ＋ 海蘊 ＝ 神・海蘊
+    'pien+pien':                 'jiraiqueen',   // ぴえん女子 ＋ ぴえん女子 ＝ 地雷系クイーン
+    'kintore+nasuchin':          'machogod',     // 筋トレ勢 ＋ なすちん ＝ 超人マッチョ神
+    'toushika+sakashita':        'okuribito',    // 投資家 ＋ 坂下 ＝ 億り人ゴッド
+    'minatoku+nano':             'empress',      // 港区女子 ＋ なの ＝ 港区の女帝
+    'supertakashi+shuraba':      'darkgari'      // ｽｰﾊﾟｰたかし ＋ 修羅場 ＝ 破壊神ガリ
   };
 
-  // プレイヤー状態
-  var p = { lv: 1, exp: 0, hp: 30, items: 5, pos: 0, far: 0, money: 30, party: [], roster: [], allyHp: {} };
+  // プレイヤー状態（初期値も10倍基準）
+  var p = { lv: 1, exp: 0, hp: 300, items: 5, pos: 0, far: 0, money: 500, party: [], roster: [], allyHp: {} };
   var st = 'map', q = [], after = null, cur = 0, b = null, yn = null, fusionOpts = [];
   var menuItems = [], menuCancel = null;
 
   function $(id) { return document.getElementById(id); }
-  function maxHp() { return Math.floor(30 + 15 * Math.pow(p.lv - 1, 1.2)); }
-  function atk() { return Math.floor(10 + 5 * Math.pow(p.lv - 1, 1.1)); }
-  function need() { return Math.floor(20 + 15 * Math.pow(p.lv, 1.5)); }
+  // 成長計算式（10倍基準）
+  function maxHp() { return Math.floor(300 + 150 * Math.pow(p.lv - 1, 1.2)); }
+  function atk() { return Math.floor(100 + 50 * Math.pow(p.lv - 1, 1.1)); }
+  function need() { return Math.floor(200 + 150 * Math.pow(p.lv, 1.5)); }
   function rnd(n) { return Math.floor(Math.random() * n); }
   function pick(a) { return a[rnd(a.length)]; }
-  function zone(i) { return Math.min(9, Math.floor(i / 40)); }
-  function tile(i) { 
+  // 4000マスを10ゾーンに分割（400歩ごとにゾーン変化）
+  function zone(i) { return Math.min(9, Math.floor(i / 400)); }
+  function tile(i) {
     if (TOWNS[i]) return TOWNS[i].e;
     if (i === LAST) return '🏰';
-    return ZONE_TILE[zone(i)]; 
+    return ZONE_TILE[zone(i)];
   }
 
-  // rostor内の仲間の実データ取得
   function getAllyData(rosterIdx) { return p.roster[rosterIdx]; }
   function allyMaxHp(rIdx) { var a = getAllyData(rIdx); return Math.max(1, Math.floor(maxHp() * CHAR_DEFS[a.id].hpMult * (1 + a.plus * 0.2))); }
   function allyAtk(rIdx) { var a = getAllyData(rIdx); return Math.max(1, Math.floor(atk() * CHAR_DEFS[a.id].atkMult * (1 + a.plus * 0.2))); }
@@ -187,25 +288,32 @@
   }
 
   function render() {
-    var partyStr = p.party.map(function(idx) { 
-      var a = getAllyData(idx); 
-      return CHAR_DEFS[a.id].emoji + (a.plus > 0 ? '+' + a.plus : ''); 
+    var partyStr = p.party.map(function(idx) {
+      var a = getAllyData(idx);
+      return a ? (CHAR_DEFS[a.id].emoji + (a.plus > 0 ? '+' + a.plus : '')) : '';
     }).join(' ');
-    
-    $('status').innerHTML = '<span>Lv' + p.lv + '</span> <span>HP ' + p.hp + '/' + maxHp() + '</span> <span>EXP ' + p.exp + '/' + need() + '</span> <span>🧪×' + p.items + '</span> <span>🪙' + p.money + '</span>' + (partyStr ? '<br>👥 ' + partyStr : '');
-    
+
+    $('status').innerHTML =
+      '<span>Lv' + p.lv + '</span> ' +
+      '<span>地点 ' + p.pos + '/' + LAST + '</span> ' +
+      '<span>HP ' + p.hp + '/' + maxHp() + '</span> ' +
+      '<span>EXP ' + p.exp + '/' + need() + '</span> ' +
+      '<span>🧪×' + p.items + '</span> ' +
+      '<span>🪙' + p.money + '</span>' +
+      (partyStr ? '<br>👥 ' + partyStr : '');
+
     var v = $('view'); v.textContent = '';
     if (b) {
       var f = el('div', 'foe');
       f.appendChild(el('div', 'big', b.m.e));
-      f.appendChild(el('div', 'nm', b.m.n));
+      f.appendChild(el('div', 'nm', b.m.n + '（HP ' + b.m.hp + '）'));
       var bar = el('div', 'bar'), i = el('i');
       i.style.width = Math.max(0, Math.min(100, (b.m.hp / b.m.max * 100))) + '%';
       bar.appendChild(i); f.appendChild(bar);
       var hpLine = 'ガリ' + p.hp;
-      p.party.forEach(function (rIdx) { 
+      p.party.forEach(function (rIdx) {
         var a = getAllyData(rIdx);
-        hpLine += ' ' + CHAR_DEFS[a.id].emoji + (p.allyHp[rIdx] || 0); 
+        if (a) hpLine += ' ' + CHAR_DEFS[a.id].emoji + (p.allyHp[rIdx] || 0);
       });
       f.appendChild(el('div', 'nm', hpLine));
       v.appendChild(f);
@@ -217,7 +325,7 @@
       }
       v.appendChild(s);
     }
-    
+
     var m = $('menu'); m.textContent = '';
     if (st === 'battle') {
       ['口説く（たたかう）', 'ガンギマリンα ×' + p.items, 'にげる'].forEach(function (t, n) {
@@ -229,7 +337,6 @@
       menuItems.forEach(function (it, n) {
         m.appendChild(el('div', n === cur ? 'sel' : '', (n === cur ? '▶ ' : ' ') + it.label));
       });
-      // メニューのスクロール調整
       if (m.children[cur]) m.children[cur].scrollIntoView({ block: 'nearest' });
     }
   }
@@ -242,8 +349,8 @@
   }
   function toMap() {
     st = 'map'; b = null;
-    var msg = TOWNS[p.pos] ? TOWNS[p.pos].e + ' ' + TOWNS[p.pos].line + '（OKで街メニュー）' 
-            : '▲▶で奥へ、◀▼で手前へ進もう。';
+    var msg = TOWNS[p.pos] ? TOWNS[p.pos].e + ' 【' + TOWNS[p.pos].name + '】' + TOWNS[p.pos].line + '（OKで街メニュー）'
+            : '▲▶で奥へ、◀▼で手前へ進もう。（現在地：' + p.pos + '歩）';
     if (p.pos === LAST) msg = '🏰 大魔王の城だ…（OKで突入）';
     $('msg').textContent = msg;
     save(); render();
@@ -251,41 +358,45 @@
   function yesNo(text, y, n) { st = 'yn'; yn = { y: y, n: n }; $('msg').innerHTML = text; render(); }
 
   function newGame() {
-    p = { lv: 1, exp: 0, hp: 30, items: 5, pos: 0, far: 0, money: 50, party: [], roster: [], allyHp: {} };
-    say(['ガリは、大魔王サンドゥーラを口説きに旅立った！',
-         '持ち物：ガンギマリンα×5 所持金🪙50',
-         'おうち（🏠）や街（🏘️）では、休んだり仲間を合体できるよ。',
-         '人間系の敵を倒すと、仲間になってくれるかも…？'], toMap);
+    p = { lv: 1, exp: 0, hp: 300, items: 5, pos: 0, far: 0, money: 500, party: [], roster: [], allyHp: {} };
+    say(['ガリは、スケール10倍の世界へ大魔王サンドゥーラを口説きに旅立った！',
+         '持ち物：ガンギマリンα×5 所持金🪙500',
+         '100歩ごとに全40個の街があるぞ。街では「ルーラ」や「仲間合体」ができる！',
+         '人間やうさぎ系の敵を倒すと、仲間になってくれるかも…？'], toMap);
   }
 
   function move(d) {
     if (d === 0 && TOWNS[p.pos]) { openTown(); return; }
     if (d === 0 && p.pos === LAST) { triggerBoss(); return; }
-    
+
     var np = Math.max(0, Math.min(LAST, p.pos + d));
     if (np === p.pos) return;
     p.pos = np;
     if (p.pos > p.far) p.far = p.pos;
     render();
 
-    if (p.pos > 0 && !TOWNS[p.pos] && p.pos !== LAST && rnd(100) < 25) {
+    if (p.pos > 0 && !TOWNS[p.pos] && p.pos !== LAST && rnd(100) < 22) {
       var z = zone(p.pos);
-      // 1%の確率ではぐれメタル
-      var m = (rnd(100) < 1) ? METAL : pick(MON.filter(function (x) { return x.z === z || x.z === z-1; }));
-      startBattle(m, false);
+      var pool = MON.filter(function (x) { return x.z === z || x.z === z - 1; });
+      if (!pool.length) pool = MON;
+      var m = (rnd(100) < 2) ? METAL : pick(pool);
+      startBattle(m, 0);
     } else {
       toMap();
     }
   }
 
   function triggerBoss() {
-    yesNo('大魔王サンドゥーラの城だ…… 口説き（討伐）に挑む？', function () { startBattle(BOSS, true); }, function () { p.pos--; toMap(); });
+    yesNo('大魔王サンドゥーラの城だ…… 口説き（討伐）に挑む？', function () { startBattle(BOSS_1, 1); }, function () { p.pos--; toMap(); });
   }
 
-  function startBattle(m, boss) {
-    // 敵のステータスを少しブレさせる
-    var ehp = boss ? m.hp : Math.floor(m.hp * (0.9 + rnd(20)/100));
-    b = { m: { n: m.n, e: m.e, hp: ehp, max: ehp, atk: m.atk, exp: m.exp, line: m.line, recruit: m.recruit, metal: m.metal }, boss: boss };
+  // bossStage: 0=通常敵, 1=大魔王(第1形態), 2=学歴神(第2形態)
+  function startBattle(m, bossStage) {
+    var ehp = bossStage ? m.hp : Math.floor(m.hp * (0.9 + rnd(20) / 100));
+    b = {
+      m: { n: m.n, e: m.e, hp: ehp, max: ehp, atk: m.atk, exp: m.exp, line: m.line, recruit: m.recruit, metal: m.metal },
+      boss: bossStage
+    };
     say([m.e + ' ' + m.n + 'が現れた！', m.line], battleMenu);
   }
   function battleMenu() { st = 'battle'; cur = 0; $('msg').textContent = 'どうする？'; render(); }
@@ -293,10 +404,9 @@
   function allyDamage(rIdx) {
     var a = getAllyData(rIdx);
     var c = CHAR_DEFS[a.id];
-    var dmg = allyAtk(rIdx) + rnd(10);
+    var dmg = allyAtk(rIdx) + rnd(100);
     var flavor = c.name + 'の一撃！';
 
-    // 会心判定（メタル対策）
     var isCrit = false;
     if (a.id === 'miruku' && rnd(100) < 30) isCrit = true;
     else if (rnd(100) < 5) isCrit = true;
@@ -306,7 +416,7 @@
       flavor = c.name + 'の会心の一撃！！';
     }
 
-    if (b.m.metal && !isCrit) dmg = 1; // メタル系には会心以外1ダメージ
+    if (b.m.metal && !isCrit) dmg = 1;
 
     return { dmg: Math.max(1, dmg), line: flavor + ' ' + b.m.n + 'に' + Math.max(1, dmg) + 'ダメージ！' };
   }
@@ -314,8 +424,8 @@
   function enemyAttack(lines) {
     var targets = ['gari'].concat(aliveAllies());
     var target = targets[rnd(targets.length)];
-    var d = Math.max(1, b.m.atk - Math.floor(p.lv * 1.5) + rnd(10));
-    
+    var d = Math.max(10, b.m.atk - Math.floor(p.lv * 15) + rnd(100));
+
     if (target === 'gari') {
       p.hp = Math.max(0, p.hp - d);
       lines.push(b.m.n + 'の攻撃！ ガリは' + d + 'のダメージを受けた！');
@@ -326,7 +436,7 @@
       if (p.allyHp[target] === 0) lines.push(CHAR_DEFS[a.id].name + 'は倒れてしまった…');
     }
   }
-  
+
   function endTurn(lines) {
     if (p.hp <= 0) {
       lines.push('ガリは力尽きた…', '目が覚めると、実家の布団で寝ていた。（もう一度、旅立とう）');
@@ -349,10 +459,10 @@
     }
 
     var isCrit = (rnd(100) < 5);
-    var d = atk() + rnd(10);
+    var d = atk() + rnd(100);
     if (isCrit) d *= 2;
     if (b.m.metal && !isCrit) d = 1;
-    
+
     b.m.hp = Math.max(0, b.m.hp - d);
     lines.push('ガリ「' + pick(ATK_LINES) + '」！ ' + b.m.n + 'に' + d + 'のダメージ！' + (isCrit ? '（会心！）' : ''));
     if (b.m.hp <= 0) return win(lines);
@@ -373,27 +483,30 @@
   function useItem() {
     if (p.items <= 0) { say(['ガンギマリンαが ない！'], battleMenu); return; }
     var opts = [{ id: 'gari', label: 'ガリ', hp: p.hp, max: maxHp() }];
-    p.party.forEach(function (rIdx) { 
+    p.party.forEach(function (rIdx) {
       var a = getAllyData(rIdx);
-      opts.push({ id: rIdx, label: CHAR_DEFS[a.id].name, hp: (p.allyHp[rIdx] || 0), max: allyMaxHp(rIdx) }); 
+      opts.push({ id: rIdx, label: CHAR_DEFS[a.id].name, hp: (p.allyHp[rIdx] || 0), max: allyMaxHp(rIdx) });
     });
     var items = opts.map(function (o) {
       return { label: o.label + '（HP' + o.hp + '/' + o.max + '）', fn: function () { itemHealTarget(o.id); } };
     });
     items.push({ label: 'やめる', fn: battleMenu });
-    $('msg').textContent = '🧪 誰に使う？';
+    $('msg').textContent = '🧪 誰に使う？（最大HPの50%回復）';
     openMenu(items, battleMenu);
   }
-  
+
   function itemHealTarget(target) {
     p.items--;
-    var lines, heal = 100; // 回復量アップ
+    var lines;
     if (target === 'gari') {
-      var h = Math.min(heal, maxHp() - p.hp); p.hp += h;
+      var heal = Math.max(1000, Math.floor(maxHp() * 0.5));
+      var h = Math.min(heal, maxHp() - p.hp);
+      p.hp += h;
       lines = ['ガリはガンギマリンαを飲んだ！ HPが' + h + '回復した！'];
     } else {
       var max = allyMaxHp(target);
-      var h2 = Math.min(heal, max - (p.allyHp[target] || 0));
+      var heal2 = Math.max(1000, Math.floor(max * 0.5));
+      var h2 = Math.min(heal2, max - (p.allyHp[target] || 0));
       p.allyHp[target] += h2;
       lines = [CHAR_DEFS[getAllyData(target).id].name + 'はガンギマリンαを飲んだ！ HPが' + h2 + '回復した！'];
     }
@@ -407,36 +520,56 @@
   }
 
   function win(lines) {
-    if (b.boss) {
-      try { localStorage.removeItem(SAVE); } catch (e) {}
-      lines.push('大魔王サンドゥーラ「……友だちからなら、いいわよ」', 'ガリは大魔王サンドゥーラを口説き落とした！！', '孤独な旅は、ついに報われた。');
-      say(lines, function () { st = 'clear'; b = null; $('msg').textContent = '〜 滅・FIN 〜 決定ボタンで最初から'; render(); });
+    // 大魔王 第1形態撃破 → 学歴神へ第2段階変身！
+    if (b.boss === 1) {
+      lines.push(
+        '大魔王サンドゥーラを打ち倒した……！！',
+        '……しかし、城全体が激しい偏差値のオーラに包まれる！！',
+        '「ふふ……所詮はFランレベルの口説きね。本当の絶望を見せてあげるわ……！」',
+        '大魔王サンドゥーラは【学歴神サンドゥーラ】に変身した！！'
+      );
+      say(lines, function () {
+        startBattle(BOSS_2, 2);
+      });
       return;
     }
-    
+
+    // 学歴神 第2形態撃破 → 完全クリア！
+    if (b.boss === 2) {
+      try { localStorage.removeItem(SAVE); } catch (e) {}
+      lines.push(
+        '学歴神サンドゥーラ「……学歴も年収も関係ないのね。あなたの優しさに、合格……！」',
+        'ガリは学歴神サンドゥーラを完全に口説き落とした！！',
+        'スケール10倍の壮大な旅は、ついに報われた。'
+      );
+      say(lines, function () { st = 'clear'; b = null; $('msg').textContent = '〜 真・滅・FIN 〜 決定ボタンで最初から'; render(); });
+      return;
+    }
+
     p.exp += b.m.exp;
-    var gold = Math.max(1, Math.floor(b.m.exp * 0.4));
+    var gold = Math.max(10, Math.floor(b.m.exp * 0.4));
     p.money += gold;
     lines.push(b.m.n + 'を倒した！ 経験値' + b.m.exp + 'と🪙' + gold + 'を得た！');
-    
+
     while (p.lv < LV_MAX && p.exp >= need()) {
       p.exp -= need(); p.lv++; p.hp = maxHp();
       p.party.forEach(function (rIdx) { p.allyHp[rIdx] = allyMaxHp(rIdx); });
       lines.push('レベル' + p.lv + 'になった！ ' + pick(LV_LINES));
     }
-    
+
     var recruitId = b.m.recruit;
-    if (recruitId && rnd(100) < 30) { // 30%で仲間になる
+    if (recruitId && rnd(100) < 35) {
       say(lines, function() {
         var c = CHAR_DEFS[recruitId];
-        yesNo(c.name + 'が仲間になりたそうにこちらを見ている。仲間にする？', 
+        yesNo(c.name + 'が仲間になりたそうにこちらを見ている。仲間にする？',
           function() {
             var newIdx = p.roster.length;
             p.roster.push({ id: recruitId, plus: 0 });
             p.allyHp[newIdx] = allyMaxHp(newIdx);
-            if (p.party.length < 3) p.party.push(newIdx); // 空きがあれば自動編成
+            if (p.party.length < 3) p.party.push(newIdx);
+            save();
             say([c.name + 'が仲間のストックに加わった！'], toMap);
-          }, 
+          },
           toMap);
       });
       return;
@@ -444,32 +577,56 @@
     say(lines, toMap);
   }
 
-  // === 街の機能 ===
+  // ==========================================
+  // 7. 街の機能（ルーラ・宿屋・道具屋・編成・合体）
+  // ==========================================
   function openTown() {
     var t = TOWNS[p.pos];
-    $('msg').textContent = t.e + ' ' + t.name + '：何をする？';
+    $('msg').textContent = t.e + ' ' + t.name + '（' + p.pos + '歩）：何をする？';
     var acts = [
-      { label: '🛏️ 宿屋（全回復）🪙' + (p.lv * 5), fn: restAtInn },
-      { label: '🛍️ 道具屋（ガンギマリンα）🪙25', fn: buyItem },
+      { label: '🛏️ 宿屋（全回復）🪙' + (p.lv * 50), fn: restAtInn },
+      { label: '🛍️ 道具屋（ガンギマリンα）🪙250', fn: buyItem },
       { label: '👥 仲間編成', fn: openParty },
       { label: '👯 怪しい裏路地（仲間合体）', fn: openFusion },
+      { label: '✈️ ルーラ（行った街へ移動）', fn: openWarp },
       { label: '🚪 旅にもどる', fn: toMap }
     ];
     openMenu(acts, toMap);
   }
 
+  function openWarp() {
+    var items = [];
+    Object.keys(TOWNS).forEach(function (k) {
+      var posNum = Number(k);
+      if (posNum <= p.far) {
+        items.push({
+          label: TOWNS[posNum].e + ' ' + posNum + '歩：' + TOWNS[posNum].name,
+          fn: function () {
+            p.pos = posNum;
+            say(['✈️ ルーラで「' + TOWNS[posNum].name + '」へ瞬時に移動した！'], openTown);
+          }
+        });
+      }
+    });
+    items.push({ label: 'やめる', fn: openTown });
+    $('msg').textContent = '✈️ どの街へ移動する？';
+    openMenu(items, openTown);
+  }
+
   function restAtInn() {
-    var cost = p.lv * 5;
+    var cost = p.lv * 50;
     if (p.money < cost) { say(['お金が足りないよ…（🪙' + p.money + '）'], openTown); return; }
     p.money -= cost; p.hp = maxHp();
     p.party.forEach(function (idx) { p.allyHp[idx] = allyMaxHp(idx); });
+    save();
     say(['宿屋でぐっすり休んだ。全員のHPが全回復した！'], openTown);
   }
 
   function buyItem() {
-    if (p.money < 25) { say(['お金が足りないよ…（🪙' + p.money + '）'], openTown); return; }
+    if (p.money < 250) { say(['お金が足りないよ…（🪙' + p.money + '）'], openTown); return; }
     if (p.items >= 15) { say(['これ以上は持てないみたい。（🧪15個上限）'], openTown); return; }
-    p.money -= 25; p.items++;
+    p.money -= 250; p.items++;
+    save();
     say(['ガンギマリンαを買った！（🧪×' + p.items + '）'], openTown);
   }
 
@@ -478,21 +635,26 @@
     var items = p.roster.map(function (a, idx) {
       var c = CHAR_DEFS[a.id];
       var active = p.party.indexOf(idx) >= 0;
-      return { label: (active ? '✅ ' : '  ') + c.emoji + c.name + (a.plus > 0 ? '+'+a.plus : '') + '（' + c.role + '）', 
-               fn: function () { toggleParty(idx); } };
+      return {
+        label: (active ? '✅ ' : '  ') + c.emoji + c.name + (a.plus > 0 ? '+' + a.plus : '') + '（' + c.role + '）',
+        fn: function () { toggleParty(idx); }
+      };
     });
     items.push({ label: 'やめる', fn: openTown });
-    $('msg').textContent = '👥 編成：編成する人を選んでね（ガリ＋最大3人）';
+    $('msg').textContent = '👥 編成：連れて行く仲間を選んでね（最大3人）';
     openMenu(items, openTown);
   }
   function toggleParty(idx) {
     var pos = p.party.indexOf(idx);
     if (pos >= 0) p.party.splice(pos, 1);
     else if (p.party.length < 3) p.party.push(idx);
+    save();
     openParty();
   }
 
-  // === 仲間合体システム ===
+  // ==========================================
+  // 8. 仲間合体システム
+  // ==========================================
   function openFusion() {
     fusionOpts = [];
     if (p.roster.length < 2) { say(['合体するには、ストックに仲間が2人以上必要だ。'], openTown); return; }
@@ -500,17 +662,19 @@
   }
   function selectFusion1() {
     var items = p.roster.map(function (a, idx) {
-      return { label: CHAR_DEFS[a.id].name + (a.plus>0?'+'+a.plus:''), fn: function () { fusionOpts[0] = idx; selectFusion2(); } };
+      var c = CHAR_DEFS[a.id];
+      return { label: c.emoji + c.name + (a.plus > 0 ? '+' + a.plus : ''), fn: function () { fusionOpts[0] = idx; selectFusion2(); } };
     });
     items.push({ label: 'やめる', fn: openTown });
-    $('msg').textContent = '👯 合体：ベースになる1人目を選んでね。（※合体すると編成から外れます）';
+    $('msg').textContent = '👯 合体：ベースになる1人目を選んでね。（※編成は一度リセットされます）';
     openMenu(items, openTown);
   }
   function selectFusion2() {
     var items = [];
     p.roster.forEach(function (a, idx) {
       if (idx !== fusionOpts[0]) {
-        items.push({ label: CHAR_DEFS[a.id].name + (a.plus>0?'+'+a.plus:''), fn: function () { fusionOpts[1] = idx; executeFusion(); } });
+        var c = CHAR_DEFS[a.id];
+        items.push({ label: c.emoji + c.name + (a.plus > 0 ? '+' + a.plus : ''), fn: function () { fusionOpts[1] = idx; executeFusion(); } });
       }
     });
     items.push({ label: '選び直す', fn: selectFusion1 });
@@ -520,42 +684,44 @@
   function executeFusion() {
     var idx1 = fusionOpts[0], idx2 = fusionOpts[1];
     var a1 = p.roster[idx1], a2 = p.roster[idx2];
-    
+
     var recipeKey1 = a1.id + '+' + a2.id;
     var recipeKey2 = a2.id + '+' + a1.id;
     var newId = FUSION_RECIPES[recipeKey1] || FUSION_RECIPES[recipeKey2];
-    
+
     var resultPlus = 0;
     if (newId) {
-      // 進化合体
-      resultPlus = Math.max(a1.plus, a2.plus); 
+      resultPlus = Math.max(a1.plus, a2.plus);
     } else {
-      // ベースアップ合体（同キャラなら+2、別キャラなら+1）
       newId = a1.id;
       resultPlus = a1.plus + (a1.id === a2.id ? (a2.plus + 1) : 1);
     }
-    
-    var cName = CHAR_DEFS[newId].name + (resultPlus > 0 ? '+' + resultPlus : '');
-    yesNo(CHAR_DEFS[a1.id].name + ' と ' + CHAR_DEFS[a2.id].name + ' を合体させて「' + cName + '」にする？', 
+
+    var cName = CHAR_DEFS[newId].emoji + CHAR_DEFS[newId].name + (resultPlus > 0 ? '+' + resultPlus : '');
+    yesNo(CHAR_DEFS[a1.id].name + ' と ' + CHAR_DEFS[a2.id].name + ' を合体させて「' + cName + '」にする？',
       function() {
-        // 編成から一旦外す
         p.party = [];
-        // 後ろのインデックスから削除
         var maxIdx = Math.max(idx1, idx2), minIdx = Math.min(idx1, idx2);
         p.roster.splice(maxIdx, 1);
         p.roster.splice(minIdx, 1);
-        
-        // 新しいキャラをストックに追加
-        var newIdx = p.roster.length;
+
         p.roster.push({ id: newId, plus: resultPlus });
-        p.allyHp[newIdx] = allyMaxHp(newIdx);
-        
+
+        // 全ストックのHPをインデックスずれなく再構築
+        p.allyHp = {};
+        p.roster.forEach(function (_, i) {
+          p.allyHp[i] = allyMaxHp(i);
+        });
+        save();
+
         say(['👯 怪しい光が包み込む……！', '合体成功！「' + cName + '」が誕生した！'], openTown);
       },
       selectFusion1);
   }
 
-  // === キー入力制御 ===
+  // ==========================================
+  // 9. キー入力制御
+  // ==========================================
   function press(k) {
     if (st === 'map') {
       if (k === 'ok') move(0);
@@ -591,7 +757,7 @@
   });
 
   var s = load();
-  if (s) { yesNo('前回の続きから始める？', function () { p = s; toMap(); }, newGame); } 
+  if (s) { yesNo('前回の続きから始める？', function () { p = s; toMap(); }, newGame); }
   else { newGame(); }
 })();
 </script>
