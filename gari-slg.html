@@ -350,7 +350,7 @@ let nextUid = 1;
 const MOB_TYPES = [
   { key: 'crab', name: '質問の蟹', icon: '🦀', hp: 1, atk: 1, def: 1, move: 2, range: 1, exp: 99, gold: 50, zone: 'all' },
   { key: 'takashi', name: 'たかし', icon: '👴', hp: 2, atk: 1, def: 1, move: 2, range: 1, exp: 99, gold: 50, zone: 'all' },
-  { key: 'sandura', name: 'サンドゥーラ', icon: '🎓', hp: 30, atk: 12, def: 4, move: 2, range: 1, exp: 500, gold: 500, zone: 'all' },
+  { key: 'sandura', name: 'サンドゥーラ', icon: '🎓', hp: 30, atk: 2, def: 4, move: 2, range: 1, exp: 500, gold: 500, zone: 'all' },
   { key: 'mozuku_slime', name: '迷子スライムもずく', icon: '🫧', hp: 14, atk: 6, def: 1, move: 1, range: 1, exp: 999, gold: 999, zone: 'west' },
   { key: 'wild_rabbit', name: '野良うさぎ', icon: '🐇', hp: 16, atk: 9, def: 1, move: 3, range: 1, exp: 999, gold: 18, zone: 'west' },
   { key: 'ghost', name: '学歴亡霊', icon: '👻', hp: 26, atk: 11, def: 5, move: 2, range: 1, exp: 999, gold: 30, zone: 'east' }
@@ -410,9 +410,9 @@ function generateMap() {
 
 function initUnits() {
   allies = [
-    { id: nextUid++, name: 'ガリ', icon: '🐻', lv: 1, exp: 0, hp: 50, maxHp: 50, atk: 12, def: 4, move: 3, range: 1, x: 5, y: 6, moved: false, acted: false, isHealer: false },
-    { id: nextUid++, name: 'やにうさ', icon: '🐰', lv: 1, exp: 0, hp: 40, maxHp: 40, atk: 11, def: 5, move: 4, range: 1, x: 6, y: 5, moved: false, acted: false, isHealer: false },
-    { id: nextUid++, name: '海蘊', icon: '🌿', lv: 1, exp: 0, hp: 30, maxHp: 30, atk: 9, def: 2, move: 4, range: 2, x: 5, y: 5, moved: false, acted: false, isHealer: true }
+    { id: nextUid++, name: 'ガリ', icon: '🐻', lv: 1, exp: 0, hp: 50, maxHp: 52, atk: 12, def: 12, move: 3, range: 1, x: 5, y: 6, moved: false, acted: false, isHealer: false },
+    { id: nextUid++, name: 'やにうさ', icon: '🐰', lv: 1, exp: 0, hp: 40, maxHp: 42, atk: 15, def: 5, move: 5, range: 1, x: 6, y: 5, moved: false, acted: false, isHealer: false },
+    { id: nextUid++, name: '海蘊', icon: '🌿', lv: 1, exp: 0, hp: 30, maxHp: 32, atk: 9, def: 2, move: 4, range: 2, x: 5, y: 5, moved: false, acted: false, isHealer: true }
   ];
 
   // 城の防衛幹部＆ラスボス（移動0：その場から動かず待ち構える）
