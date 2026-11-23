@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ガリゴンクエスト 2D移動テスト版</title>
+<style>
+  * { box-sizing: border-box; user-select: none; }
+  body {
+    margin: 0;
+    background: #111;
+    color: #fff;
+    font-family: "Courier New", Consolas, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 10px;
+  }
+  .window {
+    border: 3px solid #fff;
+    border-radius: 6px;
+    background: #000;
+    padding: 8px 12px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 8px;
+  }
+  .status {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  #map-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
+    width: 100%;
+    max-width: 396px;
+    aspect-ratio: 1 / 1;
+    border: 3px solid #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 8px;
+  }
+  .tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    line-height: 1;
+    position: relative;
+  }
+  .t-sea { background: #154360; }
+  .t-grass { background: #1e8449; }
+  .t-forest { background: #145a32; }
+  .t-mountain { background: #5d6d7e; }
+  .t-bridge { background: #9c640c; }
+  .t-poison { background: #5b2c6f; }
+  .t-town { background: #1e8449; }
+  .t-castle { background: #641e16; }
+  .player-sprite {
+    position: absolute;
+    font-size: 24px;
+    filter: drop-shadow(0 0 3px #000);
+    z-index: 2;
+  }
+  #log {
+    height: 76px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 64px);
+    grid-template-rows: repeat(3, 52px);
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .dpad button {
+    background: #222;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .dpad button:active { background: #555; }
+  .empty { visibility: hidden; }
+</style>
+</head>
+<body>
+
+  <div class="window status">
+    <span>ガリ Lv.<span id="lv">1</span></span>
+    <span>HP:<span id="hp">30</span>/<span id="maxhp">30</span></span>
+    <span>X:<span id="pos-x">0</span> Y:<span id="pos-y">0</span></span>
+  </div>
+
+  <div id="map-grid"></div>
+
+  <div class="window" id="log"></div>
+
+  <div class="dpad">
+    <div class="empty"></div>
+    <button onclick="move(0, -1)">▲</button>
+    <div class="empty"></div>
+    <button onclick="move(-1, 0)">◀</button>
+    <button onclick="checkSpot()">●</button>
+    <button onclick="move(1, 0)">▶</button>
+    <div class="empty"></div>
+    <button onclick="move(0, 1)">▼</button>
+    <div class="empty"></div>
+  </div>
+
+<script>
+const MAP_SIZE = 40;
+const VIEW_SIZE = 11; // 奇数（中央がプレイヤー）
+const HALF = Math.floor(VIEW_SIZE / 2);
+
+// 0:海(不可), 1:草原, 2:森, 3:山(不可), 4:橋, 5:毒の沼, 6:町, 7:魔王城
+const TILES = {
+  0: { cls: 't-sea', icon: '🌊', walk: false, name: '海' },
+  1: { cls: 't-grass', icon: '', walk: true, name: '草原', enc: 0.12 },
+  2: { cls: 't-forest', icon: '🌲', walk: true, name: '森', enc: 0.22 },
+  3: { cls: 't-mountain', icon: '⛰️', walk: false, name: '山' },
+  4: { cls: 't-bridge', icon: '🌉', walk: true, name: '橋', enc: 0.15 },
+  5: { cls: 't-poison', icon: '🟣', walk: true, name: '毒の沼', enc: 0.18 },
+  6: { cls: 't-town', icon: '🏘️', walk: true, name: '町', enc: 0 },
+  7: { cls: 't-castle', icon: '🏰', walk: true, name: '学歴神の城', enc: 0 }
+};
+
+let world = [];
+let player = { x: 8, y: 8, lv: 1, hp: 30, maxHp: 30, exp: 0 };
+
+function generateMap() {
+  // 全体を草原で初期化し、外周を海にする
+  for (let y = 0; y < MAP_SIZE; y++) {
+    let row = [];
+    for (let x = 0; x < MAP_SIZE; x++) {
+      if (x <= 1 || y <= 1 || x >= MAP_SIZE - 2 || y >= MAP_SIZE - 2) {
+        row.push(0);
+      } else {
+        row.push(1);
+      }
+    }
+    world.push(row);
+  }
+
+  // 中央付近に川（海）を縦に走らせ、橋を架ける（ドラクエ1風エリア分け）
+  for (let y = 2; y < MAP_SIZE - 2; y++) {
+    world[y][19] = 0;
+    world[y][20] = 0;
+  }
+  world[12][19] = 4; world[12][20] = 4; // 北の橋
+  world[28][19] = 4; world[28][20] = 4; // 南の橋
+
+  // ランダムに森・山・毒の沼を配置
+  for (let y = 3; y < MAP_SIZE - 3; y++) {
+    for (let x = 3; x < MAP_SIZE - 3; x++) {
+      if (x >= 18 && x <= 21) continue; // 橋周辺は空ける
+      if (Math.abs(x - 8) <= 2 && Math.abs(y - 8) <= 2) continue; // 初期位置周辺は空ける
+      const r = Math.random();
+      if (r < 0.18) world[y][x] = 2;      // 森
+      else if (r < 0.25) world[y][x] = 3; // 山
+      else if (r < 0.29 && x > 20) world[y][x] = 5; // 東大陸に毒の沼
+    }
+  }
+
+  // 町と城を配置
+  world[8][8] = 6;   // 始まりの町
+  world[15][10] = 6; // 西の村
+  world[10][26] = 6; // 橋を渡った先の町
+  world[32][12] = 6; // 南の町
+  world[33][33] = 7; // 魔王城（学歴神サンドゥーラ）
+}
+
+function addLog(msg) {
+  const logEl = document.getElementById('log');
+  logEl.innerHTML += `<div>${msg}</div>`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function render() {
+  const grid = document.getElementById('map-grid');
+  grid.innerHTML = '';
+
+  for (let dy = -HALF; dy <= HALF; dy++) {
+    for (let dx = -HALF; dx <= HALF; dx++) {
+      const wx = player.x + dx;
+      const wy = player.y + dy;
+      const cell = document.createElement('div');
+      cell.className = 'tile';
+
+      if (wx < 0 || wy < 0 || wx >= MAP_SIZE || wy >= MAP_SIZE) {
+        cell.classList.add('t-sea');
+        cell.textContent = '🌊';
+      } else {
+        const t = TILES[world[wy][wx]];
+        cell.classList.add(t.cls);
+        cell.textContent = t.icon;
+      }
+
+      if (dx === 0 && dy === 0) {
+        const p = document.createElement('span');
+        p.className = 'player-sprite';
+        p.textContent = '🍺'; // 主人公ガリ
+        cell.appendChild(p);
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  document.getElementById('lv').textContent = player.lv;
+  document.getElementById('hp').textContent = player.hp;
+  document.getElementById('maxhp').textContent = player.maxHp;
+  document.getElementById('pos-x').textContent = player.x;
+  document.getElementById('pos-y').textContent = player.y;
+}
+
+function move(dx, dy) {
+  const nx = player.x + dx;
+  const ny = player.y + dy;
+  if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) return;
+
+  const tile = TILES[world[ny][nx]];
+  if (!tile.walk) {
+    addLog(`⚠️ ${tile.name}には進めない！`);
+    return;
+  }
+
+  player.x = nx;
+  player.y = ny;
+
+  // 地形イベント
+  if (world[ny][nx] === 5) {
+    player.hp = Math.max(1, player.hp - 2);
+    addLog(`🟣 毒の沼！ダメージ2を受けた！`);
+  } else if (world[ny][nx] === 6) {
+    player.hp = player.maxHp;
+    addLog(`🏘️ 町に入った！HPが全回復した！`);
+  } else if (world[ny][nx] === 7) {
+    addLog(`🏰 魔王城に到達！（本実装ではここでサンドゥーラ戦！）`);
+  } else if (tile.enc && Math.random() < tile.enc) {
+    // 簡易エンカウントテスト（距離に応じて敵が変わるイメージ）
+    const dist = Math.abs(nx - 8) + Math.abs(ny - 8);
+    const enemy = dist < 15 ? '🐰やにうさ' : '😈強敵';
+    const dmg = dist < 15 ? 2 : 6;
+    player.hp = Math.max(1, player.hp - dmg);
+    player.exp += 5;
+    if (player.exp >= player.lv * 15) {
+      player.lv++;
+      player.maxHp += 10;
+      player.hp = player.maxHp;
+      addLog(`⚔️ ${enemy}を倒した！レベルアップ！Lv.${player.lv}`);
+    } else {
+      addLog(`⚔️ ${enemy}が現れた！${dmg}ダメージ受けつつ撃破！`);
+    }
+  }
+
+  render();
+}
+
+function checkSpot() {
+  const tile = TILES[world[player.y][player.x]];
+  addLog(`🔍 足元は【${tile.name}】(X:${player.x}, Y:${player.y})`);
+}
+
+window.addEventListener('keydown', (e) => {
+  if (['ArrowUp', 'w', 'W'].includes(e.key)) { e.preventDefault(); move(0, -1); }
+  if (['ArrowDown', 's', 'S'].includes(e.key)) { e.preventDefault(); move(0, 1); }
+  if (['ArrowLeft', 'a', 'A'].includes(e.key)) { e.preventDefault(); move(-1, 0); }
+  if (['ArrowRight', 'd', 'D'].includes(e.key)) { e.preventDefault(); move(1, 0); }
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); checkSpot(); }
+});
+
+generateMap();
+render();
+addLog('🍺 ガリゴンクエスト2D テスト起動！十字キー/WASDで移動！');
+</script>
+</body>
+</html>
