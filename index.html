@@ -38,7 +38,7 @@
     }
     a { color: #ffb98a; text-decoration: none; }
     a:hover { text-decoration: underline wavy; text-underline-offset: 3px; }
-    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
 
     .container { max-width: 1020px; margin: 0 auto; }
 
@@ -210,10 +210,6 @@
       border-radius: 14px;
       padding: 6px 12px;
     }
-    textarea.dummy-input {
-      resize: vertical;
-      min-height: 64px;
-    }
     .login-form { display: flex; flex-direction: column; gap: 8px; }
     .login-form label { font-size: 12px; color: var(--ink-soft); }
     .btn-login, .btn-admin {
@@ -234,66 +230,6 @@
     /* 捨てメールアドレス発行 */
     .mail-result[readonly] { cursor: text; }
     .mail-note { min-height: 1.6em; }
-
-    /* 簡易掲示板 */
-    .bbs-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .bbs-row .dummy-input { flex: 1; }
-    .bbs-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .bbs-actions .btn-login { flex: 1; }
-    .bbs-list {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 290px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-    .bbs-item {
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: var(--panel2);
-      border: 1px solid var(--line);
-    }
-    .bbs-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: var(--ink-soft);
-      margin-bottom: 4px;
-      gap: 8px;
-    }
-    .bbs-name {
-      font-weight: 700;
-      color: #ffbf93;
-    }
-    .bbs-del {
-      background: transparent;
-      border: 1px solid var(--line);
-      color: var(--ink-soft);
-      border-radius: 99px;
-      padding: 1px 8px;
-      font-size: 10px;
-      cursor: pointer;
-    }
-    .bbs-del:hover {
-      border-color: #ff8f8f;
-      color: #ff8f8f;
-    }
-    .bbs-text {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 13px;
-    }
 
     footer {
       margin-top: 8px;
@@ -318,7 +254,7 @@
   <!-- ヘッダー -->
   <header>
     <div>
-      <div class="logo">🎀 MOZUU! <span>JAPAN</span></div>
+      <div class="logo">🐰MOZUU! <span>JAPAN</span>🐻</div>
       <div class="sub-text" style="background:none;padding:0;">もずーじゃぱん ポータル</div>
     </div>
     <div class="sub-text">2026年10月31日 | ポータル公開中 ✨</div>
@@ -338,7 +274,6 @@
         <div class="panel-header">🐾 MOZUU! JAPAN コンテンツ</div>
         <ul class="category-list">
           <li class="category-item highlight"><a href="#mail">📮 捨てメール</a></li>
-          <li class="category-item highlight"><a href="#bbs">💬 簡易掲示板</a></li>
           <li class="category-item highlight"><a href="qr.html">📱 QR変換</a></li>
           <li class="category-item highlight"><a href="gari-rpg.html">⚔️ 真・ガリゴンクエスト</a></li>
           <li class="category-item highlight"><a href="test-2d.html">⚔️ テスト・ガリゴンクエスト</a></li>
@@ -385,25 +320,6 @@
             <button type="button" class="btn-admin" id="tmpmailCopy" disabled>コピー</button>
             <div class="sub-text mail-note" id="tmpmailNote" role="status">MOZUU! ID発行後に使用できます</div>
           </form>
-        </div>
-      </div>
-
-      <!-- もずー簡易掲示板 -->
-      <div class="panel" id="bbs">
-        <div class="panel-header">💬 もずー簡易掲示板（ミニメモBBS）</div>
-        <div class="panel-body">
-          <form onsubmit="return false;" class="login-form" id="bbsForm">
-            <div class="bbs-row">
-              <input id="bbsName" type="text" class="dummy-input" maxlength="20" placeholder="おなまえ（空欄なら名無しのもずく）" aria-label="おなまえ">
-            </div>
-            <textarea id="bbsMsg" class="dummy-input" maxlength="200" placeholder="ひとこと書き込んでね！（200文字まで）" aria-label="メッセージ"></textarea>
-            <div class="bbs-actions">
-              <button type="button" class="btn-login" id="bbsSubmit">書き込む ✍️</button>
-              <button type="button" class="btn-admin" id="bbsClear">全消去</button>
-            </div>
-            <div class="sub-text" id="bbsNote">※この端末のブラウザ内に保存されるローカル掲示板だよ✨</div>
-          </form>
-          <div class="bbs-list" id="bbsList" aria-live="polite"></div>
         </div>
       </div>
 
@@ -493,7 +409,7 @@
   </div>
 
   <footer>
-    <p>🎀 Copyright (C) Mozuu!-Japan &amp; Mozubeya. All Rights Reserved. 🎀</p>
+    <p>🐰 Copyright (C) Mozuu!-Japan &amp; Mozubeya. All Rights Reserved. 🐻</p>
     <p>QRコードは株式会社デンソーウェーブの登録商標です。</p>
   </footer>
 </div>
@@ -555,131 +471,6 @@
       links[i].setAttribute('target', '_blank');
       links[i].setAttribute('rel', 'noopener noreferrer');
     }
-  })();
-
-  // ---- もずー簡易掲示板（ローカル保存型） ----
-  (function () {
-    var STORAGE_KEY = 'mozuu_mini_bbs_v1';
-    var nameInput = document.getElementById('bbsName');
-    var msgInput = document.getElementById('bbsMsg');
-    var submitBtn = document.getElementById('bbsSubmit');
-    var clearBtn = document.getElementById('bbsClear');
-    var listEl = document.getElementById('bbsList');
-
-    var DEFAULT_POSTS = [
-      {
-        id: 1,
-        name: '管理人',
-        time: '2026/10/31 23:59',
-        text: 'もずーじゃぱん簡易掲示板へようこそ！メモやひとことに使ってね🎀'
-      }
-    ];
-
-    function loadPosts() {
-      try {
-        var raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return DEFAULT_POSTS.slice();
-        var parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : DEFAULT_POSTS.slice();
-      } catch (e) {
-        return DEFAULT_POSTS.slice();
-      }
-    }
-
-    function savePosts(posts) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-      } catch (e) {
-        // ストレージ制限時などは無視
-      }
-    }
-
-    function formatNow() {
-      var d = new Date();
-      var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
-      return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) +
-        ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-    }
-
-    function render() {
-      var posts = loadPosts();
-      listEl.textContent = '';
-
-      if (posts.length === 0) {
-        var empty = document.createElement('div');
-        empty.className = 'sub-text';
-        empty.style.textAlign = 'center';
-        empty.style.padding = '12px 0';
-        empty.textContent = 'まだ書き込みはないよ〜っ！一番乗りしちゃお✨';
-        listEl.appendChild(empty);
-        return;
-      }
-
-      for (var i = 0; i < posts.length; i++) {
-        (function (post) {
-          var item = document.createElement('div');
-          item.className = 'bbs-item';
-
-          var meta = document.createElement('div');
-          meta.className = 'bbs-meta';
-
-          var left = document.createElement('span');
-          var nameSpan = document.createElement('span');
-          nameSpan.className = 'bbs-name';
-          nameSpan.textContent = post.name;
-          left.appendChild(nameSpan);
-          left.appendChild(document.createTextNode(' ・ ' + post.time));
-
-          var delBtn = document.createElement('button');
-          delBtn.type = 'button';
-          delBtn.className = 'bbs-del';
-          delBtn.textContent = '削除';
-          delBtn.addEventListener('click', function () {
-            var current = loadPosts().filter(function (p) { return p.id !== post.id; });
-            savePosts(current);
-            render();
-          });
-
-          meta.appendChild(left);
-          meta.appendChild(delBtn);
-
-          var body = document.createElement('div');
-          body.className = 'bbs-text';
-          body.textContent = post.text;
-
-          item.appendChild(meta);
-          item.appendChild(body);
-          listEl.appendChild(item);
-        })(posts[i]);
-      }
-    }
-
-    submitBtn.addEventListener('click', function () {
-      var text = msgInput.value.replace(/^\s+|\s+$/g, '');
-      if (!text) return;
-      var name = nameInput.value.replace(/^\s+|\s+$/g, '') || '名無しのもずく';
-
-      var posts = loadPosts();
-      posts.unshift({
-        id: Date.now() + Math.random(),
-        name: name.slice(0, 20),
-        time: formatNow(),
-        text: text.slice(0, 200)
-      });
-      if (posts.length > 50) posts = posts.slice(0, 50);
-
-      savePosts(posts);
-      msgInput.value = '';
-      render();
-    });
-
-    clearBtn.addEventListener('click', function () {
-      if (!confirm('掲示板の書き込みをすべて消去する？')) return;
-      savePosts([]);
-      render();
-    });
-
-    render();
   })();
 </script>
 
