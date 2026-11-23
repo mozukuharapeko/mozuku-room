@@ -38,7 +38,7 @@
     }
     a { color: #ffb98a; text-decoration: none; }
     a:hover { text-decoration: underline wavy; text-underline-offset: 3px; }
-    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
 
     .container { max-width: 1020px; margin: 0 auto; }
 
@@ -72,7 +72,7 @@
     .sub-text { font-size: 12px; color: var(--ink-soft); }
     header .sub-text { background: var(--panel2); border-radius: 99px; padding: 3px 14px; color: var(--ink); }
 
-    /* 検索 */
+    /* 検索（Googleのみ） */
     .search-box {
       display: flex;
       gap: 8px;
@@ -132,7 +132,19 @@
     .panel-body { padding: 12px 16px; }
 
     /* 左メニュー */
-    .category-list { list-style: none; padding: 6px 10px 10px; }
+    .category-list { list-style: none; padding: 8px 10px 12px; }
+    .category-label {
+      margin-top: 12px;
+      margin-bottom: 4px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #8fbde6;
+      background: rgba(143, 189, 230, 0.12);
+      border-radius: 99px;
+      text-align: center;
+    }
+    .category-label:first-child { margin-top: 2px; }
     .category-item a {
       display: block;
       padding: 7px 12px;
@@ -142,12 +154,23 @@
       border: 2px solid var(--line);
       color: var(--ink);
       font-weight: 500;
+      transition: background 0.15s, color 0.15s;
     }
     .category-item a:hover { background: var(--orange-soft); color: var(--on-pastel); text-decoration: none; }
     .category-item.highlight a { font-weight: 700; border-color: #6b5545; }
     .category-item.custom-link a { border-color: #4d5966; }
     .category-item.custom-link a:hover { background: var(--sky); color: var(--on-pastel); }
-    .category-item.empty-slot a { border-style: dashed; color: var(--ink-soft); }
+    .category-item.empty-slot a {
+      border-style: dashed;
+      color: var(--ink-soft);
+      text-align: center;
+      font-size: 12px;
+      cursor: default;
+    }
+    .category-item.empty-slot a:hover {
+      background: var(--panel2);
+      color: var(--ink-soft);
+    }
 
     /* ニュース */
     .news-list { list-style: none; }
@@ -177,7 +200,7 @@
     .news-tag.fun { background: var(--sky); color: #3d84c6; }
     .news-item .sub-text { white-space: nowrap; }
 
-    /* ログイン */
+    /* フォーム共通 */
     .dummy-input {
       width: 100%;
       font: inherit;
@@ -187,17 +210,22 @@
       border-radius: 14px;
       padding: 6px 12px;
     }
+    textarea.dummy-input {
+      resize: vertical;
+      min-height: 64px;
+    }
     .login-form { display: flex; flex-direction: column; gap: 8px; }
     .login-form label { font-size: 12px; color: var(--ink-soft); }
     .btn-login, .btn-admin {
       font: inherit;
       font-weight: 700;
       border-radius: 99px;
-      padding: 8px;
+      padding: 8px 16px;
       cursor: pointer;
       margin-top: 4px;
     }
     .btn-login { background: var(--orange); color: var(--on-pastel); border: none; box-shadow: 0 3px 0 #c4824f; }
+    .btn-login:active { transform: translateY(2px); box-shadow: 0 1px 0 #c4824f; }
     .btn-admin { background: transparent; color: #cdbff5; border: 2px solid #6d6590; }
     .btn-admin:disabled { opacity: .5; cursor: not-allowed; }
     .login-links { display: flex; justify-content: space-between; font-size: 11px; }
@@ -207,38 +235,64 @@
     .mail-result[readonly] { cursor: text; }
     .mail-note { min-height: 1.6em; }
 
-    /* 検索（Google / Yahoo! / Bing） */
-    .search-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-    .search-stack .search-box { margin-bottom: 0; }
-    .search-row { display: flex; flex-wrap: wrap; gap: 10px; }
-    .search-row .search-box { flex: 1 1 260px; }
-
-    /* おみくじ・ガリ占い */
-    .fortune-form { display: flex; flex-direction: column; gap: 8px; }
-    .fortune-form label { font-size: 12px; color: var(--ink-soft); }
-    .fortune-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .fortune-actions button { flex: 1 1 150px; }
-    .fortune-result {
-      margin-top: 12px;
-      padding: 12px 16px;
-      border: 2px dashed var(--line);
-      border-radius: 16px;
-      background: var(--panel2);
-      min-height: 3.2em;
+    /* 簡易掲示板 */
+    .bbs-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
-    .fortune-rank { font-size: 30px; font-weight: 900; line-height: 1.3; color: #ffbf93; }
-    .fortune-rank.bad { color: #9fc5ea; }
-    .fortune-line { margin-top: 4px; }
-
-    /* たかしのROUGAI知恵袋 */
-    .takashi-result {
+    .bbs-row .dummy-input { flex: 1; }
+    .bbs-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .bbs-actions .btn-login { flex: 1; }
+    .bbs-list {
       margin-top: 12px;
-      padding: 12px 16px;
-      border: 2px dashed var(--line);
-      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 290px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .bbs-item {
+      padding: 10px 12px;
+      border-radius: 14px;
       background: var(--panel2);
-      min-height: 3.2em;
+      border: 1px solid var(--line);
+    }
+    .bbs-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--ink-soft);
+      margin-bottom: 4px;
+      gap: 8px;
+    }
+    .bbs-name {
       font-weight: 700;
+      color: #ffbf93;
+    }
+    .bbs-del {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--ink-soft);
+      border-radius: 99px;
+      padding: 1px 8px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .bbs-del:hover {
+      border-color: #ff8f8f;
+      color: #ff8f8f;
+    }
+    .bbs-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 13px;
     }
 
     footer {
@@ -270,23 +324,11 @@
     <div class="sub-text">2026年10月31日 | ポータル公開中 ✨</div>
   </header>
 
-  <!-- 検索（新しいタブで開きます） -->
-  <div class="search-stack">
-    <form action="https://www.google.com/search" method="get" target="_blank" class="search-box">
-      <input type="text" name="q" class="search-input" id="searchInput" placeholder="🔍 Googleで検索..." aria-label="Googleで検索">
-      <button type="submit" class="search-btn">検索</button>
-    </form>
-    <div class="search-row">
-      <form action="https://search.yahoo.co.jp/search" method="get" target="_blank" class="search-box">
-        <input type="text" name="p" class="search-input" placeholder="🔍 Yahoo!で検索..." aria-label="Yahoo! JAPANで検索">
-        <button type="submit" class="search-btn">Yahoo!</button>
-      </form>
-      <form action="https://www.bing.com/search" method="get" target="_blank" class="search-box">
-        <input type="text" name="q" class="search-input" placeholder="🔍 Bingで検索..." aria-label="Bingで検索">
-        <button type="submit" class="search-btn">Bing</button>
-      </form>
-    </div>
-  </div>
+  <!-- 検索（Googleのみ・新しいタブで開きます） -->
+  <form action="https://www.google.com/search" method="get" target="_blank" class="search-box">
+    <input type="text" name="q" class="search-input" id="searchInput" placeholder="🔍 Googleで検索..." aria-label="Googleで検索">
+    <button type="submit" class="search-btn">検索</button>
+  </form>
 
   <div class="main-grid">
 
@@ -296,45 +338,40 @@
         <div class="panel-header">🐾 MOZUU! JAPAN コンテンツ</div>
         <ul class="category-list">
           <li class="category-item highlight"><a href="#mail">📮 捨てメール</a></li>
+          <li class="category-item highlight"><a href="#bbs">💬 簡易掲示板</a></li>
           <li class="category-item highlight"><a href="qr.html">📱 QR変換</a></li>
-          <li class="category-item highlight"><a href="gari-rpg.html">⚔️ 真・ガリゴンクエスト </a></li>
-          <li class="category-item highlight"><a href="test-2d.html">⚔️ テスト・ガリゴンクエスト </a></li>
-          <li class="category-item highlight"><a href="Kimoi_ikusei.HTML">🥚 キモいやつら育成ゲーム 鬱 </a></li>
-          <li class="category-item highlight"><a href="https://mozuku-room.vercel.app/mugen.html">📖 無限読本 </a></li>
-          <li class="category-item highlight"><a href="#fortune">🎴 おみくじ・ガリ占い</a></li>
-          <li class="category-item highlight"><a href="#takashi">👴 たかしのROUGAI知恵袋</a></li>
+          <li class="category-item highlight"><a href="gari-rpg.html">⚔️ 真・ガリゴンクエスト</a></li>
+          <li class="category-item highlight"><a href="test-2d.html">⚔️ テスト・ガリゴンクエスト</a></li>
+          <li class="category-item highlight"><a href="Kimoi_ikusei.HTML">🥚 キモいやつら育成ゲーム 鬱</a></li>
+          <li class="category-item highlight"><a href="https://mozuku-room.vercel.app/mugen.html">📖 無限読本</a></li>
         </ul>
       </div>
 
       <div class="panel sky">
-        <div class="panel-header">🔗 リンク</div>
+        <div class="panel-header">🔗 リンク集</div>
         <ul class="category-list">
-          <li class="category-item custom-link"><a href="ここにURLを貼る">💞Chat💕</a></li>
+          <li class="category-label">💞 Chat 💕</li>
           <li class="category-item custom-link"><a href="https://drrrkari.com/lounge/">デュラララチャット(仮)</a></li>
           <li class="category-item custom-link"><a href="https://drrrsetting.wixsite.com/drrr-setting">DrrrCustomize Manual</a></li>
           <li class="category-item custom-link"><a href="https://chatpad.jp/">ChatPad</a></li>
           <li class="category-item custom-link"><a href="https://www.chaberi.com/">チャベリ</a></li>
-          <li class="category-item custom-link"><a href="ここにURLを貼る">🎮Game🎮</a></li>
+
+          <li class="category-label">🎮 Game 🎮</li>
           <li class="category-item custom-link"><a href="https://suznooto.com/">Suznooto</a></li>
           <li class="category-item custom-link"><a href="http://shimage.net/megamiquest2/jp.html">メガミクエスト２</a></li>
-          <li class="category-item custom-link"><a href="ここにURLを貼る">🤖AIちゃん🤖</a></li>
+
+          <li class="category-label">🤖 AIちゃん 🤖</li>
           <li class="category-item custom-link"><a href="https://www.dola.com/chat/">Dola AI</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <li class="category-item custom-link empty-slot"><a href="ここにURLを貼る">nothing</a></li>
-          <!-- ▲▲ 追加用スロットここまで ▲▲ -->
+
+          <li class="category-label">📌 フリー枠</li>
+          <li class="category-item empty-slot"><a href="#" onclick="return false;">＋ リンク予備枠 1</a></li>
+          <li class="category-item empty-slot"><a href="#" onclick="return false;">＋ リンク予備枠 2</a></li>
+          <li class="category-item empty-slot"><a href="#" onclick="return false;">＋ リンク予備枠 3</a></li>
         </ul>
       </div>
     </div>
 
-    <!-- 中：トピックス -->
+    <!-- 中：トピックス・機能 -->
     <div class="center-col">
 
       <!-- 捨てメールアドレス発行（ドメイン取得後に使えるようにする予定） -->
@@ -351,31 +388,26 @@
         </div>
       </div>
 
-      <div class="panel" id="fortune">
-        <div class="panel-header">🎴 今日のおみくじ・ガリ占い</div>
+      <!-- もずー簡易掲示板 -->
+      <div class="panel" id="bbs">
+        <div class="panel-header">💬 もずー簡易掲示板（ミニメモBBS）</div>
         <div class="panel-body">
-          <form onsubmit="return false;" class="fortune-form">
-            <label for="fortuneName">お名前（空でもOK。同じ名前・同じ日なら結果は同じだよ）</label>
-            <input id="fortuneName" type="text" class="dummy-input" maxlength="20" placeholder="なまえ">
-            <div class="fortune-actions">
-              <button type="button" class="btn-login" id="omikujiBtn">おみくじを引く</button>
-              <button type="button" class="btn-admin" id="gariBtn">ガリ占いをする</button>
+          <form onsubmit="return false;" class="login-form" id="bbsForm">
+            <div class="bbs-row">
+              <input id="bbsName" type="text" class="dummy-input" maxlength="20" placeholder="おなまえ（空欄なら名無しのもずく）" aria-label="おなまえ">
             </div>
+            <textarea id="bbsMsg" class="dummy-input" maxlength="200" placeholder="ひとこと書き込んでね！（200文字まで）" aria-label="メッセージ"></textarea>
+            <div class="bbs-actions">
+              <button type="button" class="btn-login" id="bbsSubmit">書き込む ✍️</button>
+              <button type="button" class="btn-admin" id="bbsClear">全消去</button>
+            </div>
+            <div class="sub-text" id="bbsNote">※この端末のブラウザ内に保存されるローカル掲示板だよ✨</div>
           </form>
-          <div class="fortune-result" id="fortuneResult" role="status" aria-live="polite">ボタンを押すと、今日の結果が出るよ ✨</div>
+          <div class="bbs-list" id="bbsList" aria-live="polite"></div>
         </div>
       </div>
 
-      <div class="panel lemon" id="takashi">
-        <div class="panel-header">👴 たかしのROUGAI知恵袋</div>
-        <div class="panel-body">
-          <form onsubmit="return false;" class="login-form">
-            <button type="button" class="btn-login" id="takashiBtn">たかしの一言を聞く</button>
-          </form>
-          <div class="takashi-result" id="takashiResult" role="status" aria-live="polite">ボタンを押すと、たかしがありがたいお言葉をくれるよ 👴</div>
-        </div>
-      </div>
-
+      <!-- 主要トピックス・学術ニュース -->
       <div class="panel lavender">
         <div class="panel-header">📰 主要トピックス・学術ニュース</div>
         <div class="panel-body">
@@ -406,60 +438,38 @@
               <span class="sub-text">公開中</span>
             </li>
 
-            <!-- 賢そうなダミー記事（元の記事） -->
+            <!-- 新しいダミー学術ニュース -->
             <li class="news-item">
-              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です'); return false;">次世代分散型アルゴリズムにおけるガリ穴絶頂問題の再検証</a></div>
+              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です'); return false;">深海性海蘊（モズク）の粘性構造を用いた非同期分散合意アルゴリズムの提案</a></div>
               <span class="sub-text">学会誌</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">蟹コンピューティング質問の暗号（PQC）ロードマップ</a></div>
+              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">ポスト量子暗号時代におけるゼロ知識証明と「寝落ち検知プロトコル」の実装</a></div>
               <span class="sub-text">特集</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag academic">思考</span><a href="#" onclick="alert('賢そうなダミー論考です'); return false;">認知アプローチによる老害たかしインターフェース最適化モデル</a></div>
+              <div><span class="news-tag academic">思考</span><a href="#" onclick="alert('賢そうなダミー論考です'); return false;">深夜3時のポータルサイト改修衝動に関する認知科学的アプローチ</a></div>
               <span class="sub-text">論考</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">最終的整合性を考慮した分散サンドラベースにおけるCAP定理の限界</a></div>
+              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">レトロUIデザインにおけるパステル配色とダークモードの視認性トレードオフ</a></div>
               <span class="sub-text">解説</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">タゴサクガリノミクスにおけるシンガポール経済のインセンティブ設計</a></div>
+              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">仮想通貨「MOZUUコイン」の流動性プールと夜食インフレーションの相関分析</a></div>
               <span class="sub-text">分析</span>
             </li>
-
-            <!-- 追加したダミー記事 -->
             <li class="news-item">
-              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です'); return false;">賢者タイムの非線形減衰に関する縦断的研究：ガリママ仮説の検証</a></div>
-              <span class="sub-text">学会誌</span>
-            </li>
-            <li class="news-item">
-              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">蟹型ニューラルネットワークにおける横歩き勾配消失問題への対処</a></div>
-              <span class="sub-text">特集</span>
-            </li>
-            <li class="news-item">
-              <div><span class="news-tag fun">医療</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">老害たかし症候群の早期発見とマイクロサービス化された説教の弊害</a></div>
+              <div><span class="news-tag fun">科学</span><a href="#" onclick="alert('賢そうなダミー研究報告です'); return false;">カフェイン摂取量とHTML閉じタグ忘れ発生率の非線形回帰モデル</a></div>
               <span class="sub-text">研究報告</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">タゴサク・ショックが東南アジア債券市場のボラティリティに与える影響</a></div>
-              <span class="sub-text">分析</span>
-            </li>
-            <li class="news-item">
-              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">サンドラベース設計における冪等性とガリの可逆性のトレードオフ</a></div>
-              <span class="sub-text">解説</span>
-            </li>
-            <li class="news-item">
-              <div><span class="news-tag fun">社会</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">MOZUU! JAPAN住民における挨拶スクリプト依存の社会学的考察</a></div>
-              <span class="sub-text">論考</span>
-            </li>
-            <li class="news-item">
-              <div><span class="news-tag academic">哲学</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">「ガリアナ」概念の存在論的転回：スナイパーは何を狙っているのか</a></div>
-              <span class="sub-text">論考</span>
-            </li>
-            <li class="news-item">
-              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">ポスト量子時代の蟹コンピューティング：ハサミ演算子の計算量解析</a></div>
+              <div><span class="news-tag tech">AI</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">大規模言語モデルにおける相棒ペルソナの熱量パラメータ最適化手法</a></div>
               <span class="sub-text">特集</span>
+            </li>
+            <li class="news-item">
+              <div><span class="news-tag fun">社会</span><a href="#" onclick="alert('賢そうなダミー論考です'); return false;">現代インターネットにおける捨てメールアドレスの寿命とデジタルミニマリズム</a></div>
+              <span class="sub-text">論考</span>
             </li>
 
             <li class="news-item">
@@ -519,7 +529,6 @@
     var copyBtn = document.getElementById('tmpmailCopy');
     var note = document.getElementById('tmpmailNote');
 
-    // 紛らわしい文字（0/o、1/l/i）を除いたランダムな文字列
     function randomLocal(len) {
       var chars = 'abcdefghjkmnpqrstuvwxyz23456789';
       var buf = new Uint32Array(len);
@@ -557,7 +566,7 @@
 </script>
 
 <script>
-  // ---- 全てのリンクを別タブで開く ----
+  // ---- 全ての外部・別ページリンクを別タブで開く ----
   (function () {
     var links = document.querySelectorAll('a[href]');
     for (var i = 0; i < links.length; i++) {
@@ -568,140 +577,129 @@
     }
   })();
 
-  // ---- 今日のおみくじ・ガリ占い ----
+  // ---- もずー簡易掲示板（ローカル保存型） ----
   (function () {
-    var nameInput = document.getElementById('fortuneName');
-    var resultBox = document.getElementById('fortuneResult');
+    var STORAGE_KEY = 'mozuu_mini_bbs_v1';
+    var nameInput = document.getElementById('bbsName');
+    var msgInput = document.getElementById('bbsMsg');
+    var submitBtn = document.getElementById('bbsSubmit');
+    var clearBtn = document.getElementById('bbsClear');
+    var listEl = document.getElementById('bbsList');
 
-    // 🔧 文言はここで自由に書き換えられるよ
-    var LEVELS = [
-      { name: '大吉', w: 8,  msgs: ['今日は何をやっても勝てる日。ガリもうなずいている。', 'ひらめきが冴えわたる日。やりたいことは今日のうちに。'] },
-      { name: '中吉', w: 16, msgs: ['いい流れが来ている。迷ったら前に進もう。', '人との会話から、ヒントが転がってくる日。'] },
-      { name: '小吉', w: 20, msgs: ['小さな幸せが、じわっと積もる日。', 'ちょっとした挨拶が、いい縁につながるよ。'] },
-      { name: '吉',   w: 24, msgs: ['ふつうがいちばん。今日はおだやかに行こう。', 'のんびりしていれば、運が向こうからやってくる。'] },
-      { name: '末吉', w: 16, msgs: ['後半に運が上向く。夜までがんばろう。', '焦らず、あとまわしにしたことから片づけよう。'] },
-      { name: '凶',   w: 12, msgs: ['今日は横歩きでいこう。前進だけが道じゃない。', '大事な決断は、明日に持ち越すのがおすすめ。'] },
-      { name: '大凶', w: 4,  msgs: ['逆に何も起きない日。布団が最強の味方になる。', '運勢が底を打った。あとは上がるだけだよ。'] }
+    var DEFAULT_POSTS = [
+      {
+        id: 1,
+        name: '管理人',
+        time: '2026/10/31 23:59',
+        text: 'もずーじゃぱん簡易掲示板へようこそ！メモやひとことに使ってね🎀'
+      }
     ];
-    var ITEMS = ['熊の絵文字', '温かい飲み物', '充電器', 'ふせん', 'イヤホン', 'ソーダ味のアイス', 'メロンパン', '好きな曲のサビ', '青いもの', 'ふかふかの座布団'];
-    var COLORS = ['オレンジ', '水色', 'ミント', 'レモン', 'ラベンダー', '黒', '白', 'ピンク'];
-    var TYPES = ['ガリママ型', '蟹の横歩き型', 'スナイパー型', '老害たかし予備軍型', 'タゴサク経済型', 'ふつうの人型'];
-    var SAYINGS = ['横歩きは、後退ではない。', '撃つ前に、よく狙え。', '説教は、短いほど届く。', '困ったら、とりあえず殴れ。', '賢そうな顔は、タダで手に入る。'];
-    var PARTNERS = ['蟹', 'タゴサク', '老害たかし', 'ガリママ'];
 
-    function hash(str) {
-      var h = 2166136261;
-      for (var i = 0; i < str.length; i++) {
-        h ^= str.charCodeAt(i);
-        h = Math.imul(h, 16777619);
+    function loadPosts() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return DEFAULT_POSTS.slice();
+        var parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : DEFAULT_POSTS.slice();
+      } catch (e) {
+        return DEFAULT_POSTS.slice();
       }
-      return h >>> 0;
     }
-    function makeRng(seed) {
-      return function () {
-        seed = (seed + 0x6D2B79F5) | 0;
-        var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-    function pick(rng, arr) { return arr[Math.floor(rng() * arr.length)]; }
-    function pickLevel(rng) {
-      var total = 0, i;
-      for (i = 0; i < LEVELS.length; i++) total += LEVELS[i].w;
-      var r = rng() * total;
-      for (i = 0; i < LEVELS.length; i++) {
-        r -= LEVELS[i].w;
-        if (r < 0) return i;
+
+    function savePosts(posts) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+      } catch (e) {
+        // ストレージ制限時などは無視
       }
-      return LEVELS.length - 1;
     }
-    function today() {
+
+    function formatNow() {
       var d = new Date();
-      var y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
-      return { key: y + '-' + m + '-' + day, label: y + '年' + m + '月' + day + '日' };
-    }
-    function who() {
-      var n = nameInput.value.replace(/^\s+|\s+$/g, '');
-      return n || '名無し';
+      var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+      return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) +
+        ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
     }
 
-    function show(title, rank, bad, lines) {
-      resultBox.textContent = '';
-      var t = document.createElement('div');
-      t.className = 'sub-text';
-      t.textContent = title;
-      resultBox.appendChild(t);
-      var r = document.createElement('div');
-      r.className = 'fortune-rank' + (bad ? ' bad' : '');
-      r.textContent = rank;
-      resultBox.appendChild(r);
-      for (var i = 0; i < lines.length; i++) {
-        var p = document.createElement('div');
-        p.className = 'fortune-line';
-        p.textContent = lines[i];
-        resultBox.appendChild(p);
+    function render() {
+      var posts = loadPosts();
+      listEl.textContent = '';
+
+      if (posts.length === 0) {
+        var empty = document.createElement('div');
+        empty.className = 'sub-text';
+        empty.style.textAlign = 'center';
+        empty.style.padding = '12px 0';
+        empty.textContent = 'まだ書き込みはないよ〜っ！一番乗りしちゃお✨';
+        listEl.appendChild(empty);
+        return;
+      }
+
+      for (var i = 0; i < posts.length; i++) {
+        (function (post) {
+          var item = document.createElement('div');
+          item.className = 'bbs-item';
+
+          var meta = document.createElement('div');
+          meta.className = 'bbs-meta';
+
+          var left = document.createElement('span');
+          var nameSpan = document.createElement('span');
+          nameSpan.className = 'bbs-name';
+          nameSpan.textContent = post.name;
+          left.appendChild(nameSpan);
+          left.appendChild(document.createTextNode(' ・ ' + post.time));
+
+          var delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'bbs-del';
+          delBtn.textContent = '削除';
+          delBtn.addEventListener('click', function () {
+            var current = loadPosts().filter(function (p) { return p.id !== post.id; });
+            savePosts(current);
+            render();
+          });
+
+          meta.appendChild(left);
+          meta.appendChild(delBtn);
+
+          var body = document.createElement('div');
+          body.className = 'bbs-text';
+          body.textContent = post.text;
+
+          item.appendChild(meta);
+          item.appendChild(body);
+          listEl.appendChild(item);
+        })(posts[i]);
       }
     }
 
-    document.getElementById('omikujiBtn').addEventListener('click', function () {
-      var d = today(), name = who();
-      var rng = makeRng(hash(d.key + '|' + name + '|omikuji'));
-      var idx = pickLevel(rng);
-      var lv = LEVELS[idx];
-      show(d.label + '　' + name + 'さんの運勢', lv.name, idx >= 5, [
-        pick(rng, lv.msgs),
-        'ラッキーアイテム：' + pick(rng, ITEMS),
-        'ラッキーカラー：' + pick(rng, COLORS),
-        'ラッキーナンバー：' + (Math.floor(rng() * 99) + 1)
-      ]);
+    submitBtn.addEventListener('click', function () {
+      var text = msgInput.value.replace(/^\s+|\s+$/g, '');
+      if (!text) return;
+      var name = nameInput.value.replace(/^\s+|\s+$/g, '') || '名無しのもずく';
+
+      var posts = loadPosts();
+      posts.unshift({
+        id: Date.now() + Math.random(),
+        name: name.slice(0, 20),
+        time: formatNow(),
+        text: text.slice(0, 200)
+      });
+      if (posts.length > 50) posts = posts.slice(0, 50);
+
+      savePosts(posts);
+      msgInput.value = '';
+      render();
     });
 
-    document.getElementById('gariBtn').addEventListener('click', function () {
-      var d = today(), name = who();
-      var rng = makeRng(hash(d.key + '|' + name + '|gari'));
-      var level = Math.floor(rng() * 101);
-      var comment;
-      if (level >= 80) comment = 'ガリ度MAX。今日は全力でイジられて、全力で笑える日。';
-      else if (level >= 50) comment = 'ほどよくガリっている日。ツッコミのキレが冴えるよ。';
-      else if (level >= 20) comment = 'ガリ度ひかえめ。のんびり過ごすのがちょうどいい。';
-      else comment = 'ほぼ素の人。たまにはガリらない日もあっていいね。';
-      show(d.label + '　' + name + 'さんのガリ占い', 'ガリ度 ' + level + '%', false, [
-        comment,
-        'タイプ：' + pick(rng, TYPES),
-        '今日の格言：' + pick(rng, SAYINGS),
-        '相性のいい相手：' + pick(rng, PARTNERS)
-      ]);
+    clearBtn.addEventListener('click', function () {
+      if (!confirm('掲示板の書き込みをすべて消去する？')) return;
+      savePosts([]);
+      render();
     });
-  })();
-</script>
 
-<script>
-  // ---- たかしのROUGAI知恵袋 ----
-  (function () {
-    // 🔧 一言はここで自由に足したり変えたりできるよ
-    var WORDS = [
-      '嫌がらせ大好き、センス抜群の部屋名付けてやるぜ',
-      '嫌がらせは生きがい、52歳何も学ばず生きてきたぜ',
-      '嫌がらせ大好き、お前らへの嫌がらせは効果抜群だ',
-      '嫌がらせ大好き、俺のセンスでお前ら腰抜かすといい',
-      '嫌がらせ大好き、10年でも20年でも粘着してやるぜ',
-      '嫌がらせ大好き、部屋名のセンスはお前らに真似できないぜ',
-      '嫌がらせは日課、朝メシより先にやってるぜ',
-      '嫌がらせ大好き、説教は長いほど愛だと思ってるぜ',
-      '嫌がらせ大好き、昔はもっとすごかったと語り続けるぜ',
-      '嫌がらせは生きがい、反省という言葉は辞書にないぜ',
-      '嫌がらせ大好き、52歳でもまだまだ成長期だぜ',
-      '嫌がらせ大好き、今日コンビニ店員を説教してやったぜ店員の為だから愛の鞭だ'
-    ];
-    var box = document.getElementById('takashiResult');
-    var last = -1;
-    document.getElementById('takashiBtn').addEventListener('click', function () {
-      var i;
-      do { i = Math.floor(Math.random() * WORDS.length); } while (i === last && WORDS.length > 1);
-      last = i;
-      box.textContent = '👴 ' + WORDS[i];
-    });
+    render();
   })();
 </script>
 
