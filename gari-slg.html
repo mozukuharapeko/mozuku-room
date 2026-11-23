@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ガリゴンクエスト SLG 〜なの城攻防戦〜</title>
+<style>
+  * { box-sizing: border-box; user-select: none; }
+  body {
+    margin: 0;
+    background: #141418;
+    color: #f4f1ea;
+    font-family: "Courier New", Consolas, "Hiragino Kaku Gothic ProN", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 10px;
+  }
+  .window {
+    border: 2px solid #e0dcd3;
+    border-radius: 10px;
+    background: #1f1f26;
+    padding: 8px 12px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: bold;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    background: #353542;
+    padding: 2px 8px;
+    border-radius: 99px;
+    border: 1px solid #666;
+  }
+  .badge.turn-player { background: #264d3b; border-color: #63d49b; color: #a7f3ce; }
+  .badge.turn-enemy { background: #592626; border-color: #f07171; color: #ffc2c2; }
+
+  /* ユニットバー */
+  .party-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .unit-chip {
+    flex: 1 1 0;
+    min-width: 76px;
+    background: #2b2b36;
+    border: 2px solid #4a4a5a;
+    border-radius: 8px;
+    padding: 4px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.1s, border-color 0.1s;
+  }
+  .unit-chip.selected {
+    border-color: #ffb27a;
+    background: #3c3430;
+    transform: translateY(-2px);
+  }
+  .unit-chip.acted {
+    opacity: 0.55;
+  }
+  .unit-chip .u-icon { font-size: 18px; display: block; }
+  .unit-chip .u-name { font-weight: bold; white-space: nowrap; }
+  .unit-chip .u-hp { color: #9ae6b4; font-size: 10px; }
+
+  /* マップグリッド */
+  #map-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
+    width: 100%;
+    max-width: 440px;
+    aspect-ratio: 1 / 1;
+    border: 2px solid #e0dcd3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 8px;
+  }
+  .tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    line-height: 1;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.18);
+  }
+  .t-sea { background: #154360; cursor: not-allowed; }
+  .t-grass { background: #1e8449; }
+  .t-forest { background: #145a32; }
+  .t-mountain { background: #5d6d7e; cursor: not-allowed; }
+  .t-bridge { background: #9c640c; }
+  .t-poison { background: #5b2c6f; }
+  .t-town { background: #2874a6; }
+  .t-castle { background: #641e16; }
+
+  /* SLGハイライト */
+  .tile.movable::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    background: rgba(99, 179, 237, 0.42);
+    border: 2px solid #90cdf4;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .tile.attackable::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    background: rgba(245, 101, 101, 0.48);
+    border: 2px solid #feb2b2;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .tile.healable::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    background: rgba(104, 211, 145, 0.45);
+    border: 2px solid #9ae6b4;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .sprite {
+    position: absolute;
+    font-size: 22px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.85));
+    z-index: 2;
+    pointer-events: none;
+  }
+  .sprite.acted {
+    filter: grayscale(60%) brightness(75%);
+  }
+  .hp-pip {
+    position: absolute;
+    bottom: 1px;
+    left: 3px;
+    right: 3px;
+    height: 3px;
+    background: #222;
+    border-radius: 2px;
+    overflow: hidden;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .hp-pip-fill {
+    height: 100%;
+    background: #68d391;
+  }
+  .hp-pip-fill.enemy {
+    background: #fc8181;
+  }
+  .boss-crown {
+    position: absolute;
+    top: 0px;
+    right: 1px;
+    font-size: 10px;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  /* アクションボタン */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 8px;
+  }
+  .btn {
+    flex: 1 1 auto;
+    background: #2d2d3a;
+    color: #fff;
+    border: 2px solid #999;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover:not(:disabled) { background: #3e3e50; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary { background: #c05621; border-color: #fbd38d; }
+  .btn.town { background: #2b6cb0; border-color: #90cdf4; }
+  .btn.heal { background: #276749; border-color: #9ae6b4; }
+
+  /* 情報・ログ */
+  .info-box {
+    font-size: 12px;
+    color: #cbd5e0;
+    margin-bottom: 4px;
+    min-height: 18px;
+  }
+  #log {
+    height: 88px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* モーダル（街の傭兵雇用） */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 20;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #23232e;
+    border: 2px solid #fbd38d;
+    border-radius: 12px;
+    padding: 16px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .modal h3 { margin: 0 0 8px; font-size: 16px; color: #fbd38d; }
+  .merc-card {
+    background: #2f2f3d;
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .merc-info { font-size: 12px; }
+</style>
+</head>
+<body>
+
+  <div class="window header-bar">
+    <span id="turn-badge" class="badge turn-player">第1ターン（自軍）</span>
+    <span class="badge">💰 <span id="gold">120</span>G</span>
+    <span class="badge">👥 <span id="party-count">3</span>/5体</span>
+    <span class="badge">🎯 目標: なの姫👑撃破</span>
+  </div>
+
+  <!-- 味方パーティ一覧 -->
+  <div class="window">
+    <div class="party-bar" id="party-bar"></div>
+  </div>
+
+  <!-- マップ（選択ユニット中心 11x11 ビュー） -->
+  <div id="map-grid"></div>
+
+  <!-- アクションボタン -->
+  <div class="controls">
+    <button class="btn" id="btn-wait" onclick="waitUnit()">待機</button>
+    <button class="btn heal" id="btn-heal" onclick="toggleHealMode()" style="display:none;">🌿 回復スキル</button>
+    <button class="btn town" id="btn-town" onclick="openTownModal()" style="display:none;">🏘️ 街（傭兵・宿）</button>
+    <button class="btn" id="btn-center" onclick="centerSelected()">👁️ 選択へ戻す</button>
+    <button class="btn primary" id="btn-end" onclick="endPlayerTurn()">ターン終了 ⏭️</button>
+  </div>
+
+  <!-- 選択情報＆ログ -->
+  <div class="window">
+    <div class="info-box" id="unit-detail">味方ユニットをタップして移動先を選んでね！</div>
+    <div id="log"></div>
+  </div>
+
+  <!-- 街モーダル -->
+  <div class="modal-backdrop" id="town-modal">
+    <div class="modal">
+      <h3>🏘️ 冒険者の街（傭兵酒場＆宿屋）</h3>
+      <p style="font-size:12px; margin:0 0 10px;">所持金: <strong id="modal-gold">0</strong>G（味方最大5ユニットまで）</p>
+      <div class="merc-card">
+        <div class="merc-info">
+          <strong>🛡️ 鉄壁の傭兵（重装）</strong><br>
+          HP42 / 攻11 / 守7 / 移動2 / 射程1
+        </div>
+        <button class="btn town" onclick="hireMerc('guard')">80Gで雇う</button>
+      </div>
+      <div class="merc-card">
+        <div class="merc-info">
+          <strong>🏹 狙撃の傭兵（弓兵）</strong><br>
+          HP28 / 攻12 / 守3 / 移動3 / 射程2
+        </div>
+        <button class="btn town" onclick="hireMerc('archer')">90Gで雇う</button>
+      </div>
+      <div class="merc-card">
+        <div class="merc-info">
+          <strong>🛏️ 宿屋でパーティ全回復</strong><br>
+          生存中の味方全員のHPを全快する
+        </div>
+        <button class="btn heal" onclick="restAtInn()">30Gで泊まる</button>
+      </div>
+      <button class="btn" style="width:100%; margin-top:4px;" onclick="closeTownModal()">閉じる</button>
+    </div>
+  </div>
+
+<script>
+const MAP_SIZE = 28;
+const VIEW_SIZE = 11;
+const HALF = Math.floor(VIEW_SIZE / 2);
+
+// 0:海(不可), 1:草原, 2:森, 3:山(不可), 4:橋, 5:毒の沼, 6:町, 7:なの城
+const TILES = {
+  0: { cls: 't-sea', icon: '🌊', walk: false, cost: 99, def: 0, name: '海' },
+  1: { cls: 't-grass', icon: '', walk: true, cost: 1, def: 0, name: '草原' },
+  2: { cls: 't-forest', icon: '🌲', walk: true, cost: 2, def: 2, name: '森(防+2)' },
+  3: { cls: 't-mountain', icon: '⛰️', walk: false, cost: 99, def: 0, name: '山' },
+  4: { cls: 't-bridge', icon: '🌉', walk: true, cost: 1, def: 0, name: '橋' },
+  5: { cls: 't-poison', icon: '🟣', walk: true, cost: 2, def: -1, name: '毒の沼(ターン毎-3HP)' },
+  6: { cls: 't-town', icon: '🏘️', walk: true, cost: 1, def: 2, name: '街(傭兵・回復)' },
+  7: { cls: 't-castle', icon: '🏰', walk: true, cost: 1, def: 3, name: 'なの城(防+3)' }
+};
+
+let world = [];
+let turn = 1;
+let phase = 'player'; // 'player' | 'enemy' | 'gameover' | 'clear'
+let gold = 120;
+let camX = 6;
+let camY = 6;
+
+let allies = [];
+let enemies = [];
+let selectedId = null;
+let healMode = false;
+let nextUid = 1;
+
+// 雑魚敵テンプレート（無限POP＆徘徊）
+const MOB_TYPES = [
+  { key: 'crab', name: '質問の蟹', icon: '🦀', hp: 18, atk: 8, def: 2, move: 2, range: 1, exp: 12, gold: 18, zone: 'all' },
+  { key: 'takashi', name: 'たかし', icon: '👴', hp: 22, atk: 9, def: 2, move: 2, range: 1, exp: 16, gold: 22, zone: 'all' },
+  { key: 'sandura', name: 'サンドゥーラ', icon: '🎓', hp: 30, atk: 12, def: 4, move: 2, range: 1, exp: 26, gold: 35, zone: 'all' },
+  { key: 'mozuku_slime', name: '迷子スライムもずく', icon: '🫧', hp: 14, atk: 6, def: 1, move: 2, range: 1, exp: 10, gold: 14, zone: 'west' },
+  { key: 'wild_rabbit', name: '野良のやにうさぎ', icon: '🐇', hp: 16, atk: 9, def: 1, move: 3, range: 1, exp: 14, gold: 18, zone: 'west' },
+  { key: 'ghost', name: '学歴亡霊', icon: '👻', hp: 26, atk: 11, def: 5, move: 2, range: 1, exp: 22, gold: 30, zone: 'east' }
+];
+
+function addLog(msg) {
+  const logEl = document.getElementById('log');
+  const div = document.createElement('div');
+  div.textContent = msg;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function generateMap() {
+  world = [];
+  for (let y = 0; y < MAP_SIZE; y++) {
+    let row = [];
+    for (let x = 0; x < MAP_SIZE; x++) {
+      if (x <= 1 || y <= 1 || x >= MAP_SIZE - 2 || y >= MAP_SIZE - 2) row.push(0);
+      else row.push(1);
+    }
+    world.push(row);
+  }
+
+  // 中央の川と2本の橋
+  for (let y = 2; y < MAP_SIZE - 2; y++) {
+    world[y][13] = 0;
+  }
+  world[8][13] = 4;
+  world[20][13] = 4;
+
+  // 森・山・毒の沼を配置
+  for (let y = 3; y < MAP_SIZE - 3; y++) {
+    for (let x = 3; x < MAP_SIZE - 3; x++) {
+      if (Math.abs(x - 13) <= 1) continue;
+      if (x <= 9 && y <= 9) continue; // 初期エリア付近は歩きやすく
+      if (x >= 19 && y >= 19) continue; // なの城周辺は城エリアにする
+      const r = Math.random();
+      if (r < 0.18) world[y][x] = 2;
+      else if (r < 0.24) world[y][x] = 3;
+      else if (r < 0.28 && x > 14) world[y][x] = 5;
+    }
+  }
+
+  // 街の配置
+  world[6][6] = 6;   // 始まりの街
+  world[18][7] = 6;  // 南西の街
+  world[7][18] = 6;  // 東大陸の街
+
+  // なの城エリア（右奥）
+  for (let y = 20; y <= 24; y++) {
+    for (let x = 20; x <= 24; x++) {
+      world[y][x] = 7;
+    }
+  }
+}
+
+function initUnits() {
+  allies = [
+    { id: nextUid++, name: 'ガリ', icon: '🐻', lv: 1, exp: 0, hp: 36, maxHp: 36, atk: 12, def: 4, move: 3, range: 1, x: 5, y: 6, moved: false, acted: false, isHealer: false },
+    { id: nextUid++, name: 'やにうさ', icon: '🐰', lv: 1, exp: 0, hp: 28, maxHp: 28, atk: 11, def: 3, move: 4, range: 1, x: 6, y: 5, moved: false, acted: false, isHealer: false },
+    { id: nextUid++, name: '海蘊', icon: '🌿', lv: 1, exp: 0, hp: 26, maxHp: 26, atk: 9, def: 2, move: 3, range: 2, x: 5, y: 5, moved: false, acted: false, isHealer: true }
+  ];
+
+  // 城の防衛幹部＆ラスボス（移動0：その場から動かず待ち構える）
+  enemies = [
+    { id: nextUid++, name: 'なの姫', icon: '👑', hp: 75, maxHp: 75, atk: 17, def: 6, move: 0, range: 2, exp: 100, gold: 500, x: 23, y: 23, fixed: true, isBoss: true },
+    { id: nextUid++, name: '坂下', icon: '🗡️', hp: 46, maxHp: 46, atk: 15, def: 5, move: 0, range: 1, exp: 45, gold: 80, x: 22, y: 23, fixed: true, isBoss: false },
+    { id: nextUid++, name: 'ぜんちん', icon: '🧐', hp: 38, maxHp: 38, atk: 13, def: 4, move: 0, range: 2, exp: 40, gold: 70, x: 23, y: 22, fixed: true, isBoss: false },
+    { id: nextUid++, name: 'なすちん', icon: '🍆', hp: 54, maxHp: 54, atk: 11, def: 9, move: 0, range: 1, exp: 45, gold: 80, x: 21, y: 21, fixed: true, isBoss: false }
+  ];
+
+  // 初期の無限POP雑魚を12体ほど配置
+  for (let i = 0; i < 12; i++) {
+    spawnRandomMob(true);
+  }
+
+  selectedId = allies[0].id;
+  camX = allies[0].x;
+  camY = allies[0].y;
+}
+
+function getUnitAt(x, y) {
+  return allies.find(u => u.x === x && u.y === y) || enemies.find(u => u.x === x && u.y === y) || null;
+}
+
+function spawnRandomMob(initial = false) {
+  for (let tries = 0; tries < 40; tries++) {
+    const x = 3 + Math.floor(Math.random() * (MAP_SIZE - 6));
+    const y = 3 + Math.floor(Math.random() * (MAP_SIZE - 6));
+    const t = world[y][x];
+    if (!TILES[t].walk || t === 6 || t === 7) continue; // 街や城の中には湧かない
+    if (getUnitAt(x, y)) continue;
+    // プレイヤーのすぐ隣には湧かない
+    if (allies.some(a => Math.abs(a.x - x) + Math.abs(a.y - y) <= (initial ? 4 : 3))) continue;
+
+    const area = x < 13 ? 'west' : 'east';
+    const pool = MOB_TYPES.filter(m => m.zone === 'all' || m.zone === area);
+    const tpl = pool[Math.floor(Math.random() * pool.length)];
+
+    enemies.push({
+      id: nextUid++,
+      name: tpl.name,
+      icon: tpl.icon,
+      hp: tpl.hp,
+      maxHp: tpl.hp,
+      atk: tpl.atk,
+      def: tpl.def,
+      move: tpl.move,
+      range: tpl.range,
+      exp: tpl.exp,
+      gold: tpl.gold,
+      x, y,
+      fixed: false,
+      isBoss: false
+    });
+    return tpl;
+  }
+  return null;
+}
+
+// 移動可能マス探索（BFS）
+function getReachableTiles(unit) {
+  if (!unit || unit.moved || unit.acted) return new Map();
+  const visited = new Map();
+  const queue = [{ x: unit.x, y: unit.y, rem: unit.move }];
+  visited.set(`${unit.x},${unit.y}`, unit.move);
+
+  const dirs = [[0,-1],[0,1],[-1,0],[1,0]];
+  while (queue.length > 0) {
+    queue.sort((a, b) => b.rem - a.rem);
+    const cur = queue.shift();
+    for (const [dx, dy] of dirs) {
+      const nx = cur.x + dx;
+      const ny = cur.y + dy;
+      if (nx < 0 || ny < 0 || nx >= MAP_SIZE || ny >= MAP_SIZE) continue;
+      const tile = TILES[world[ny][nx]];
+      if (!tile.walk) continue;
+      const occ = getUnitAt(nx, ny);
+      if (occ && enemies.includes(occ)) continue; // 敵はすり抜け不可
+      const nextRem = cur.rem - tile.cost;
+      if (nextRem < 0) continue;
+      const key = `${nx},${ny}`;
+      if (!visited.has(key) || visited.get(key) < nextRem) {
+        visited.set(key, nextRem);
+        queue.push({ x: nx, y: ny, rem: nextRem });
+      }
+    }
+  }
+
+  // 他ユニットがいるマスには止まれない
+  const result = new Set();
+  for (const key of visited.keys()) {
+    const [kx, ky] = key.split(',').map(Number);
+    if (kx === unit.x && ky === unit.y) continue;
+    if (!getUnitAt(kx, ky)) result.add(key);
+  }
+  return result;
+}
+
+// 攻撃 or 回復対象マス
+function getTargetTiles(unit) {
+  const targets = new Set();
+  if (!unit || unit.acted) return targets;
+  for (let dy = -unit.range; dy <= unit.range; dy++) {
+    for (let dx = -unit.range; dx <= unit.range; dx++) {
+      const dist = Math.abs(dx) + Math.abs(dy);
+      if (dist === 0 || dist > unit.range) continue;
+      const tx = unit.x + dx;
+      const ty = unit.y + dy;
+      if (healMode && unit.isHealer) {
+        const ally = allies.find(a => a.x === tx && a.y === ty && a.hp < a.maxHp);
+        if (ally) targets.add(`${tx},${ty}`);
+      } else {
+        const enemy = enemies.find(e => e.x === tx && e.y === ty);
+        if (enemy) targets.add(`${tx},${ty}`);
+      }
+    }
+  }
+  return targets;
+}
+
+function gainExp(unit, amount) {
+  unit.exp += amount;
+  const need = unit.lv * 25;
+  if (unit.exp >= need) {
+    unit.exp -= need;
+    unit.lv++;
+    unit.maxHp += 6;
+    unit.hp = Math.min(unit.maxHp, unit.hp + 10);
+    unit.atk += 2;
+    unit.def += 1;
+    addLog(`✨ ${unit.icon}${unit.name}が Lv.${unit.lv} にレベルアップ！`);
+  }
+}
+
+function attackTarget(attacker, defender, isPlayerAttack) {
+  const defTile = TILES[world[defender.y][defender.x]];
+  const rawDmg = attacker.atk - Math.floor((defender.def + defTile.def) * 0.6);
+  const dmg = Math.max(2, rawDmg + Math.floor(Math.random() * 3) - 1);
+  defender.hp -= dmg;
+  addLog(`⚔️ ${attacker.icon}${attacker.name}の攻撃！ ${defender.icon}${defender.name}に ${dmg} ダメージ！`);
+
+  if (defender.hp <= 0) {
+    addLog(`💥 ${defender.icon}${defender.name}を撃破した！`);
+    if (isPlayerAttack) {
+      gold += defender.gold;
+      gainExp(attacker, defender.exp);
+      enemies = enemies.filter(e => e.id !== defender.id);
+      if (defender.isBoss) {
+        phase = 'clear';
+        addLog('🎉🎉 なの姫を撃破！なの城攻略クリアおめでとう〜っ！！ 🎉🎉');
+      }
+    } else {
+      allies = allies.filter(a => a.id !== defender.id);
+      if (allies.length === 0) {
+        phase = 'gameover';
+        addLog('💀 味方が全滅してしまった…リロードで再挑戦！');
+      }
+    }
+  }
+}
+
+function onTileClick(wx, wy) {
+  if (phase !== 'player') return;
+  const clickedUnit = getUnitAt(wx, wy);
+
+  // 味方クリックで選択切替
+  if (clickedUnit && allies.includes(clickedUnit)) {
+    selectedId = clickedUnit.id;
+    healMode = false;
+    camX = clickedUnit.x;
+    camY = clickedUnit.y;
+    render();
+    return;
+  }
+
+  const sel = allies.find(a => a.id === selectedId);
+  if (!sel) return;
+
+  const key = `${wx},${wy}`;
+  const targets = getTargetTiles(sel);
+
+  // 攻撃 or 回復実行
+  if (targets.has(key)) {
+    if (healMode && sel.isHealer) {
+      const targetAlly = allies.find(a => a.x === wx && a.y === wy);
+      const healVal = 14 + sel.lv * 3;
+      targetAlly.hp = Math.min(targetAlly.maxHp, targetAlly.hp + healVal);
+      addLog(`🌿 ${sel.name}の癒やし！ ${targetAlly.name}のHPが ${healVal} 回復！`);
+      gainExp(sel, 8);
+      sel.acted = true;
+      sel.moved = true;
+      healMode = false;
+      autoSelectNext();
+      render();
+      return;
+    } else {
+      const targetEnemy = enemies.find(e => e.x === wx && e.y === wy);
+      if (targetEnemy) {
+        attackTarget(sel, targetEnemy, true);
+        sel.acted = true;
+        sel.moved = true;
+        autoSelectNext();
+        render();
+        return;
+      }
+    }
+  }
+
+  // 移動実行
+  const reachable = getReachableTiles(sel);
+  if (reachable.has(key)) {
+    sel.x = wx;
+    sel.y = wy;
+    sel.moved = true;
+    camX = wx;
+    camY = wy;
+    const tName = TILES[world[wy][wx]].name;
+    addLog(`👣 ${sel.icon}${sel.name}が【${tName}】へ移動した`);
+    // 移動後に攻撃対象がいなければそのまま待機でもOKだが、攻撃チャンスがあれば残す
+    render();
+    return;
+  }
+
+  // 何もできない場所をタップしたらカメラだけ少し寄せる
+  if (clickedUnit && enemies.includes(clickedUnit)) {
+    document.getElementById('unit-detail').textContent =
+      `敵: ${clickedUnit.icon}${clickedUnit.name} HP:${clickedUnit.hp}/${clickedUnit.maxHp} 攻:${clickedUnit.atk} 守:${clickedUnit.def}${clickedUnit.fixed ? '【固定防衛】' : '【徘徊】'}`;
+  }
+}
+
+function waitUnit() {
+  if (phase !== 'player') return;
+  const sel = allies.find(a => a.id === selectedId);
+  if (!sel || sel.acted) return;
+  sel.moved = true;
+  sel.acted = true;
+  healMode = false;
+  addLog(`🛡️ ${sel.icon}${sel.name}は待機した`);
+  autoSelectNext();
+  render();
+}
+
+function toggleHealMode() {
+  const sel = allies.find(a => a.id === selectedId);
+  if (!sel || !sel.isHealer || sel.acted) return;
+  healMode = !healMode;
+  render();
+}
+
+function centerSelected() {
+  const sel = allies.find(a => a.id === selectedId) || allies[0];
+  if (sel) {
+    camX = sel.x;
+    camY = sel.y;
+    render();
+  }
+}
+
+function autoSelectNext() {
+  const next = allies.find(a => !a.acted);
+  if (next) {
+    selectedId = next.id;
+    camX = next.x;
+    camY = next.y;
+  }
+}
+
+function endPlayerTurn() {
+  if (phase !== 'player') return;
+  phase = 'enemy';
+  healMode = false;
+  render();
+
+  setTimeout(() => {
+    runEnemyTurn();
+  }, 260);
+}
+
+function runEnemyTurn() {
+  if (phase !== 'enemy') return;
+  addLog(`--- 第${turn}ターン 敵＆徘徊フェーズ ---`);
+
+  // 敵行動
+  for (const e of [...enemies]) {
+    if (e.hp <= 0 || allies.length === 0) continue;
+
+    // 1. 射程内に味方がいれば攻撃（固定ボスもここは攻撃する）
+    let target = allies.find(a => Math.abs(a.x - e.x) + Math.abs(a.y - e.y) <= e.range);
+    if (target) {
+      attackTarget(e, target, false);
+      if (phase === 'gameover') { render(); return; }
+      continue;
+    }
+
+    // 2. 固定キャラ（なの姫・坂下・ぜんちん・なすちん）は移動しない
+    if (e.fixed) continue;
+
+    // 3. 雑魚敵は近く(5マス以内)に味方がいれば寄り、いなければ気ままにウロウロ
+    let nearAlly = null;
+    let bestDist = 999;
+    for (const a of allies) {
+      const d = Math.abs(a.x - e.x) + Math.abs(a.y - e.y);
+      if (d < bestDist) { bestDist = d; nearAlly = a; }
+    }
+
+    for (let step = 0; step < e.move; step++) {
+      const dirs = [[0,-1],[0,1],[-1,0],[1,0]].sort(() => Math.random() - 0.5);
+      let moved = false;
+      if (nearAlly && bestDist <= 5) {
+        dirs.sort((d1, d2) => {
+          const dist1 = Math.abs((e.x + d1[0]) - nearAlly.x) + Math.abs((e.y + d1[1]) - nearAlly.y);
+          const dist2 = Math.abs((e.x + d2[0]) - nearAlly.x) + Math.abs((e.y + d2[1]) - nearAlly.y);
+          return dist1 - dist2;
+        });
+      }
+      for (const [dx, dy] of dirs) {
+        const nx = e.x + dx;
+        const ny = e.y + dy;
+        if (nx < 2 || ny < 2 || nx >= MAP_SIZE - 2 || ny >= MAP_SIZE - 2) continue;
+        const t = world[ny][nx];
+        if (!TILES[t].walk || t === 6 || t === 7) continue;
+        if (getUnitAt(nx, ny)) continue;
+        e.x = nx;
+        e.y = ny;
+        moved = true;
+        break;
+      }
+      if (!moved) break;
+    }
+
+    // 移動後に攻撃できるなら攻撃
+    target = allies.find(a => Math.abs(a.x - e.x) + Math.abs(a.y - e.y) <= e.range);
+    if (target) {
+      attackTarget(e, target, false);
+      if (phase === 'gameover') { render(); return; }
+    }
+  }
+
+  // 無限POP補充（雑魚敵が12体未満なら毎ターン最大2体まで再POP）
+  const roamingCount = enemies.filter(e => !e.fixed).length;
+  if (roamingCount < 12) {
+    const spawned = spawnRandomMob(false);
+    if (spawned) {
+      addLog(`✨ フィールドに ${spawned.icon}${spawned.name} が新たに現れた！`);
+    }
+  }
+
+  // 毒の沼地形ダメージ（自軍ターン開始時）
+  for (const a of allies) {
+    if (world[a.y][a.x] === 5) {
+      a.hp = Math.max(1, a.hp - 3);
+      addLog(`🟣 ${a.name}は毒の沼で3ダメージを受けた！`);
+    }
+    a.moved = false;
+    a.acted = false;
+  }
+
+  turn++;
+  phase = 'player';
+  if (allies.length > 0) {
+    selectedId = allies[0].id;
+    camX = allies[0].x;
+    camY = allies[0].y;
+  }
+  render();
+}
+
+// 街モーダル操作
+function openTownModal() {
+  document.getElementById('modal-gold').textContent = gold;
+  document.getElementById('town-modal').classList.add('open');
+}
+function closeTownModal() {
+  document.getElementById('town-modal').classList.remove('open');
+}
+function hireMerc(type) {
+  if (allies.length >= 5) {
+    alert('パーティは最大5ユニットまでだよ！');
+    return;
+  }
+  const sel = allies.find(a => a.id === selectedId);
+  if (!sel) return;
+
+  // 街の周囲の空きマスを探す
+  const spots = [[0,1],[1,0],[0,-1],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]];
+  let spawn = null;
+  for (const [dx, dy] of spots) {
+    const nx = sel.x + dx;
+    const ny = sel.y + dy;
+    if (nx >= 0 && ny >= 0 && nx < MAP_SIZE && ny < MAP_SIZE && TILES[world[ny][nx]].walk && !getUnitAt(nx, ny)) {
+      spawn = { x: nx, y: ny };
+      break;
+    }
+  }
+  if (!spawn) {
+    alert('街のまわりに空きマスがないよ！');
+    return;
+  }
+
+  if (type === 'guard') {
+    if (gold < 80) { alert('お金が足りないよ！(80G必要)'); return; }
+    gold -= 80;
+    allies.push({ id: nextUid++, name: '重装傭兵', icon: '🛡️', lv: 1, exp: 0, hp: 42, maxHp: 42, atk: 11, def: 7, move: 2, range: 1, x: spawn.x, y: spawn.y, moved: false, acted: false, isHealer: false });
+    addLog('🛡️ 鉄壁の傭兵が仲間になった！');
+  } else if (type === 'archer') {
+    if (gold < 90) { alert('お金が足りないよ！(90G必要)'); return; }
+    gold -= 90;
+    allies.push({ id: nextUid++, name: '弓傭兵', icon: '🏹', lv: 1, exp: 0, hp: 28, maxHp: 28, atk: 12, def: 3, move: 3, range: 2, x: spawn.x, y: spawn.y, moved: false, acted: false, isHealer: false });
+    addLog('🏹 狙撃の傭兵が仲間になった！');
+  }
+  document.getElementById('modal-gold').textContent = gold;
+  render();
+}
+function restAtInn() {
+  if (gold < 30) { alert('お金が足りないよ！(30G必要)'); return; }
+  gold -= 30;
+  for (const a of allies) a.hp = a.maxHp;
+  addLog('🛏️ 宿屋に泊まって全員のHPが全回復した！');
+  document.getElementById('modal-gold').textContent = gold;
+  render();
+}
+
+function render() {
+  const turnBadge = document.getElementById('turn-badge');
+  if (phase === 'clear') {
+    turnBadge.textContent = '🎉 VICTORY! クリア！';
+    turnBadge.className = 'badge turn-player';
+  } else if (phase === 'gameover') {
+    turnBadge.textContent = '💀 GAME OVER';
+    turnBadge.className = 'badge turn-enemy';
+  } else if (phase === 'player') {
+    turnBadge.textContent = `第${turn}ターン（自軍）`;
+    turnBadge.className = 'badge turn-player';
+  } else {
+    turnBadge.textContent = `第${turn}ターン（敵行動中）`;
+    turnBadge.className = 'badge turn-enemy';
+  }
+
+  document.getElementById('gold').textContent = gold;
+  document.getElementById('party-count').textContent = allies.length;
+
+  // パーティチップ描画
+  const partyBar = document.getElementById('party-bar');
+  partyBar.innerHTML = '';
+  for (const a of allies) {
+    const chip = document.createElement('div');
+    chip.className = 'unit-chip' + (a.id === selectedId ? ' selected' : '') + (a.acted ? ' acted' : '');
+    chip.innerHTML = `<span class="u-icon">${a.icon}</span><div class="u-name">${a.name} Lv.${a.lv}</div><div class="u-hp">HP ${a.hp}/${a.maxHp}</div>`;
+    chip.onclick = () => {
+      selectedId = a.id;
+      healMode = false;
+      camX = a.x;
+      camY = a.y;
+      render();
+    };
+    partyBar.appendChild(chip);
+  }
+
+  const sel = allies.find(a => a.id === selectedId);
+  const reachable = (phase === 'player' && sel) ? getReachableTiles(sel) : new Set();
+  const targets = (phase === 'player' && sel) ? getTargetTiles(sel) : new Set();
+
+  // ボタン状態更新
+  document.getElementById('btn-wait').disabled = !(phase === 'player' && sel && !sel.acted);
+  document.getElementById('btn-end').disabled = (phase !== 'player');
+  const healBtn = document.getElementById('btn-heal');
+  if (sel && sel.isHealer && !sel.acted && phase === 'player') {
+    healBtn.style.display = 'inline-block';
+    healBtn.textContent = healMode ? '⚔️ 攻撃に戻す' : '🌿 回復スキル';
+  } else {
+    healBtn.style.display = 'none';
+  }
+  const townBtn = document.getElementById('btn-town');
+  if (sel && world[sel.y][sel.x] === 6 && phase === 'player') {
+    townBtn.style.display = 'inline-block';
+  } else {
+    townBtn.style.display = 'none';
+  }
+
+  if (sel) {
+    const st = sel.acted ? '行動済' : (sel.moved ? '移動済(攻撃/待機可)' : '行動可能');
+    document.getElementById('unit-detail').textContent =
+      `選択: ${sel.icon}${sel.name} Lv.${sel.lv} [${st}] HP:${sel.hp}/${sel.maxHp} 攻:${sel.atk} 守:${sel.def} 移:${sel.move} 射:${sel.range}`;
+  }
+
+  // マップグリッド描画
+  const grid = document.getElementById('map-grid');
+  grid.innerHTML = '';
+
+  for (let dy = -HALF; dy <= HALF; dy++) {
+    for (let dx = -HALF; dx <= HALF; dx++) {
+      const wx = camX + dx;
+      const wy = camY + dy;
+      const cell = document.createElement('div');
+      cell.className = 'tile';
+
+      if (wx < 0 || wy < 0 || wx >= MAP_SIZE || wy >= MAP_SIZE) {
+        cell.classList.add('t-sea');
+        cell.textContent = '🌊';
+      } else {
+        const t = TILES[world[wy][wx]];
+        cell.classList.add(t.cls);
+        cell.textContent = t.icon;
+
+        const key = `${wx},${wy}`;
+        if (reachable.has(key)) cell.classList.add('movable');
+        if (targets.has(key)) cell.classList.add(healMode ? 'healable' : 'attackable');
+
+        const u = getUnitAt(wx, wy);
+        if (u) {
+          const isAlly = allies.includes(u);
+          const sp = document.createElement('span');
+          sp.className = 'sprite' + (isAlly && u.acted ? ' acted' : '');
+          sp.textContent = u.icon;
+          cell.appendChild(sp);
+
+          if (u.fixed) {
+            const pin = document.createElement('span');
+            pin.className = 'boss-crown';
+            pin.textContent = u.isBoss ? '⭐' : '🛡️';
+            cell.appendChild(pin);
+          }
+
+          const bar = document.createElement('div');
+          bar.className = 'hp-pip';
+          const fill = document.createElement('div');
+          fill.className = 'hp-pip-fill' + (isAlly ? '' : ' enemy');
+          fill.style.width = `${Math.max(0, Math.min(100, (u.hp / u.maxHp) * 100))}%`;
+          bar.appendChild(fill);
+          cell.appendChild(bar);
+        }
+
+        cell.onclick = () => onTileClick(wx, wy);
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+}
+
+generateMap();
+initUnits();
+render();
+addLog('🐻 ガリゴンクエストSLG 開幕！雑魚を狩って傭兵を雇い、右奥のなの城👑を目指そう！');
+</script>
+</body>
+</html>
