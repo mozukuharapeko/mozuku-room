@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>雑にダンジョン行くやつ</title>
 <style>
-  :root { --bg:#1f1f23; --card:#2b2b31; --card2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --mint:#8fd9b0; --red:#f87171; --sky:#cfe3f5; }
+  :root { --bg:#1f1f23; --card:#2b2b31; --card2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --mint:#8fd9b0; --red:#f87171; --sky:#cfe3f5; --mp:#b794f4; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif; font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--bg); -webkit-tap-highlight-color: transparent;
          padding: calc(10px + env(safe-area-inset-top, 0px)) 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
@@ -19,6 +19,8 @@
   .bar { height: 8px; background: var(--line); border-radius: 5px; overflow: hidden; margin: 3px 0 6px; }
   .bar i { display: block; height: 100%; width: 0; background: var(--mint); transition: width .12s; }
   .bar.x i { background: #7aa8ff; }
+  .bar.m i { background: var(--mp); }
+  .bars-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; }
   #log { white-space: pre-wrap; font-size: 12.5px; min-height: 6.2em; color: var(--soft); }
   .grid { display: grid; gap: 6px; } .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
@@ -26,25 +28,33 @@
   button.b:disabled { opacity: 0.4; cursor: default; }
   button.b.sub { background: var(--card2); color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 12.5px; }
   button.b.on { background: var(--mint); border-color: #5ba884; color: #193326; font-weight: 700; }
+  button.b.lock { background: #3b262a; border-color: #9e4752; color: #fca5a5; opacity: 0.9; }
   button.b.mini { min-height: 30px; font-size: 12px; padding: 2px 8px; }
+  button.b.sp { background: #342b47; border-color: #7c5cc4; color: #e9d8fd; font-size: 12px; min-height: 32px; padding: 3px 6px; }
   select { background: #232327; color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 13px; width: 100%; }
 
   /* 小さなダンジョンマップ表示 */
   .explore-wrap { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; }
   #map { display: grid; grid-template-columns: repeat(11, 24px); grid-template-rows: repeat(7, 24px); gap: 1px; background: #141418; border: 2px solid var(--line); border-radius: 10px; padding: 3px; width: fit-content; margin: 0 auto; cursor: pointer; touch-action: manipulation; }
-  .cell { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 3px; user-select: none; }
+  .cell { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 3px; user-select: none; position: relative; }
   .c-dark { background: #141418; }
   .c-wall { background: #3b3b45; }
   .c-wall.dim { background: #26262d; }
   .c-floor { background: #25252c; }
   .c-floor.dim { background: #1c1c22; opacity: 0.65; }
   .c-me { background: #4a3828; box-shadow: inset 0 0 0 1.5px var(--orange); }
+  .slp { position: absolute; top: -3px; right: -2px; font-size: 9px; }
 
   /* 操作パッド */
   .pad-area { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 155px; }
   .dpad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 40px); gap: 4px; justify-content: center; }
   .dpad button { min-height: 40px; padding: 0; font-size: 16px; border-radius: 10px; }
   .dpad .wait { font-size: 11px; background: var(--card2); color: var(--ink); border-color: var(--line); }
+
+  /* 呪文エリア */
+  .spells-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .spells { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 5px; margin-top: 4px; }
+  .buffs { font-size: 11.5px; color: #fde68a; }
 
   .it { border: 2px solid var(--line); border-radius: 12px; padding: 6px 8px; margin-top: 6px; background: var(--card2); }
   .it b { display: block; font-size: 13px; word-break: break-all; }
@@ -60,7 +70,7 @@
 <body>
 <div id="app">
   <header>
-    <h1>🧭 雑にダンジョン行くやつ</h1>
+    <h1>🐰 雑にダンジョン行くやつ</h1>
     <div><button id="reset" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
   </header>
 
@@ -68,9 +78,19 @@
     <div class="row"><span id="lv"></span><span id="gold"></span></div>
     <div class="bar x"><i id="expbar"></i></div>
     <div class="row"><span id="floor"></span><span id="remain"></span></div>
-    <div class="row"><span>おまえ <small id="shd" style="color:#7aa8ff"></small></span><span id="php"></span></div>
-    <div class="bar"><i id="pbar"></i></div>
-    <div class="row" id="pst" style="color:var(--sky)"></div>
+
+    <div class="bars-2">
+      <div>
+        <div class="row"><span>🐰 HP <small id="shd" style="color:#7aa8ff"></small></span><span id="php"></span></div>
+        <div class="bar"><i id="pbar"></i></div>
+      </div>
+      <div>
+        <div class="row"><span style="color:var(--mp)">✨ MP</span><span id="pmp" style="color:var(--mp)"></span></div>
+        <div class="bar m"><i id="mbar"></i></div>
+      </div>
+    </div>
+
+    <div class="row"><span id="pst" style="color:var(--sky)"></span><span id="buffs" class="buffs"></span></div>
 
     <div class="explore-wrap">
       <div id="map" title="行きたい方向をタップして移動"></div>
@@ -86,6 +106,11 @@
           <button class="b sub mini" id="town" type="button">⛺ 帰還回復</button>
         </div>
       </div>
+    </div>
+
+    <div class="spells-wrap">
+      <div class="row"><span style="font-size:12px;color:var(--mp);font-weight:700">🪄 じゅもん</span><span id="magst" style="font-size:11.5px;color:var(--soft)"></span></div>
+      <div class="spells" id="spells"></div>
     </div>
   </div>
 
@@ -121,33 +146,94 @@
   var MAT = ['ぼろ', '木', '石', '骨', '革', '銅', '鉄', '青銅', '鋼', '銀', '金', '白銀', '水晶', '翡翠', '紅玉', '蒼玉', '黒鉄', 'ミスリル', 'オリハルコン', '竜骨', '竜鱗', '星屑', '月光', '日輪', '雷鳴', '氷河', '炎獄', '深海', '天空', '虚空', '幻獣', '神木', '神鉄', '時渡り', '世界樹', '創世'];
   var ADJ = ['輝く', '燃える', '凍てつく', '古びた', '呪われた', '祝福の', '荒ぶる', '静かな', '歌う', '眠る', '飢えた', '気高い', '狂気の', '忘れられた', '伝説の', '禁じられた', '夜明けの', '黄昏の', '嵐の', '秘められた',
              'しょーもない', 'ありがたい', 'ぬるぬるの', 'きらきらの', 'ふわふわの', 'ごつい', 'とがった', 'まるい', 'おかしな', '最強の', '泣き虫の', '怒りの', '笑う', 'こっそり', '堂々たる', 'ぴかぴかの', 'どっしりした', '軽やかな', '真夜中の', '朝焼けの'];
+
+  // 武器・防具・アクセ（下位〜伝説級まで大量収録：FF・女神転生・ドラクエ・各種有名RPG網羅）
   var K = [
-    { s: 'w', n: '剣',   b: ['ブロードソード', 'サーベル', 'ロングソード'], m: { atk: 1 } },
-    { s: 'w', n: '槍',   b: ['スピア', 'ハルバード', 'ランス'], m: { atk: 1.05 } },
-    { s: 'w', n: '斧',   b: ['バトルアックス', 'ハチェット', '大斧'], m: { atk: 1.25 } },
-    { s: 'w', n: '弓',   b: ['ショートボウ', 'ロングボウ', 'クロスボウ'], m: { atk: 0.95, spd: 0.3 } },
-    { s: 'w', n: '杖',   b: ['ワンド', 'スタッフ', 'ロッド'], m: { atk: 1.1 } },
-    { s: 'w', n: '短剣', b: ['ダガー', 'ナイフ', 'クナイ'], m: { atk: 0.8, spd: 1 } },
-    { s: 'w', n: '鞭',   b: ['ウィップ', 'ロープ', 'ムチ'], m: { atk: 0.9, spd: 0.8 } },
-    { s: 'w', n: '槌',   b: ['ハンマー', 'メイス', 'モール'], m: { atk: 1.15, hp: 1 } },
-    { s: 'w', n: '刀',   b: ['カタナ', 'ナタ', '太刀'], m: { atk: 1.1 } },
-    { s: 'w', n: '鎌',   b: ['サイズ', 'カマ', 'デスサイズ'], m: { atk: 1.1, spd: 0.3 } },
-    { s: 'h', n: '兜',   b: ['かぶと', 'ヘルム', 'ずきん'], m: { def: 0.6, hp: 2 } },
-    { s: 'b', n: '鎧',   b: ['よろい', 'ローブ', 'ベスト'], m: { def: 1, hp: 4 } },
-    { s: 'f', n: '靴',   b: ['ブーツ', 'グリーブ', 'わらじ'], m: { def: 0.5, spd: 0.6, hp: 1 } },
-    { s: 'a', n: '指輪', b: ['リング', 'ゆびわ', '印章'], m: { atk: 0.5 } },
-    { s: 'a', n: '首飾り', b: ['ネックレス', 'ペンダント', '数珠'], m: { hp: 3 } },
-    { s: 'a', n: '腕輪', b: ['ブレスレット', 'バングル', '手甲'], m: { def: 0.5, hp: 1 } },
-    { s: 'a', n: '耳飾り', b: ['イヤリング', 'ピアス', '耳飾り'], m: { spd: 0.6, atk: 0.3 } },
-    { s: 'a', n: 'お守り', b: ['タリスマン', 'お守り', '札'], m: { hp: 2, def: 0.3 } },
-    { s: 'a', n: 'マント', b: ['マント', 'ケープ', '羽織'], m: { def: 0.4, spd: 0.4, hp: 1 } }
+    { s: 'w', n: '剣', m: { atk: 1 }, b: [
+      'ブロードソード', 'ロングソード', 'サーベル', 'バスターソード', 'ブラザーフッド', 'ルーンブレイド', 'アイスブランド', 'フレイムタン', 'サンダーブレード',
+      'ディフェンダー', 'セイブザクイーン', 'ライトブリンガー', 'マスターソード', 'マナの剣', 'グランドリオン', '虹の剣',
+      'はやぶさの剣', 'はぐれメタルの剣', '王者の剣', '天空の剣', 'ロトの剣', '銀河の剣',
+      'グラム', 'ティルフィング', 'デュランダル', 'アロンダイト', 'カラドボルグ', 'レーヴァテイン',
+      'ヒノカグツチ', 'フツノミタマ', '月光の大剣', 'ラグナロク', 'エクスカリバー', 'アルテマウェポン'
+    ]},
+    { s: 'w', n: '刀', m: { atk: 1.1, spd: 0.2 }, b: [
+      'カタナ', 'ナタ', '太刀', '菊一文字', '虎徹', '備前長船', '小烏丸', '村雨', '村正', '正宗', 'マサムネ',
+      '天叢雲剣', 'アメノムラクモ', 'クサナギの剣', '布都御魂', '鬼神丸国重', '数珠丸', '童子切安綱', '神威の刀', 'マサカドの刀'
+    ]},
+    { s: 'w', n: '槍', m: { atk: 1.05 }, b: [
+      'スピア', 'ハルバード', 'ランス', 'パルチザン', 'トライデント', 'ジャベリン', 'ホーリーランス', '飛竜の槍', '竜騎士の槍',
+      '蜻蛉切', '方天画戟', '天沼矛', 'ゲイボルグ', 'ブリューナク', 'グングニル', 'ロンギヌス'
+    ]},
+    { s: 'w', n: '斧', m: { atk: 1.25 }, b: [
+      'ハチェット', 'バトルアックス', '大斧', 'トマホーク', 'ルーンアクス', 'ギガントアクス', '魔神の斧', '黒騎士の大斧', 'ブラッドアクス'
+    ]},
+    { s: 'w', n: '槌', m: { atk: 1.15, hp: 1 }, b: [
+      'ハンマー', 'メイス', 'モール', 'ウォーハンマー', '大地のハンマー', 'メガトンハンマー', '裁きの鉄槌', 'トールハンマー', 'ミョルニル'
+    ]},
+    { s: 'w', n: '短剣', m: { atk: 0.85, spd: 1 }, b: [
+      'ナイフ', 'ダガー', 'クナイ', 'マインゴーシュ', 'グラディウス', '盗賊のナイフ', '手裏剣', '風魔手裏剣',
+      'ゾーリンシェイプ', 'ダンジューロ', 'チキンナイフ', 'オリハルコン', 'ガンブレード', 'ライオンハート'
+    ]},
+    { s: 'w', n: '弓', m: { atk: 0.95, spd: 0.4 }, b: [
+      'ショートボウ', 'ロングボウ', 'クロスボウ', 'キラーボウ', 'エルフィンボウ', '与一の弓', 'アルテミスの弓', 'ガーンデーヴァ'
+    ]},
+    { s: 'w', n: '鞭', m: { atk: 0.9, spd: 0.8 }, b: [
+      'ロープ', 'ムチ', 'ウィップ', 'チェーンウィップ', 'ビーストキラー', 'ヴァンパイアキラー', 'グリンガムのムチ'
+    ]},
+    { s: 'w', n: '杖', m: { atk: 1.05, mag: 1.4 }, b: [
+      'ワンド', 'スタッフ', 'ロッド', '光の杖', 'マグマの杖', 'ルーンの杖', 'ウィザードロッド', '賢者の杖', '大賢者の杖',
+      '星屑のロッド', 'ケリュケイオン', 'アスクレピオスの杖', '太陽の杖', 'ニルヴァーナ', 'ネクロノミコン'
+    ]},
+    { s: 'w', n: '鎌', m: { atk: 1.12, spd: 0.3, mag: 0.5 }, b: [
+      'カマ', 'サイズ', 'デスサイズ', 'ソウルイーター', 'ブラッドサイズ', 'クロノスサイズ', 'ハーデスサイズ', 'アポカリプス'
+    ]},
+    { s: 'h', n: '兜', m: { def: 0.65, hp: 2, mag: 0.2 }, b: [
+      'ずきん', '皮の帽子', 'かぶと', 'ヘルム', '三角帽子', '黒頭巾', 'ミスリルヘルム', 'クリスタルヘルム', 'ダイヤの兜',
+      '知力の兜', 'ロトの兜', 'レウスヘルム', '王家の冠', 'ティアラ', '源氏の兜', '将門の兜', 'グランドヘルム', 'リボン'
+    ]},
+    { s: 'b', n: '鎧', m: { def: 1, hp: 4, mag: 0.3 }, b: [
+      'ベスト', '皮のよろい', 'よろい', 'ローブ', '鎖かたびら', '忍び装束', '白のローブ', '黒のローブ', 'ミスリルベスト',
+      'クリスタルメイル', 'ドラゴンメイル', '水の羽衣', 'プリンセスローブ', '賢者のローブ', 'やいばのよろい', '神秘のビキニ',
+      'はぐれメタルよろい', '光の鎧', 'ロトの鎧', 'ブレイブスーツ', 'マクシミリアン', '源氏の鎧', '将門の鎧', 'グランドアーマー', '神々の衣'
+    ]},
+    { s: 'f', n: '靴', m: { def: 0.5, spd: 0.65, hp: 1 }, b: [
+      'わらじ', '皮のブーツ', 'ブーツ', 'グリーブ', '忍び足袋', 'アイアングリーブ', 'ミスリルブーツ', 'クリスタルグリーブ',
+      '疾風のブーツ', 'ウイングブーツ', 'ガラスの靴', '天使のサンダル', 'キリンブーツ', 'レッドシューズ', '幸せの靴', 'エルメスの靴', '源氏の具足', '将門の具足'
+    ]},
+    { s: 'a', n: '盾', m: { def: 0.75, hp: 2 }, b: [
+      'バックラー', 'ミスリルの盾', 'ハイリアの盾', '勇者の盾', 'はぐれメタルの盾', 'ロトの盾', '源氏の盾', 'イージスの盾', '英雄の盾'
+    ]},
+    { s: 'a', n: '腕輪', m: { def: 0.45, atk: 0.35, hp: 1 }, b: [
+      'バングル', 'ブレスレット', '手甲', 'パワーリスト', '守りの腕輪', '盗賊の小手', '豪傑の腕輪', '星降る腕輪', '鬼神の篭手', '源氏の小手', '将門の篭手'
+    ]},
+    { s: 'a', n: '指輪', m: { atk: 0.45, mag: 0.6 }, b: [
+      'ゆびわ', 'リング', '印章', '力の指輪', '命の指輪', '祈りの指輪', 'ソーサリーリング', 'リフレクトリング', '女神の指輪', 'マカラカーンの指輪', 'スリースターズ'
+    ]},
+    { s: 'a', n: '首飾り', m: { hp: 3, mag: 0.5 }, b: [
+      '数珠', 'ペンダント', 'ネックレス', '銀のロザリオ', 'チャクラドロップ', 'ソーマの雫', '賢者の石', 'マテリアの結晶'
+    ]},
+    { s: 'a', n: '耳飾り', m: { spd: 0.65, atk: 0.3 }, b: [
+      'ピアス', 'イヤリング', '耳飾り', '疾風のピアス', '魔導のイヤリング', '竜騎士の耳飾り', '天使のピアス'
+    ]},
+    { s: 'a', n: 'お守り', m: { hp: 2, def: 0.3, mag: 0.4 }, b: [
+      '札', 'お守り', 'タリスマン', 'モグのお守り', 'テトラジャの護符', '反魂香のお守り', 'グロウエッグ', 'セーフティビット'
+    ]},
+    { s: 'a', n: 'マント', m: { def: 0.4, spd: 0.45, hp: 1 }, b: [
+      '羽織', 'ケープ', 'マント', '黒帯', 'エルメスの羽根', '見切りのマント', '竜鱗のマント', '英雄のマント'
+    ]}
   ];
+
+  // 累積ベースインデックス事前計算（図鑑用）
+  var BASE_TOTAL = 0;
+  K.forEach(function (k) { k._off = BASE_TOTAL; BASE_TOTAL += k.b.length; });
+
   var AF = [
     ['hpP', '生命', 6, 1.0, 'HP'], ['atkP', '破壊', 6, 1.4, 'こうげき'], ['defP', '守護', 6, 1.0, 'ぼうぎょ'], ['spd', '疾風', 6, 1.0, 'すばやさ'],
     ['crit', '会心', 4, 1.2, '会心率'], ['critd', '猛撃', 10, 0.6, '会心ダメージ'], ['ls', '吸血', 3, 2.0, '吸収'], ['regen', '再生', 2, 0.8, '歩数HP回復'],
     ['thorn', '反撃', 8, 0.5, '反撃'], ['dodge', '回避', 3, 1.2, '回避率'], ['gold', '黄金', 12, 0.3, 'ゴールド'], ['exp', '賢者', 12, 0.3, '経験値'],
     ['drop', '幸運', 8, 0.7, 'レア率'], ['dbl', '二連', 4, 1.2, '2回攻撃'], ['pierce', '貫通', 6, 0.8, '防御無視'], ['block', '堅牢', 3, 1.2, 'ダメージ軽減'],
-    ['burst', '爆裂', 3, 1.2, '大ダメージ率'], ['exec', '処刑', 12, 0.5, '瀕死の敵に追加'], ['boss', '竜殺し', 12, 0.5, 'ボスに追加'], ['shield', '結界', 8, 0.8, '階層バリア']
+    ['burst', '爆裂', 3, 1.2, '大ダメージ率'], ['exec', '処刑', 12, 0.5, '瀕死の敵に追加'], ['boss', '竜殺し', 12, 0.5, 'ボスに追加'], ['shield', '結界', 8, 0.8, '階層バリア'],
+    ['mpP', '魔導', 10, 0.9, '最大MP'], ['mag', '賢哲', 8, 1.2, '呪文威力'], ['mpSave', '節約', 4, 1.0, 'MP軽減']
   ];
   var SLOTS = [['w', '武器'], ['h', '頭'], ['b', '体'], ['f', '足'], ['a1', 'アクセ1'], ['a2', 'アクセ2']];
   var BAG_MAX = 300, MAP_W = 19, MAP_H = 15, VIEW_W = 11, VIEW_H = 7;
@@ -158,16 +244,25 @@
 
   function gen(it) {
     if (it._g) return it._g;
-    var r = mulberry(it.s), k = K[it.k], t = Math.max(0, Math.min(MAT.length - 1, Math.floor(it.l / 3) + Math.floor(r() * 3) - 1));
-    var base = k.b[Math.floor(r() * 3)], adj = it.r > 0 ? ADJ[Math.floor(r() * ADJ.length)] : '';
+    var r = mulberry(it.s), k = K[it.k % K.length];
+    var t = Math.max(0, Math.min(MAT.length - 1, Math.floor(it.l / 3) + Math.floor(r() * 3) - 1));
+    // レア度が高いほど後半の伝説級装備名が選ばれやすい
+    var bLen = k.b.length;
+    var bIdx = Math.min(bLen - 1, Math.max(0, Math.floor((it.r / 5) * (bLen - 1) * 0.75 + r() * bLen * 0.35)));
+    var base = k.b[bIdx];
+    var adj = it.r > 0 ? ADJ[Math.floor(r() * ADJ.length)] : '';
     var ids = [], i;
     while (ids.length < it.r) { i = Math.floor(r() * AF.length); if (ids.indexOf(i) < 0) ids.push(i); }
-    var V = (3 + it.l * 1.6) * RM[it.r] * (1 + 0.08 * it.p), st = { atk: 0, def: 0, hp: 0, spd: 0 }, m = k.m;
-    st.atk = Math.round(V * (m.atk || 0)); st.def = Math.round(V * 0.7 * (m.def || 0)); st.hp = Math.round(V * 4 * (m.hp || 0)); st.spd = Math.round(V * 0.12 * (m.spd || 0));
+    var V = (3 + it.l * 1.6) * RM[it.r] * (1 + 0.08 * it.p), st = { atk: 0, def: 0, hp: 0, spd: 0, mag: 0 }, m = k.m;
+    st.atk = Math.round(V * (m.atk || 0));
+    st.def = Math.round(V * 0.7 * (m.def || 0));
+    st.hp = Math.round(V * 4 * (m.hp || 0));
+    st.spd = Math.round(V * 0.12 * (m.spd || 0));
+    st.mag = Math.round(V * 0.9 * (m.mag || 0));
     var af = ids.map(function (j) { var a = AF[j]; return { k: a[0], n: a[1], u: a[4], w: a[3], v: Math.round(a[2] * (0.7 + 0.6 * r()) * (1 + it.l / 45) * (1 + 0.1 * it.r) * 10) / 10 }; });
-    var score = st.atk * 2 + st.def * 2 + st.hp / 4 + st.spd * 2 + af.reduce(function (s, a) { return s + a.v * a.w * 3; }, 0);
+    var score = st.atk * 2 + st.def * 2 + st.hp / 4 + st.spd * 2 + st.mag * 1.6 + af.reduce(function (s, a) { return s + a.v * a.w * 3; }, 0);
     var tag = af.slice(0, 2).map(function (a) { return a.n; }).join('・');
-    it._g = { name: adj + MAT[t] + 'の' + base + (it.p ? ' +' + it.p : '') + (tag ? '【' + tag + '】' : ''), slot: k.s, st: st, af: af, score: Math.round(score), mat: t, bi: it.k * 3 + k.b.indexOf(base) };
+    it._g = { name: adj + MAT[t] + 'の' + base + (it.p ? ' +' + it.p : '') + (tag ? '【' + tag + '】' : ''), slot: k.s, st: st, af: af, score: Math.round(score), mat: t, bi: k._off + bIdx };
     return it._g;
   }
 
@@ -175,25 +270,184 @@
   var S, P, D, uid = 1, dirty = true, logs = [];
   function newState() {
     return { lv: 1, exp: 0, gold: 0, floor: 1, auto: true, sell: 0, bag: [], eq: { w: null, h: null, b: null, f: null, a1: null, a2: null },
+      buff: { atk: 0, def: 0 },
       rec: { drops: 0, kills: 0, max: 1, best: 0, steps: 0, seenB: {}, seenM: {} } };
   }
   function say(t) { logs.push(t); if (logs.length > 40) logs.shift(); }
   function fmt(n) { n = Math.round(n); return n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1) + 'k' : String(n); }
   function mkItem(s, k, l, r) { return { s: s, k: k, l: l, r: r, p: 0, x: 0, id: uid++ }; }
 
-  // ===== プレイヤー能力計算 =====
-  function calc() {
-    var b = { hp: 100 + 25 * S.lv, atk: 10 + 2.6 * S.lv, def: 2 + 1.2 * S.lv, spd: 0 }, a = {};
+  // ===== プレイヤー能力計算（keepRatio=trueで装備付け替え時のHP/MP目減りを防止） =====
+  function calc(keepRatio) {
+    var oldMaxHp = P ? P.hp : null;
+    var oldMaxMp = P ? P.mp : null;
+    var b = { hp: 100 + 25 * S.lv, mp: 20 + 4 * S.lv, atk: 10 + 2.6 * S.lv, def: 2 + 1.2 * S.lv, spd: 0, mag: 8 + 2.2 * S.lv }, a = {};
     AF.forEach(function (x) { a[x[0]] = 0; });
     Object.keys(S.eq).forEach(function (sl) {
       var it = S.eq[sl]; if (!it) return; var g = gen(it);
-      b.hp += g.st.hp; b.atk += g.st.atk; b.def += g.st.def; b.spd += g.st.spd;
-      g.af.forEach(function (x) { a[x.k] += x.v; });
+      b.hp += g.st.hp; b.atk += g.st.atk; b.def += g.st.def; b.spd += g.st.spd; b.mag += (g.st.mag || 0);
+      g.af.forEach(function (x) { a[x.k] = (a[x.k] || 0) + x.v; });
     });
-    P = { hp: Math.round(b.hp * (1 + a.hpP / 100)), atk: b.atk * (1 + a.atkP / 100), def: b.def * (1 + a.defP / 100), spd: b.spd + a.spd, a: a };
+    if (!S.buff) S.buff = { atk: 0, def: 0 };
+    var atkMul = (1 + a.atkP / 100) * (S.buff.atk > 0 ? 1.5 : 1);
+    var defMul = (1 + a.defP / 100) * (S.buff.def > 0 ? 1.5 : 1);
+    P = {
+      hp: Math.round(b.hp * (1 + a.hpP / 100)),
+      mp: Math.round(b.mp * (1 + a.mpP / 100)),
+      atk: b.atk * atkMul,
+      def: b.def * defMul,
+      spd: b.spd + a.spd,
+      mag: b.mag * (1 + a.mag / 100),
+      a: a
+    };
     P.crit = Math.min(90, 5 + a.crit); P.critd = 150 + a.critd; P.dodge = Math.min(60, a.dodge); P.block = Math.min(60, a.block);
     P.pierce = Math.min(80, a.pierce); P.dbl = Math.min(80, a.dbl); P.burst = Math.min(50, a.burst);
-    if (S.php === undefined || S.php > P.hp) S.php = P.hp;
+    P.mpSave = Math.min(50, a.mpSave);
+
+    if (S.php === undefined) {
+      S.php = P.hp;
+    } else if (keepRatio && oldMaxHp && oldMaxHp > 0) {
+      S.php = S.php >= oldMaxHp ? P.hp : Math.max(1, Math.min(P.hp, Math.round(P.hp * (S.php / oldMaxHp))));
+    } else if (S.php > P.hp) {
+      S.php = P.hp;
+    }
+
+    if (S.pmp === undefined) {
+      S.pmp = P.mp;
+    } else if (keepRatio && oldMaxMp && oldMaxMp > 0) {
+      S.pmp = S.pmp >= oldMaxMp ? P.mp : Math.max(0, Math.min(P.mp, Math.round(P.mp * (S.pmp / oldMaxMp))));
+    } else if (S.pmp > P.mp) {
+      S.pmp = P.mp;
+    }
+  }
+
+  // ===== ドラクエ系呪文システム =====
+  function getSpells() {
+    var lv = S.lv;
+    var list = [];
+    // 単体攻撃（メラ系）
+    if (lv >= 25) list.push({ id: 'mera', name: '🔥 メラゾーマ', cost: 16, type: 'single', desc: '特大の火の玉' });
+    else if (lv >= 12) list.push({ id: 'mera', name: '🔥 メラミ', cost: 9, type: 'single', desc: '大きな火の玉' });
+    else list.push({ id: 'mera', name: '🔥 メラ', cost: 4, type: 'single', desc: '小さな火の玉' });
+
+    // 回復（ホイミ系）
+    if (lv >= 2) {
+      if (lv >= 28) list.push({ id: 'hoimi', name: '💚 ベホマ', cost: 15, type: 'self', desc: 'HP全快' });
+      else if (lv >= 14) list.push({ id: 'hoimi', name: '💚 ベホイミ', cost: 9, type: 'self', desc: 'HP大回復' });
+      else list.push({ id: 'hoimi', name: '💚 ホイミ', cost: 5, type: 'self', desc: 'HP回復' });
+    }
+
+    // 眠り（ラリホー）
+    if (lv >= 4) list.push({ id: 'rariho', name: '💤 ラリホー', cost: 6, type: 'single', desc: '魔物を眠らせる' });
+
+    // 全体爆発（イオ系）
+    if (lv >= 6) {
+      if (lv >= 30) list.push({ id: 'io', name: '💥 イオナズン', cost: 22, type: 'aoe', desc: '視界全体に特大爆発' });
+      else if (lv >= 16) list.push({ id: 'io', name: '💥 イオラ', cost: 14, type: 'aoe', desc: '視界全体に大爆発' });
+      else list.push({ id: 'io', name: '💥 イオ', cost: 9, type: 'aoe', desc: '視界全体に爆発' });
+    }
+
+    // 攻撃アップ（バイキルト）
+    if (lv >= 8) list.push({ id: 'baikiruto', name: '⚔️ バイキルト', cost: 8, type: 'self', desc: '6T攻撃1.5倍' });
+
+    // 防御アップ（スクルト）
+    if (lv >= 10) list.push({ id: 'sukulto', name: '🛡️ スクルト', cost: 8, type: 'self', desc: '6T防御1.5倍' });
+
+    // MP吸収（マホトラ）
+    if (lv >= 11) list.push({ id: 'mahotora', name: '🌀 マホトラ', cost: 0, type: 'single', desc: '魔物からMP吸収' });
+
+    return list.map(function (sp) {
+      sp.realCost = sp.cost === 0 ? 0 : Math.max(1, Math.round(sp.cost * (1 - P.mpSave / 100)));
+      return sp;
+    });
+  }
+
+  function visibleMobs() {
+    return D.mobs.filter(function (m) {
+      return (m.x - D.px) * (m.x - D.px) + (m.y - D.py) * (m.y - D.py) <= 11;
+    }).sort(function (a, b) {
+      return (Math.abs(a.x - D.px) + Math.abs(a.y - D.py)) - (Math.abs(b.x - D.px) + Math.abs(b.y - D.py));
+    });
+  }
+
+  function castSpell(id) {
+    var sp = getSpells().filter(function (x) { return x.id === id; })[0];
+    if (!sp || S.pmp < sp.realCost) return;
+    var vis = visibleMobs();
+    if ((sp.type === 'single' || sp.type === 'aoe') && vis.length === 0) {
+      say('🪄 視界内に魔物がいない！');
+      renderLive();
+      return;
+    }
+    S.pmp -= sp.realCost;
+    var m, dmg, heal;
+
+    if (sp.id === 'mera') {
+      m = vis[0];
+      var mult = sp.name.indexOf('ゾーマ') >= 0 ? 4.2 : sp.name.indexOf('メラミ') >= 0 ? 2.4 : 1.35;
+      dmg = Math.max(2, Math.round(P.mag * mult * (0.9 + Math.random() * 0.2)));
+      if (m.boss) dmg = Math.round(dmg * (1 + P.a.boss / 100));
+      m.hp -= dmg;
+      m.sleep = 0;
+      say('🔥 ' + sp.name + 'を唱えた！ ' + m.name + 'に ' + fmt(dmg) + ' の呪文ダメージ！');
+      if (m.hp <= 0) { D.mobs.splice(D.mobs.indexOf(m), 1); killMob(m.boss); }
+    } else if (sp.id === 'io') {
+      var ioMult = sp.name.indexOf('ナズン') >= 0 ? 3.2 : sp.name.indexOf('イオラ') >= 0 ? 1.9 : 1.1;
+      say('💥 ' + sp.name + 'を唱えた！ 周囲の魔物を光が包み込む！');
+      vis.slice().forEach(function (target) {
+        var d = Math.max(2, Math.round(P.mag * ioMult * (0.9 + Math.random() * 0.2)));
+        if (target.boss) d = Math.round(d * (1 + P.a.boss / 100));
+        target.hp -= d;
+        target.sleep = 0;
+        say('  └ ' + target.name + 'に ' + fmt(d) + ' ダメージ！');
+        if (target.hp <= 0) { D.mobs.splice(D.mobs.indexOf(target), 1); killMob(target.boss); }
+      });
+    } else if (sp.id === 'hoimi') {
+      if (sp.name.indexOf('ベホマ') >= 0) {
+        heal = P.hp - S.php;
+        S.php = P.hp;
+      } else if (sp.name.indexOf('ベホイミ') >= 0) {
+        heal = Math.round(P.hp * 0.65 + P.mag * 1.5);
+        S.php = Math.min(P.hp, S.php + heal);
+      } else {
+        heal = Math.round(P.hp * 0.35 + P.mag * 0.8);
+        S.php = Math.min(P.hp, S.php + heal);
+      }
+      say('💚 ' + sp.name + 'を唱えた！ HPが ' + fmt(heal) + ' 回復した！');
+    } else if (sp.id === 'rariho') {
+      m = vis[0];
+      if (Math.random() < (m.boss ? 0.55 : 0.85)) {
+        m.sleep = m.boss ? 2 : 4;
+        say('💤 ' + sp.name + 'を唱えた！ ' + m.name + 'は眠ってしまった！');
+      } else {
+        say('💤 ' + sp.name + 'を唱えた！ ……しかし ' + m.name + 'には効かなかった！');
+      }
+    } else if (sp.id === 'baikiruto') {
+      S.buff.atk = 6;
+      calc(true);
+      say('⚔️ ' + sp.name + 'を唱えた！ 攻撃力がぐーんと上がった！');
+    } else if (sp.id === 'sukulto') {
+      S.buff.def = 6;
+      calc(true);
+      say('🛡️ ' + sp.name + 'を唱えた！ 守備力がぐーんと上がった！');
+    } else if (sp.id === 'mahotora') {
+      m = vis[0];
+      var drain = Math.max(3, Math.min(P.mp - S.pmp, Math.round(6 + P.mag * 0.35)));
+      S.pmp = Math.min(P.mp, S.pmp + drain);
+      say('🌀 ' + sp.name + 'を唱えた！ ' + m.name + 'からMPを ' + fmt(drain) + ' 奪った！');
+    }
+
+    tickBuffs();
+    enemyTurn();
+    renderLive();
+    save();
+  }
+
+  function tickBuffs() {
+    var changed = false;
+    if (S.buff.atk > 0) { S.buff.atk--; if (S.buff.atk === 0) { say('⏳ バイキルトの効果が切れた'); changed = true; } }
+    if (S.buff.def > 0) { S.buff.def--; if (S.buff.def === 0) { say('⏳ スクルトの効果が切れた'); changed = true; } }
+    if (changed) calc(true);
   }
 
   // ===== ダンジョン自動生成 =====
@@ -255,7 +509,7 @@
 
   function mkMob(x, y, fl, boss) {
     var max = Math.round((22 + 9 * Math.pow(fl, 1.4)) * (boss ? 3.5 : 1));
-    return { x: x, y: y, boss: boss, hp: max, max: max, atk: (4 + 1.5 * Math.pow(fl, 1.2)) * (boss ? 1.5 : 1), def: 1 + 1.4 * fl, name: boss ? '👹 階層ボス' : '👾 魔物' };
+    return { x: x, y: y, boss: boss, sleep: 0, hp: max, max: max, atk: (4 + 1.5 * Math.pow(fl, 1.2)) * (boss ? 1.5 : 1), def: 1 + 1.4 * fl, name: boss ? '👹 階層ボス' : '👾 魔物' };
   }
 
   function reveal() {
@@ -284,6 +538,7 @@
       m.hp -= d; total += d;
       if (a.ls) S.php = Math.min(P.hp, S.php + Math.ceil(d * a.ls / 100));
     }
+    m.sleep = 0;
     say('⚔️ ' + m.name + 'に ' + fmt(total) + ' ダメージ' + (critHit ? '（会心！）' : '') + (hits > 1 ? ' ×' + hits + '連撃' : ''));
     if (m.hp <= 0) {
       D.mobs.splice(D.mobs.indexOf(m), 1);
@@ -298,9 +553,24 @@
     var e = Math.round((4 + 2.5 * fl) * (boss ? 4 : 1) * (1 + a.exp / 100));
     S.gold += g; S.exp += e;
     say('💥 倒した！（💰+' + fmt(g) + ' / EXP+' + fmt(e) + '）');
+    if (boss) say('🔓 階層ボスを倒し、階段の封印が解けた！');
     var need;
     while (S.exp >= (need = Math.round(20 * Math.pow(S.lv, 1.4)))) {
-      S.exp -= need; S.lv++; say('🎉 レベル' + S.lv + 'に上がった！HP全快！'); calc(); S.php = P.hp;
+      S.exp -= need; S.lv++;
+      calc(); S.php = P.hp; S.pmp = P.mp;
+      say('🎉 レベル' + S.lv + 'に上がった！HP・MP全快！');
+      if (S.lv === 2) say('🪄 新しい呪文「ホイミ」を覚えた！');
+      else if (S.lv === 4) say('🪄 新しい呪文「ラリホー」を覚えた！');
+      else if (S.lv === 6) say('🪄 新しい呪文「イオ」を覚えた！');
+      else if (S.lv === 8) say('🪄 新しい呪文「バイキルト」を覚えた！');
+      else if (S.lv === 10) say('🪄 新しい呪文「スクルト」を覚えた！');
+      else if (S.lv === 11) say('🪄 新しい呪文「マホトラ」を覚えた！');
+      else if (S.lv === 12) say('🪄 呪文が「メラミ」に進化した！');
+      else if (S.lv === 14) say('🪄 呪文が「ベホイミ」に進化した！');
+      else if (S.lv === 16) say('🪄 呪文が「イオラ」に進化した！');
+      else if (S.lv === 25) say('🪄 呪文が「メラゾーマ」に進化した！');
+      else if (S.lv === 28) say('🪄 呪文が「ベホマ」に進化した！');
+      else if (S.lv === 30) say('🪄 呪文が「イオナズン」に進化した！');
     }
     if (boss || Math.random() < 0.45 * (1 + a.drop / 100)) dropItem(fl, boss);
     dirty = true;
@@ -310,8 +580,11 @@
     if (dx === 0 && dy === 0) {
       // 待機（少し自然回復）
       var heal = Math.max(1, Math.round(P.hp * 0.03 + P.a.regen));
+      var mpHeal = Math.max(1, Math.round(P.mp * 0.06));
       S.php = Math.min(P.hp, S.php + heal);
-      say('⏳ 様子を見た（HP +' + heal + '）');
+      S.pmp = Math.min(P.mp, S.pmp + mpHeal);
+      say('⏳ 様子を見た（HP +' + heal + ' / MP +' + mpHeal + '）');
+      tickBuffs();
       enemyTurn();
       renderLive(); save();
       return;
@@ -326,6 +599,7 @@
       D.px = nx; D.py = ny;
       S.rec.steps++;
       if (P.a.regen > 0) S.php = Math.min(P.hp, S.php + Math.ceil(P.a.regen));
+      S.pmp = Math.min(P.mp, S.pmp + 1);
       reveal();
       var o = objAt(nx, ny);
       if (o && o.t === 'chest') {
@@ -337,19 +611,28 @@
       } else if (o && o.t === 'fountain') {
         D.objs.splice(D.objs.indexOf(o), 1);
         var rec = Math.round(P.hp * 0.5);
+        var mrec = Math.round(P.mp * 0.5);
         S.php = Math.min(P.hp, S.php + rec);
-        say('⛲ 癒やしの泉を飲んだ！HPが ' + fmt(rec) + ' 回復した');
+        S.pmp = Math.min(P.mp, S.pmp + mrec);
+        say('⛲ 癒やしの泉を飲んだ！HP ' + fmt(rec) + '・MP ' + fmt(mrec) + ' 回復した');
       } else if (o && o.t === 'stairs') {
-        say('🪜 下り階段を見つけた！');
+        var hasBoss = D.mobs.some(function (x) { return x.boss; });
+        say(hasBoss ? '🪜 下り階段を見つけた！……しかし階層ボスの魔力で封印されている！' : '🪜 下り階段を見つけた！');
       }
     }
+    tickBuffs();
     enemyTurn();
     renderLive(); save();
   }
 
   function enemyTurn() {
     for (var i = 0; i < D.mobs.length; i++) {
-      var m = D.mobs[i], dist = Math.abs(m.x - D.px) + Math.abs(m.y - D.py);
+      var m = D.mobs[i];
+      if (m.sleep > 0) {
+        m.sleep--;
+        continue;
+      }
+      var dist = Math.abs(m.x - D.px) + Math.abs(m.y - D.py);
       if (dist === 1) {
         if (Math.random() * 100 < P.dodge) {
           say('💨 ' + m.name + 'の攻撃を回避！');
@@ -365,7 +648,10 @@
           }
           if (S.php <= 0) {
             S.floor = Math.max(1, S.floor - 1);
+            S.buff = { atk: 0, def: 0 };
+            calc();
             S.php = P.hp;
+            S.pmp = P.mp;
             say('💀 力尽きた……地下' + S.floor + '階まで押し戻された');
             buildFloor(S.floor);
             dirty = true;
@@ -386,7 +672,7 @@
     while (i < 5 && r >= w[i]) { r -= w[i]; i++; }
     return i;
   }
-  function slotOf(it) { return K[it.k].s; }
+  function slotOf(it) { return K[it.k % K.length].s; }
   function eqSlotsFor(sl) { return sl === 'a' ? ['a1', 'a2'] : [sl]; }
   function worst(sl) {
     var ss = eqSlotsFor(sl), w = ss[0];
@@ -401,7 +687,7 @@
     var sl = slotOf(it), w = worst(sl), cur = S.eq[w];
     if (S.auto && (!cur || g.score > gen(cur).score)) {
       if (cur) S.bag.push(cur);
-      S.eq[w] = it; calc(); dirty = true;
+      S.eq[w] = it; calc(true); dirty = true;
       say('🛡️ 拾って即装備！ [' + RAR[r] + '] ' + g.name);
       trim(); return;
     }
@@ -425,17 +711,17 @@
     var eq = { w: null, h: null, b: null, f: null, a1: null, a2: null }, used = [];
     ['w', 'h', 'b', 'f'].forEach(function (sl) { var x = by(sl)[0]; if (x) { eq[sl] = x; used.push(x); } });
     var ac2 = by('a'); eq.a1 = ac2[0] || null; eq.a2 = ac2[1] || null; if (eq.a1) used.push(eq.a1); if (eq.a2) used.push(eq.a2);
-    S.eq = eq; S.bag = pool.filter(function (x) { return used.indexOf(x) < 0; }); calc(); dirty = true;
+    S.eq = eq; S.bag = pool.filter(function (x) { return used.indexOf(x) < 0; }); calc(true); dirty = true;
   }
   function find(id) { for (var i = 0; i < S.bag.length; i++) if (S.bag[i].id === id) return S.bag[i]; return null; }
   function equip(it) {
     var sl = slotOf(it), w = worst(sl), cur = S.eq[w];
-    S.bag.splice(S.bag.indexOf(it), 1); if (cur) S.bag.push(cur); S.eq[w] = it; calc(); dirty = true;
+    S.bag.splice(S.bag.indexOf(it), 1); if (cur) S.bag.push(cur); S.eq[w] = it; calc(true); dirty = true;
   }
   function enhCost(it) { return Math.round(30 * Math.pow(1.7, it.p) * (it.l / 10 + 1) * (it.r + 1)); }
   function enhance(it) {
     if (it.p >= 10 || S.gold < enhCost(it)) return;
-    S.gold -= enhCost(it); it.p++; it._g = null; calc(); dirty = true;
+    S.gold -= enhCost(it); it.p++; it._g = null; calc(true); dirty = true;
   }
 
   // ===== セーブ・ロード =====
@@ -452,6 +738,7 @@
     try {
       var o = JSON.parse(localStorage.getItem(SAVE)); if (!o || !o.bag) return newState();
       var s = Object.assign(newState(), o); s.bag = o.bag.map(unpack);
+      if (!s.buff) s.buff = { atk: 0, def: 0 };
       s.eq = { w: null, h: null, b: null, f: null, a1: null, a2: null }; Object.keys(o.eq || {}).forEach(function (k) { if (o.eq[k]) s.eq[k] = unpack(o.eq[k]); });
       return s;
     } catch (e) { return newState(); }
@@ -459,7 +746,12 @@
 
   // ===== 描画 =====
   function statLine(g) {
-    var p = []; if (g.st.atk) p.push('こうげき+' + g.st.atk); if (g.st.def) p.push('ぼうぎょ+' + g.st.def); if (g.st.hp) p.push('HP+' + g.st.hp); if (g.st.spd) p.push('すばやさ+' + g.st.spd);
+    var p = [];
+    if (g.st.atk) p.push('こうげき+' + g.st.atk);
+    if (g.st.def) p.push('ぼうぎょ+' + g.st.def);
+    if (g.st.hp) p.push('HP+' + g.st.hp);
+    if (g.st.spd) p.push('すばやさ+' + g.st.spd);
+    if (g.st.mag) p.push('魔力+' + g.st.mag);
     return p.join(' ') + (g.af.length ? '<br>' + g.af.map(function (a) { return a.n + ' ' + a.u + '+' + a.v + '%'; }).join(' / ') : '');
   }
   function itemHtml(it, eqSlot) {
@@ -481,7 +773,7 @@
     $('bagn').textContent = '（' + S.bag.length + ' / ' + BAG_MAX + '）';
     var r = S.rec;
     $('rec').innerHTML = '最高到達：地下' + r.max + '階／倒した魔物：' + fmt(r.kills) + '体／歩数：' + fmt(r.steps) + '歩<br>' +
-      '拾った装備：' + fmt(r.drops) + '個／最高レア：' + RAR[r.best] + '／図鑑：ベース ' + Object.keys(r.seenB).length + '/' + K.length * 3 + '・素材 ' + Object.keys(r.seenM).length + '/' + MAT.length;
+      '拾った装備：' + fmt(r.drops) + '個／最高レア：' + RAR[r.best] + '／図鑑：ベース ' + Object.keys(r.seenB).length + '/' + BASE_TOTAL + '・素材 ' + Object.keys(r.seenM).length + '/' + MAT.length;
     $('auto').textContent = S.auto ? '⚡ 自動装備ON' : '自動装備OFF';
     $('auto').className = 'b sub mini' + (S.auto ? ' on' : '');
     dirty = false;
@@ -497,18 +789,29 @@
         }
         var inSight = (mx - D.px) * (mx - D.px) + (my - D.py) * (my - D.py) <= 11;
         if (mx === D.px && my === D.py) {
-          html += '<div class="cell c-me">🧙</div>';
+          html += '<div class="cell c-me">🐰</div>';
         } else if (D.grid[my][mx] === 1) {
           html += '<div class="cell c-wall' + (inSight ? '' : ' dim') + '"></div>';
         } else {
           var icon = '', m = inSight ? mobAt(mx, my) : null, o = objAt(mx, my);
-          if (m) icon = m.boss ? '👹' : '👾';
+          if (m) icon = (m.boss ? '👹' : '👾') + (m.sleep > 0 ? '<span class="slp">💤</span>' : '');
           else if (o) icon = o.t === 'stairs' ? '🪜' : o.t === 'chest' ? '📦' : '⛲';
           html += '<div class="cell c-floor' + (inSight ? '' : ' dim') + '">' + icon + '</div>';
         }
       }
     }
     $('map').innerHTML = html;
+  }
+  function renderSpells() {
+    var visCount = visibleMobs().length;
+    var sps = getSpells();
+    $('magst').textContent = '魔力 ' + fmt(P.mag) + (P.mpSave ? '（消費-' + P.mpSave.toFixed(0) + '%）' : '');
+    $('spells').innerHTML = sps.map(function (sp) {
+      var noMp = S.pmp < sp.realCost;
+      var noTarget = (sp.type === 'single' || sp.type === 'aoe') && visCount === 0;
+      var dis = (noMp || noTarget) ? ' disabled' : '';
+      return '<button class="b sp" data-spell="' + sp.id + '" title="' + sp.desc + '" type="button"' + dis + '>' + sp.name + ' <small>(' + sp.realCost + ')</small></button>';
+    }).join('');
   }
   function renderLive() {
     if (dirty) renderStatic();
@@ -521,10 +824,35 @@
     $('shd').textContent = S.shield > 0 ? '🛡️' + fmt(S.shield) : '';
     $('php').textContent = fmt(Math.max(0, S.php)) + '/' + fmt(P.hp);
     $('pbar').style.width = Math.max(0, S.php / P.hp * 100) + '%';
+    $('pmp').textContent = fmt(Math.max(0, S.pmp)) + '/' + fmt(P.mp);
+    $('mbar').style.width = Math.max(0, S.pmp / P.mp * 100) + '%';
     $('pst').textContent = 'ATK ' + fmt(P.atk) + ' DEF ' + fmt(P.def) + ' SPD +' + fmt(P.spd) + ' 会心 ' + P.crit.toFixed(0) + '%';
+
+    var bf = [];
+    if (S.buff.atk > 0) bf.push('⚔️バイキルト(' + S.buff.atk + ')');
+    if (S.buff.def > 0) bf.push('🛡️スクルト(' + S.buff.def + ')');
+    $('buffs').textContent = bf.join(' ');
+
     var onStairs = objAt(D.px, D.py);
-    $('stairs').style.display = (onStairs && onStairs.t === 'stairs') ? 'block' : 'none';
+    var hasBoss = D.mobs.some(function (m) { return m.boss; });
+    var stBtn = $('stairs');
+    if (onStairs && onStairs.t === 'stairs') {
+      stBtn.style.display = 'block';
+      if (hasBoss) {
+        stBtn.disabled = true;
+        stBtn.className = 'b lock';
+        stBtn.textContent = '🔒 ボスを倒すまで降りられない';
+      } else {
+        stBtn.disabled = false;
+        stBtn.className = 'b on';
+        stBtn.textContent = '🪜 次の階へ降りる';
+      }
+    } else {
+      stBtn.style.display = 'none';
+    }
+
     $('log').textContent = logs.slice(-6).join('\n') || 'ダンジョンを歩いて探索しよう！';
+    renderSpells();
     renderMap();
   }
 
@@ -534,6 +862,11 @@
     if (dirBtn) {
       var d = dirBtn.getAttribute('data-dir').split(',');
       step(+d[0], +d[1]);
+      return;
+    }
+    var spBtn = e.target.closest ? e.target.closest('[data-spell]') : null;
+    if (spBtn) {
+      castSpell(spBtn.getAttribute('data-spell'));
       return;
     }
     var el = e.target.closest ? e.target.closest('[data-a]') : null;
@@ -564,19 +897,23 @@
     else if (k === 'ArrowLeft' || k === 'a' || k === 'A') { e.preventDefault(); step(-1, 0); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { e.preventDefault(); step(1, 0); }
     else if (k === ' ' || k === '.') { e.preventDefault(); step(0, 0); }
-    else if (k === 'Enter' && $('stairs').style.display !== 'none') { e.preventDefault(); $('stairs').click(); }
+    else if (k === 'Enter' && $('stairs').style.display !== 'none' && !$('stairs').disabled) { e.preventDefault(); $('stairs').click(); }
   });
 
   $('wait').onclick = function () { step(0, 0); };
   $('stairs').onclick = function () {
+    if (D.mobs.some(function (m) { return m.boss; })) return;
     S.floor++;
     if (S.floor > S.rec.max) S.rec.max = S.floor;
     say('🪜 地下' + S.floor + '階へ降りた！');
     buildFloor(S.floor); dirty = true; renderLive(); save();
   };
   $('town').onclick = function () {
+    S.buff = { atk: 0, def: 0 };
+    calc();
     S.php = P.hp;
-    say('⛺ 入口へ戻って体制を立て直した（HP全快・地下' + S.floor + '階を再生成）');
+    S.pmp = P.mp;
+    say('⛺ 入口へ戻って体制を立て直した（HP・MP全快・地下' + S.floor + '階を再生成）');
     buildFloor(S.floor); dirty = true; renderLive(); save();
   };
   $('auto').onclick = function () { S.auto = !S.auto; dirty = true; renderLive(); save(); };
@@ -586,11 +923,11 @@
     S.gold += g; say('💰 ' + n + '個を売って、' + fmt(g) + 'ゴールドになった'); dirty = true; renderLive(); save();
   };
   $('fslot').onchange = $('fsort').onchange = function () { dirty = true; renderLive(); };
-  $('fsell').innerHTML = RAR.map(function (r, i) { return '<option value="' + i + '">' + (i === 0 ? 'コモンだけ自動売却' : r + '以下を自動売却') + '</option>'; }).join('');
+  $('fsell').innerHTML = '<option value="-1">自動売却しない</option>' + RAR.map(function (r, i) { return '<option value="' + i + '">' + (i === 0 ? 'コモンだけ自動売却' : r + '以下を自動売却') + '</option>'; }).join('');
   $('fsell').onchange = function () { S.sell = +$('fsell').value; save(); };
   $('reset').onclick = function () {
     if (confirm('最初からやり直すよ。集めた装備も消えるけど、いいかな？')) {
-      S = newState(); logs = []; calc(); buildFloor(1); dirty = true; renderLive(); save();
+      S = newState(); logs = []; calc(); S.php = P.hp; S.pmp = P.mp; buildFloor(1); dirty = true; renderLive(); save();
     }
   };
 
