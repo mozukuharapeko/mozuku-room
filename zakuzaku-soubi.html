@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>雑にダンジョン行くやつ</title>
 <style>
-  :root { --bg:#1f1f23; --card:#2b2b31; --card2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --mint:#8fd9b0; --red:#f87171; --sky:#cfe3f5; --mp:#b794f4; }
+  :root { --bg:#1f1f23; --card:#2b2b31; --card2:#36363d; --ink:#ece6e0; --soft:#a9a39e; --line:#46464e; --orange:#ffb27a; --on:#3d2e24; --mint:#8fd9b0; --red:#f87171; --sky:#cfe3f5; --mp:#b794f4; --gold:#fcd34d; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif; font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--bg); -webkit-tap-highlight-color: transparent;
          padding: calc(10px + env(safe-area-inset-top, 0px)) 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
@@ -15,23 +15,32 @@
   header div { display: flex; gap: 6px; }
   header button, header a { font: inherit; font-size: 12px; color: var(--ink); background: var(--card2); border: 2px solid var(--line); border-radius: 99px; padding: 2px 12px; text-decoration: none; cursor: pointer; touch-action: manipulation; }
   .card { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 10px 12px; }
-  .card h2 { font-size: 15px; color: var(--orange); margin-bottom: 6px; }
+  .card h2 { font-size: 15px; color: var(--orange); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
   .bar { height: 8px; background: var(--line); border-radius: 5px; overflow: hidden; margin: 3px 0 6px; }
   .bar i { display: block; height: 100%; width: 0; background: var(--mint); transition: width .12s; }
   .bar.x i { background: #7aa8ff; }
   .bar.m i { background: var(--mp); }
   .bars-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; }
-  #log { white-space: pre-wrap; font-size: 12.5px; min-height: 6.2em; color: var(--soft); }
-  .grid { display: grid; gap: 6px; } .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  #log { white-space: pre-wrap; font-size: 12.5px; min-height: 6.4em; color: var(--soft); }
+  .grid { display: grid; gap: 6px; } .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
   button.b, select { font: inherit; font-weight: 700; min-height: 38px; padding: 4px 8px; border-radius: 12px; border: 2px solid #c4824f; background: var(--orange); color: var(--on); cursor: pointer; touch-action: manipulation; user-select: none; }
   button.b:disabled { opacity: 0.4; cursor: default; }
   button.b.sub { background: var(--card2); color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 12.5px; }
   button.b.on { background: var(--mint); border-color: #5ba884; color: #193326; font-weight: 700; }
   button.b.lock { background: #3b262a; border-color: #9e4752; color: #fca5a5; opacity: 0.9; }
   button.b.mini { min-height: 30px; font-size: 12px; padding: 2px 8px; }
-  button.b.sp { background: #342b47; border-color: #7c5cc4; color: #e9d8fd; font-size: 12px; min-height: 32px; padding: 3px 6px; }
+  button.b.sp { background: #342b47; border-color: #7c5cc4; color: #e9d8fd; font-size: 11.5px; min-height: 32px; padding: 3px 5px; }
+  button.b.use { background: #243b35; border-color: #4d9e86; color: #ccfbee; font-size: 11.5px; min-height: 30px; padding: 2px 6px; }
+  button.b.mythic { background: linear-gradient(135deg, #581c87, #9f1239); border-color: #f43f5e; color: #ffe4e6; }
   select { background: #232327; color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 13px; width: 100%; }
+
+  /* 特殊フロアバッジ */
+  .ftag { display: inline-block; font-size: 11px; padding: 0 7px; border-radius: 99px; font-weight: 700; margin-left: 4px; }
+  .ft-boss { background: #59252c; color: #fca5a5; border: 1px solid #b91c1c; }
+  .ft-vault { background: #4a3b18; color: #fde68a; border: 1px solid #d97706; }
+  .ft-house { background: #4c234a; color: #f5d0fe; border: 1px solid #a21caf; }
+  .ft-metal { background: #2b3545; color: #bae6fd; border: 1px solid #38bdf8; }
 
   /* 小さなダンジョンマップ表示 */
   .explore-wrap { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; }
@@ -50,11 +59,35 @@
   .dpad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 40px); gap: 4px; justify-content: center; }
   .dpad button { min-height: 40px; padding: 0; font-size: 16px; border-radius: 10px; }
   .dpad .wait { font-size: 11px; background: var(--card2); color: var(--ink); border-color: var(--line); }
+  .dpad .wait.act-atk { background: #4a2828; border-color: #c45c5c; color: #fecaca; }
+  .dpad .wait.act-st { background: #234234; border-color: #5ba884; color: #bbf7d0; }
 
-  /* 呪文エリア */
+  /* 呪文・道具エリア */
   .spells-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
-  .spells { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 5px; margin-top: 4px; }
+  .spells { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 5px; margin-top: 4px; }
+  .items-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 6px; }
   .buffs { font-size: 11.5px; color: #fde68a; }
+
+  /* 街画面 */
+  .town-box { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .town-banner { background: linear-gradient(135deg, #2f3640, #3a2f2b); border: 1.5px solid #6b5b4b; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; }
+  .town-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 8px; }
+  .town-tabs button.active { background: var(--orange); color: var(--on); border-color: #c4824f; font-weight: 700; }
+  .town-panel { background: #232328; border: 1.5px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+  .depart-bar { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 6px; margin-top: 8px; }
+  .alch-box { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; }
+  .alch-preview { background: var(--card2); border: 1px dashed var(--orange); border-radius: 10px; padding: 6px 8px; font-size: 12px; }
+
+  /* ガチャ・スロット */
+  .casino-sec { background: var(--card2); border: 1.5px solid var(--line); border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; }
+  .casino-sec:last-child { margin-bottom: 0; }
+  .reels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0; }
+  .reel { background: #141418; border: 2px solid #d97706; border-radius: 12px; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: inset 0 0 10px rgba(0,0,0,0.7); transition: transform .08s, border-color .15s; }
+  .reel.spin { border-color: var(--orange); transform: scale(0.97); }
+  .reel.win { border-color: var(--mint); background: #1c3329; box-shadow: 0 0 10px rgba(143,217,176,0.45); }
+  .paytable { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px 8px; font-size: 11px; color: var(--soft); background: #1c1c21; border-radius: 8px; padding: 6px 8px; margin-top: 6px; }
+  .gacha-res { max-height: 210px; overflow-y: auto; margin-top: 6px; border-top: 1px solid var(--line); padding-top: 4px; }
+  .new-badge { display: inline-block; background: #e11d48; color: #fff; font-size: 10px; font-weight: 700; padding: 0 5px; border-radius: 6px; margin-left: 4px; vertical-align: middle; }
 
   .it { border: 2px solid var(--line); border-radius: 12px; padding: 6px 8px; margin-top: 6px; background: var(--card2); }
   .it b { display: block; font-size: 13px; word-break: break-all; }
@@ -64,6 +97,19 @@
   .r0 { border-left: 5px solid #b8b8b8; } .r1 { border-left: 5px solid #6ee7a0; } .r2 { border-left: 5px solid #60a5fa; }
   .r3 { border-left: 5px solid #c084fc; } .r4 { border-left: 5px solid #fb923c; } .r5 { border-left: 5px solid #f43f5e; }
   .lead { font-size: 12.5px; color: var(--soft); }
+
+  /* 図鑑モーダル */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; padding: 12px; z-index: 50; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--card); border: 2px solid var(--orange); border-radius: 16px; max-width: 520px; width: 100%; max-height: 84vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .modal-bd { padding: 10px 12px; overflow-y: auto; font-size: 12.5px; }
+  .dex-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px 12px 0; }
+  .dex-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 10px; }
+  .chip { padding: 2px 7px; border-radius: 8px; background: var(--card2); border: 1px solid var(--line); font-size: 11.5px; }
+  .chip.got { border-color: var(--mint); color: #d1fae5; }
+  .chip.unk { opacity: 0.45; }
+
   button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
 </style>
 </head>
@@ -71,7 +117,7 @@
 <div id="app">
   <header>
     <h1>🐰 雑にダンジョン行くやつ</h1>
-    <div><button id="reset" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
+    <div><button id="opendex" type="button">📖 図鑑</button><button id="reset" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
   </header>
 
   <div class="card">
@@ -92,34 +138,58 @@
 
     <div class="row"><span id="pst" style="color:var(--sky)"></span><span id="buffs" class="buffs"></span></div>
 
-    <div class="explore-wrap">
-      <div id="map" title="行きたい方向をタップして移動"></div>
-      <div class="pad-area">
-        <div class="dpad">
-          <div></div><button class="b sub" data-dir="0,-1" type="button">▲</button><div></div>
-          <button class="b sub" data-dir="-1,0" type="button">◀</button><button class="b wait" id="wait" type="button">待機</button><button class="b sub" data-dir="1,0" type="button">▶</button>
-          <div></div><button class="b sub" data-dir="0,1" type="button">▼</button><div></div>
+    <!-- ダンジョン探索ビュー -->
+    <div id="dungeonView">
+      <div class="explore-wrap">
+        <div id="map" title="行きたい方向をタップして移動"></div>
+        <div class="pad-area">
+          <div class="dpad">
+            <div></div><button class="b sub" data-dir="0,-1" type="button">▲</button><div></div>
+            <button class="b sub" data-dir="-1,0" type="button">◀</button><button class="b wait" id="wait" type="button" title="Spaceキー: 階段降りる / 隣接攻撃 / 待機">待機</button><button class="b sub" data-dir="1,0" type="button">▶</button>
+            <div></div><button class="b sub" data-dir="0,1" type="button">▼</button><div></div>
+          </div>
+          <button class="b on" id="stairs" type="button" style="display:none">🪜 次の階へ降りる</button>
+          <div class="grid g2">
+            <button class="b sub mini" id="auto" type="button"></button>
+            <button class="b sub mini" id="town" type="button">🏘️ 街へ帰還</button>
+          </div>
         </div>
-        <button class="b on" id="stairs" type="button" style="display:none">🪜 次の階へ降りる</button>
-        <div class="grid g2">
-          <button class="b sub mini" id="auto" type="button"></button>
-          <button class="b sub mini" id="town" type="button">⛺ 帰還回復</button>
-        </div>
+      </div>
+
+      <div class="spells-wrap">
+        <div class="row"><span style="font-size:12px;color:var(--mp);font-weight:700">🪄 じゅもん</span><span id="magst" style="font-size:11.5px;color:var(--soft)"></span></div>
+        <div class="spells" id="spells"></div>
+        <div class="items-bar" id="itemsBar"></div>
       </div>
     </div>
 
-    <div class="spells-wrap">
-      <div class="row"><span style="font-size:12px;color:var(--mp);font-weight:700">🪄 じゅもん</span><span id="magst" style="font-size:11.5px;color:var(--soft)"></span></div>
-      <div class="spells" id="spells"></div>
+    <!-- 街ビュー -->
+    <div id="townView" class="town-box" style="display:none">
+      <div class="town-banner">
+        <div class="row"><b style="color:#ffbf93">🏘️ 冒険者の街「うさぎの街」</b><span id="mealStatus" style="font-size:11.5px;color:#fde68a"></span></div>
+        <small class="lead">HP・MPは全快！装備の購入や錬金、遊技場で運試ししよう。</small>
+      </div>
+      <div class="town-tabs" id="townTabs">
+        <button class="b sub mini active" data-ttab="inn" type="button">🏨 宿屋・食事</button>
+        <button class="b sub mini" data-ttab="item" type="button">🏪 道具屋</button>
+        <button class="b sub mini" data-ttab="shop" type="button">⚔️ 装備屋</button>
+        <button class="b sub mini" data-ttab="alch" type="button">⚗️ 錬金釜</button>
+        <button class="b sub mini" data-ttab="gacha" type="button">🎰 ガチャ・スロット</button>
+      </div>
+      <div class="town-panel" id="townPanel"></div>
+      <div class="depart-bar">
+        <select id="departFloor" aria-label="出発階層"></select>
+        <button class="b on" id="departBtn" type="button">🧭 ダンジョンへ出発！</button>
+      </div>
     </div>
   </div>
 
   <div id="log" class="card" role="log" aria-live="polite"></div>
 
-  <div class="card"><h2>🛡️ いまの装備</h2><div id="eq"></div></div>
+  <div class="card"><h2><span>🛡️ いまの装備</span><button class="b sub mini" id="quickAlch" type="button">⚗️ 錬金釜を開く</button></h2><div id="eq"></div></div>
 
   <div class="card">
-    <h2>🎒 バッグ <span id="bagn" style="font-size:12px;color:var(--soft)"></span></h2>
+    <h2><span>🎒 バッグ <span id="bagn" style="font-size:12px;color:var(--soft)"></span></span></h2>
     <div class="grid g3">
       <select id="fslot" aria-label="部位"><option value="">ぜんぶの部位</option><option value="w">武器</option><option value="h">頭</option><option value="b">体</option><option value="f">足</option><option value="a">アクセサリー</option></select>
       <select id="fsort" aria-label="並び順"><option value="s">強さ順</option><option value="r">レア度順</option><option value="n">新しい順</option></select>
@@ -129,8 +199,21 @@
     <div id="bag"></div>
   </div>
 
-  <div class="card"><h2>📖 記録</h2><div id="rec" class="lead"></div></div>
-  <p class="lead" style="text-align:center">矢印キー / WASD / 十字ボタン / マップタップで移動。敵にぶつかると攻撃、階段（🪜）の上で次の階層へ進めるよ。</p>
+  <div class="card"><h2><span>📖 記録</span><button class="b sub mini" id="opendex2" type="button">図鑑一覧</button></h2><div id="rec" class="lead"></div></div>
+  <p class="lead" style="text-align:center">矢印キー / WASD / 十字ボタンで移動。Spaceキーで「階段降りる・隣接攻撃・待機」を自動実行するよ。</p>
+</div>
+
+<!-- 図鑑モーダル -->
+<div class="modal-bg" id="dexModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-hd"><b style="color:var(--orange)">📖 冒険者の図鑑</b><button class="b sub mini" id="closedex" type="button">✕ 閉じる</button></div>
+    <div class="dex-tabs" id="dexTabs">
+      <button class="b sub mini active" data-dtab="equip" type="button">⚔️ 装備ベース</button>
+      <button class="b sub mini" data-dtab="mat" type="button">💎 素材</button>
+      <button class="b sub mini" data-dtab="mob" type="button">👾 魔物</button>
+    </div>
+    <div class="modal-bd" id="dexBody"></div>
+  </div>
 </div>
 
 <script>
@@ -147,7 +230,7 @@
   var ADJ = ['輝く', '燃える', '凍てつく', '古びた', '呪われた', '祝福の', '荒ぶる', '静かな', '歌う', '眠る', '飢えた', '気高い', '狂気の', '忘れられた', '伝説の', '禁じられた', '夜明けの', '黄昏の', '嵐の', '秘められた',
              'しょーもない', 'ありがたい', 'ぬるぬるの', 'きらきらの', 'ふわふわの', 'ごつい', 'とがった', 'まるい', 'おかしな', '最強の', '泣き虫の', '怒りの', '笑う', 'こっそり', '堂々たる', 'ぴかぴかの', 'どっしりした', '軽やかな', '真夜中の', '朝焼けの'];
 
-  // 武器・防具・アクセ（下位〜伝説級まで大量収録：FF・女神転生・ドラクエ・各種有名RPG網羅）
+  // 武器・防具・アクセ（FF・女神転生・ドラクエ・各種有名RPG網羅）
   var K = [
     { s: 'w', n: '剣', m: { atk: 1 }, b: [
       'ブロードソード', 'ロングソード', 'サーベル', 'バスターソード', 'ブラザーフッド', 'ルーンブレイド', 'アイスブランド', 'フレイムタン', 'サンダーブレード',
@@ -223,7 +306,6 @@
     ]}
   ];
 
-  // 累積ベースインデックス事前計算（図鑑用）
   var BASE_TOTAL = 0;
   K.forEach(function (k) { k._off = BASE_TOTAL; BASE_TOTAL += k.b.length; });
 
@@ -235,18 +317,55 @@
     ['burst', '爆裂', 3, 1.2, '大ダメージ率'], ['exec', '処刑', 12, 0.5, '瀕死の敵に追加'], ['boss', '竜殺し', 12, 0.5, 'ボスに追加'], ['shield', '結界', 8, 0.8, '階層バリア'],
     ['mpP', '魔導', 10, 0.9, '最大MP'], ['mag', '賢哲', 8, 1.2, '呪文威力'], ['mpSave', '節約', 4, 1.0, 'MP軽減']
   ];
+  var AF_MAP = {};
+  AF.forEach(function (a) { AF_MAP[a[0]] = a; });
+
+  // 固有モンスター＆ボス定義
+  var MOB_TIERS = [
+    [['💧', 'スライム'], ['⛄', 'ジャックフロスト'], ['🦇', 'ズバット'], ['🍄', 'おばけキノコ'], ['💀', 'がいこつ剣士']],
+    [['🌱', 'モルボル'], ['🐺', 'ケルベロス'], ['🧙', 'リッチ'], ['🗿', 'ストーンゴーレム'], ['🐲', 'ドラゴンゾンビ']],
+    [['🦁', 'ベヒーモス'], ['👁️', 'イビルアイ'], ['😈', 'アークデーモン'], ['⚔️', 'デュラハン'], ['🐍', 'ヒュドラ']],
+    [['🐉', 'バハムート'], ['🔥', 'イフリート'], ['❄️', 'シヴァ'], ['⚡', 'オーディン'], ['👑', 'メタトロン']]
+  ];
+  var METAL_MOBS = [['🪙', 'メタルスライム'], ['🥈', 'はぐれメタル'], ['👑', 'メタルキング']];
+  var BOSS_LIST = [
+    ['🐂', 'ミノタウロス王'], ['🐍', 'ヤマタノオロチ'], ['🐉', '竜王バハムート'], ['💀', '魔王ルシファー'],
+    ['👹', '破壊神シヴァ'], ['🌑', '闇の王ゼノス'], ['🔮', '神竜オメガ'], ['👑', '混沌の王マーラ様']
+  ];
+  var ALL_MOB_NAMES = [];
+  MOB_TIERS.forEach(function (t) { t.forEach(function (m) { ALL_MOB_NAMES.push(m); }); });
+  METAL_MOBS.forEach(function (m) { ALL_MOB_NAMES.push(m); });
+  BOSS_LIST.forEach(function (m) { ALL_MOB_NAMES.push(m); });
+
+  // 消費アイテム＆宿屋弁当
+  var CONS = [
+    { id: 'potion', icon: '🧪', name: '上やくそう', price: 45, desc: 'HPを60%回復' },
+    { id: 'ether', icon: '💧', name: 'まほうのせいすい', price: 65, desc: 'MPを60%回復' },
+    { id: 'elixir', icon: '💎', name: 'エリクサー', price: 240, desc: 'HP・MPを完全回復' },
+    { id: 'bomb', icon: '💣', name: 'ばくだん石', price: 110, desc: '視界内の敵全体に大ダメージ' }
+  ];
+  var MEALS = [
+    { id: 'hp', icon: '🥕', name: 'うさぎ特製薬草サラダ', cost: 80, desc: '次の帰還まで最大HP +25%' },
+    { id: 'atk', icon: '🍖', name: 'ドラゴンステーキ定食', cost: 120, desc: '次の帰還まで攻撃力 +25%' },
+    { id: 'luck', icon: '🍀', name: '四つ葉クローバー茶', cost: 150, desc: '次の帰還までレア率 +40%' }
+  ];
+
+  // スロット図柄＆ベット額
+  var SLOT_SYMBOLS = ['🐰', '💎', '⚔️', '💰', '🥕'];
+  var SLOT_BETS = [50, 300, 2000, 10000];
+
   var SLOTS = [['w', '武器'], ['h', '頭'], ['b', '体'], ['f', '足'], ['a1', 'アクセ1'], ['a2', 'アクセ2']];
   var BAG_MAX = 300, MAP_W = 19, MAP_H = 15, VIEW_W = 11, VIEW_H = 7;
 
   // ===== 乱数・装備の生成 =====
   function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   var rnd = function (n) { return Math.floor(Math.random() * n); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
   function gen(it) {
     if (it._g) return it._g;
     var r = mulberry(it.s), k = K[it.k % K.length];
     var t = Math.max(0, Math.min(MAT.length - 1, Math.floor(it.l / 3) + Math.floor(r() * 3) - 1));
-    // レア度が高いほど後半の伝説級装備名が選ばれやすい
     var bLen = k.b.length;
     var bIdx = Math.min(bLen - 1, Math.max(0, Math.floor((it.r / 5) * (bLen - 1) * 0.75 + r() * bLen * 0.35)));
     var base = k.b[bIdx];
@@ -259,25 +378,49 @@
     st.hp = Math.round(V * 4 * (m.hp || 0));
     st.spd = Math.round(V * 0.12 * (m.spd || 0));
     st.mag = Math.round(V * 0.9 * (m.mag || 0));
-    var af = ids.map(function (j) { var a = AF[j]; return { k: a[0], n: a[1], u: a[4], w: a[3], v: Math.round(a[2] * (0.7 + 0.6 * r()) * (1 + it.l / 45) * (1 + 0.1 * it.r) * 10) / 10 }; });
+
+    var af = ids.map(function (j) {
+      var a = AF[j];
+      return { k: a[0], n: a[1], u: a[4], w: a[3], v: Math.round(a[2] * (0.7 + 0.6 * r()) * (1 + it.l / 45) * (1 + 0.1 * it.r) * 10) / 10 };
+    });
+    if (it.ex && it.ex.length) {
+      it.ex.forEach(function (ex) {
+        var found = null;
+        for (var q = 0; q < af.length; q++) if (af[q].k === ex.k) found = af[q];
+        if (found) {
+          found.v = Math.round((found.v + ex.v) * 10) / 10;
+        } else {
+          var meta = AF_MAP[ex.k];
+          if (meta) af.push({ k: meta[0], n: meta[1], u: meta[4], w: meta[3], v: ex.v });
+        }
+      });
+    }
+
     var score = st.atk * 2 + st.def * 2 + st.hp / 4 + st.spd * 2 + st.mag * 1.6 + af.reduce(function (s, a) { return s + a.v * a.w * 3; }, 0);
     var tag = af.slice(0, 2).map(function (a) { return a.n; }).join('・');
-    it._g = { name: adj + MAT[t] + 'の' + base + (it.p ? ' +' + it.p : '') + (tag ? '【' + tag + '】' : ''), slot: k.s, st: st, af: af, score: Math.round(score), mat: t, bi: k._off + bIdx };
+    it._g = { name: adj + MAT[t] + 'の' + base + (it.p ? ' +' + it.p : '') + (tag ? '【' + tag + '】' : ''), base: base, slot: k.s, st: st, af: af, score: Math.round(score), mat: t, bi: k._off + bIdx };
     return it._g;
   }
 
   // ===== 状態・ダンジョンデータ =====
   var S, P, D, uid = 1, dirty = true, logs = [];
-  function newState() {
-    return { lv: 1, exp: 0, gold: 0, floor: 1, auto: true, sell: 0, bag: [], eq: { w: null, h: null, b: null, f: null, a1: null, a2: null },
-      buff: { atk: 0, def: 0 },
-      rec: { drops: 0, kills: 0, max: 1, best: 0, steps: 0, seenB: {}, seenM: {} } };
-  }
-  function say(t) { logs.push(t); if (logs.length > 40) logs.shift(); }
-  function fmt(n) { n = Math.round(n); return n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1) + 'k' : String(n); }
-  function mkItem(s, k, l, r) { return { s: s, k: k, l: l, r: r, p: 0, x: 0, id: uid++ }; }
+  var townTab = 'inn', dexTab = 'equip', alchTarget = 'eq:w', alchMatId = '';
+  var lastGacha = [], slotReels = ['🐰', '💎', '⚔️'], slotSpinning = false, slotWinState = [false, false, false];
 
-  // ===== プレイヤー能力計算（keepRatio=trueで装備付け替え時のHP/MP目減りを防止） =====
+  function newState() {
+    return { lv: 1, exp: 0, gold: 100, floor: 1, auto: true, sell: 0, inTown: false, meal: null,
+      gachaPity: 0, slotBetIdx: 0,
+      items: { potion: 2, ether: 1, elixir: 0, bomb: 0 },
+      shop: [],
+      bag: [], eq: { w: null, h: null, b: null, f: null, a1: null, a2: null },
+      buff: { atk: 0, def: 0 },
+      rec: { drops: 0, kills: 0, max: 1, best: 0, steps: 0, seenB: {}, seenM: {}, seenE: {} } };
+  }
+  function say(t) { logs.push(t); if (logs.length > 45) logs.shift(); }
+  function fmt(n) { n = Math.round(n); return n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1) + 'k' : String(n); }
+  function mkItem(s, k, l, r) { return { s: s, k: k, l: l, r: r, p: 0, x: 0, ex: [], id: uid++ }; }
+
+  // ===== プレイヤー能力計算 =====
   function calc(keepRatio) {
     var oldMaxHp = P ? P.hp : null;
     var oldMaxMp = P ? P.mp : null;
@@ -288,6 +431,10 @@
       b.hp += g.st.hp; b.atk += g.st.atk; b.def += g.st.def; b.spd += g.st.spd; b.mag += (g.st.mag || 0);
       g.af.forEach(function (x) { a[x.k] = (a[x.k] || 0) + x.v; });
     });
+    if (S.meal === 'hp') a.hpP += 25;
+    if (S.meal === 'atk') a.atkP += 25;
+    if (S.meal === 'luck') a.drop += 40;
+
     if (!S.buff) S.buff = { atk: 0, def: 0 };
     var atkMul = (1 + a.atkP / 100) * (S.buff.atk > 0 ? 1.5 : 1);
     var defMul = (1 + a.defP / 100) * (S.buff.def > 0 ? 1.5 : 1);
@@ -304,60 +451,50 @@
     P.pierce = Math.min(80, a.pierce); P.dbl = Math.min(80, a.dbl); P.burst = Math.min(50, a.burst);
     P.mpSave = Math.min(50, a.mpSave);
 
-    if (S.php === undefined) {
-      S.php = P.hp;
-    } else if (keepRatio && oldMaxHp && oldMaxHp > 0) {
-      S.php = S.php >= oldMaxHp ? P.hp : Math.max(1, Math.min(P.hp, Math.round(P.hp * (S.php / oldMaxHp))));
-    } else if (S.php > P.hp) {
-      S.php = P.hp;
-    }
+    if (S.php === undefined) S.php = P.hp;
+    else if (keepRatio && oldMaxHp && oldMaxHp > 0) S.php = S.php >= oldMaxHp ? P.hp : Math.max(1, Math.min(P.hp, Math.round(P.hp * (S.php / oldMaxHp))));
+    else if (S.php > P.hp) S.php = P.hp;
 
-    if (S.pmp === undefined) {
-      S.pmp = P.mp;
-    } else if (keepRatio && oldMaxMp && oldMaxMp > 0) {
-      S.pmp = S.pmp >= oldMaxMp ? P.mp : Math.max(0, Math.min(P.mp, Math.round(P.mp * (S.pmp / oldMaxMp))));
-    } else if (S.pmp > P.mp) {
-      S.pmp = P.mp;
-    }
+    if (S.pmp === undefined) S.pmp = P.mp;
+    else if (keepRatio && oldMaxMp && oldMaxMp > 0) S.pmp = S.pmp >= oldMaxMp ? P.mp : Math.max(0, Math.min(P.mp, Math.round(P.mp * (S.pmp / oldMaxMp))));
+    else if (S.pmp > P.mp) S.pmp = P.mp;
   }
 
   // ===== ドラクエ系呪文システム =====
   function getSpells() {
     var lv = S.lv;
     var list = [];
-    // 単体攻撃（メラ系）
     if (lv >= 25) list.push({ id: 'mera', name: '🔥 メラゾーマ', cost: 16, type: 'single', desc: '特大の火の玉' });
     else if (lv >= 12) list.push({ id: 'mera', name: '🔥 メラミ', cost: 9, type: 'single', desc: '大きな火の玉' });
     else list.push({ id: 'mera', name: '🔥 メラ', cost: 4, type: 'single', desc: '小さな火の玉' });
 
-    // 回復（ホイミ系）
     if (lv >= 2) {
       if (lv >= 28) list.push({ id: 'hoimi', name: '💚 ベホマ', cost: 15, type: 'self', desc: 'HP全快' });
       else if (lv >= 14) list.push({ id: 'hoimi', name: '💚 ベホイミ', cost: 9, type: 'self', desc: 'HP大回復' });
       else list.push({ id: 'hoimi', name: '💚 ホイミ', cost: 5, type: 'self', desc: 'HP回復' });
     }
 
-    // 眠り（ラリホー）
     if (lv >= 4) list.push({ id: 'rariho', name: '💤 ラリホー', cost: 6, type: 'single', desc: '魔物を眠らせる' });
+    if (lv >= 5) list.push({ id: 'rura', name: '🌀 ルーラ', cost: 7, type: 'self', desc: '階段へ一瞬でワープ' });
 
-    // 全体爆発（イオ系）
     if (lv >= 6) {
       if (lv >= 30) list.push({ id: 'io', name: '💥 イオナズン', cost: 22, type: 'aoe', desc: '視界全体に特大爆発' });
       else if (lv >= 16) list.push({ id: 'io', name: '💥 イオラ', cost: 14, type: 'aoe', desc: '視界全体に大爆発' });
       else list.push({ id: 'io', name: '💥 イオ', cost: 9, type: 'aoe', desc: '視界全体に爆発' });
     }
 
-    // 攻撃アップ（バイキルト）
     if (lv >= 8) list.push({ id: 'baikiruto', name: '⚔️ バイキルト', cost: 8, type: 'self', desc: '6T攻撃1.5倍' });
-
-    // 防御アップ（スクルト）
     if (lv >= 10) list.push({ id: 'sukulto', name: '🛡️ スクルト', cost: 8, type: 'self', desc: '6T防御1.5倍' });
-
-    // MP吸収（マホトラ）
-    if (lv >= 11) list.push({ id: 'mahotora', name: '🌀 マホトラ', cost: 0, type: 'single', desc: '魔物からMP吸収' });
+    if (lv >= 11) list.push({ id: 'mahotora', name: '🔮 マホトラ', cost: 0, type: 'single', desc: '魔物からMP吸収' });
+    if (lv >= 15) list.push({ id: 'zaki', name: '💀 ザキ', cost: 12, type: 'single', desc: '魔物を一撃で葬る' });
+    if (lv >= 22) list.push({ id: 'madante', name: '🌟 マダンテ', cost: 1, type: 'aoe', allMp: true, desc: '全MP消費の究極爆発' });
 
     return list.map(function (sp) {
-      sp.realCost = sp.cost === 0 ? 0 : Math.max(1, Math.round(sp.cost * (1 - P.mpSave / 100)));
+      if (sp.allMp) {
+        sp.realCost = Math.max(1, S.pmp);
+      } else {
+        sp.realCost = sp.cost === 0 ? 0 : Math.max(1, Math.round(sp.cost * (1 - P.mpSave / 100)));
+      }
       return sp;
     });
   }
@@ -379,40 +516,61 @@
       renderLive();
       return;
     }
-    S.pmp -= sp.realCost;
+    var spentMp = sp.allMp ? S.pmp : sp.realCost;
+    S.pmp -= spentMp;
     var m, dmg, heal;
 
     if (sp.id === 'mera') {
       m = vis[0];
       var mult = sp.name.indexOf('ゾーマ') >= 0 ? 4.2 : sp.name.indexOf('メラミ') >= 0 ? 2.4 : 1.35;
-      dmg = Math.max(2, Math.round(P.mag * mult * (0.9 + Math.random() * 0.2)));
+      dmg = m.metal ? 1 : Math.max(2, Math.round(P.mag * mult * (0.9 + Math.random() * 0.2)));
       if (m.boss) dmg = Math.round(dmg * (1 + P.a.boss / 100));
-      m.hp -= dmg;
-      m.sleep = 0;
+      m.hp -= dmg; m.sleep = 0;
       say('🔥 ' + sp.name + 'を唱えた！ ' + m.name + 'に ' + fmt(dmg) + ' の呪文ダメージ！');
-      if (m.hp <= 0) { D.mobs.splice(D.mobs.indexOf(m), 1); killMob(m.boss); }
+      if (m.hp <= 0) { D.mobs.splice(D.mobs.indexOf(m), 1); killMob(m); }
     } else if (sp.id === 'io') {
       var ioMult = sp.name.indexOf('ナズン') >= 0 ? 3.2 : sp.name.indexOf('イオラ') >= 0 ? 1.9 : 1.1;
       say('💥 ' + sp.name + 'を唱えた！ 周囲の魔物を光が包み込む！');
       vis.slice().forEach(function (target) {
-        var d = Math.max(2, Math.round(P.mag * ioMult * (0.9 + Math.random() * 0.2)));
+        var d = target.metal ? 1 : Math.max(2, Math.round(P.mag * ioMult * (0.9 + Math.random() * 0.2)));
         if (target.boss) d = Math.round(d * (1 + P.a.boss / 100));
-        target.hp -= d;
-        target.sleep = 0;
+        target.hp -= d; target.sleep = 0;
         say('  └ ' + target.name + 'に ' + fmt(d) + ' ダメージ！');
-        if (target.hp <= 0) { D.mobs.splice(D.mobs.indexOf(target), 1); killMob(target.boss); }
+        if (target.hp <= 0) { D.mobs.splice(D.mobs.indexOf(target), 1); killMob(target); }
       });
-    } else if (sp.id === 'hoimi') {
-      if (sp.name.indexOf('ベホマ') >= 0) {
-        heal = P.hp - S.php;
-        S.php = P.hp;
-      } else if (sp.name.indexOf('ベホイミ') >= 0) {
-        heal = Math.round(P.hp * 0.65 + P.mag * 1.5);
-        S.php = Math.min(P.hp, S.php + heal);
+    } else if (sp.id === 'madante') {
+      say('🌟 マダンテを放った！ 全ての魔力が眩い光となって爆発する！');
+      vis.slice().forEach(function (target) {
+        var d = target.metal ? 2 : Math.max(10, Math.round(spentMp * P.mag * 0.55));
+        if (target.boss) d = Math.round(d * (1 + P.a.boss / 100));
+        target.hp -= d; target.sleep = 0;
+        say('  └ ' + target.name + 'に ' + fmt(d) + ' の究極ダメージ！');
+        if (target.hp <= 0) { D.mobs.splice(D.mobs.indexOf(target), 1); killMob(target); }
+      });
+    } else if (sp.id === 'zaki') {
+      m = vis[0];
+      if (m.boss || m.metal) {
+        say('💀 ザキを唱えた！ ……しかし ' + m.name + 'には効かなかった！');
+      } else if (Math.random() < 0.72) {
+        m.hp = 0;
+        say('💀 ザキを唱えた！ ' + m.name + 'は息絶えた！');
+        D.mobs.splice(D.mobs.indexOf(m), 1);
+        killMob(m);
       } else {
-        heal = Math.round(P.hp * 0.35 + P.mag * 0.8);
-        S.php = Math.min(P.hp, S.php + heal);
+        say('💀 ザキを唱えた！ ……しかし ' + m.name + 'は死の呪いを跳ね返した！');
       }
+    } else if (sp.id === 'rura') {
+      var st = D.objs.filter(function (o) { return o.t === 'stairs'; })[0];
+      if (st) {
+        D.px = st.x; D.py = st.y;
+        reveal();
+        var hasBoss = D.mobs.some(function (x) { return x.boss; });
+        say('🌀 ルーラを唱えた！ 階段の上へ一瞬で飛び移った！' + (hasBoss ? '（⚠️ まだボスが階段を封印している！）' : ''));
+      }
+    } else if (sp.id === 'hoimi') {
+      if (sp.name.indexOf('ベホマ') >= 0) { heal = P.hp - S.php; S.php = P.hp; }
+      else if (sp.name.indexOf('ベホイミ') >= 0) { heal = Math.round(P.hp * 0.65 + P.mag * 1.5); S.php = Math.min(P.hp, S.php + heal); }
+      else { heal = Math.round(P.hp * 0.35 + P.mag * 0.8); S.php = Math.min(P.hp, S.php + heal); }
       say('💚 ' + sp.name + 'を唱えた！ HPが ' + fmt(heal) + ' 回復した！');
     } else if (sp.id === 'rariho') {
       m = vis[0];
@@ -423,22 +581,55 @@
         say('💤 ' + sp.name + 'を唱えた！ ……しかし ' + m.name + 'には効かなかった！');
       }
     } else if (sp.id === 'baikiruto') {
-      S.buff.atk = 6;
-      calc(true);
+      S.buff.atk = 6; calc(true);
       say('⚔️ ' + sp.name + 'を唱えた！ 攻撃力がぐーんと上がった！');
     } else if (sp.id === 'sukulto') {
-      S.buff.def = 6;
-      calc(true);
+      S.buff.def = 6; calc(true);
       say('🛡️ ' + sp.name + 'を唱えた！ 守備力がぐーんと上がった！');
     } else if (sp.id === 'mahotora') {
       m = vis[0];
       var drain = Math.max(3, Math.min(P.mp - S.pmp, Math.round(6 + P.mag * 0.35)));
       S.pmp = Math.min(P.mp, S.pmp + drain);
-      say('🌀 ' + sp.name + 'を唱えた！ ' + m.name + 'からMPを ' + fmt(drain) + ' 奪った！');
+      say('🔮 ' + sp.name + 'を唱えた！ ' + m.name + 'からMPを ' + fmt(drain) + ' 奪った！');
     }
 
     tickBuffs();
     enemyTurn();
+    renderLive();
+    save();
+  }
+
+  function useConsumable(id) {
+    if (!S.items || (S.items[id] || 0) <= 0) return;
+    if (id === 'potion') {
+      if (S.php >= P.hp) { say('🧪 HPはすでに満タンだ！'); renderLive(); return; }
+      S.items.potion--;
+      var h = Math.round(P.hp * 0.6);
+      S.php = Math.min(P.hp, S.php + h);
+      say('🧪 上やくそうを使った！ HPが ' + fmt(h) + ' 回復した！');
+    } else if (id === 'ether') {
+      if (S.pmp >= P.mp) { say('💧 MPはすでに満タンだ！'); renderLive(); return; }
+      S.items.ether--;
+      var m = Math.round(P.mp * 0.6);
+      S.pmp = Math.min(P.mp, S.pmp + m);
+      say('💧 まほうのせいすいを使った！ MPが ' + fmt(m) + ' 回復した！');
+    } else if (id === 'elixir') {
+      S.items.elixir--;
+      S.php = P.hp; S.pmp = P.mp;
+      say('💎 エリクサーを飲み干した！ HP・MPが完全回復！');
+    } else if (id === 'bomb') {
+      var vis = visibleMobs();
+      if (vis.length === 0) { say('💣 視界内に魔物がいない！'); renderLive(); return; }
+      S.items.bomb--;
+      say('💣 ばくだん石を投げつけた！ 大爆発が魔物を襲う！');
+      vis.slice().forEach(function (target) {
+        var d = target.metal ? 3 : Math.max(15, Math.round((P.atk + P.mag) * 1.4));
+        target.hp -= d; target.sleep = 0;
+        say('  └ ' + target.name + 'に ' + fmt(d) + ' ダメージ！');
+        if (target.hp <= 0) { D.mobs.splice(D.mobs.indexOf(target), 1); killMob(target); }
+      });
+    }
+    dirty = true;
     renderLive();
     save();
   }
@@ -450,13 +641,27 @@
     if (changed) calc(true);
   }
 
-  // ===== ダンジョン自動生成 =====
+  // ===== ダンジョン自動生成（特殊フロア対応） =====
   function buildFloor(fl) {
     var grid = [], seen = [], rooms = [], x, y, i;
     for (y = 0; y < MAP_H; y++) { grid[y] = []; seen[y] = []; for (x = 0; x < MAP_W; x++) { grid[y][x] = 1; seen[y][x] = 0; } }
 
-    for (i = 0; i < 24 && rooms.length < 5; i++) {
-      var rw = 3 + rnd(3), rh = 3 + rnd(2), rx = 1 + rnd(MAP_W - rw - 2), ry = 1 + rnd(MAP_H - rh - 2);
+    var isBossFloor = fl % 10 === 0;
+    var ftype = 'normal';
+    if (isBossFloor) {
+      ftype = 'boss';
+    } else if (fl >= 2) {
+      var roll = Math.random();
+      if (roll < 0.09) ftype = 'vault';
+      else if (roll < 0.18) ftype = 'house';
+      else if (roll < 0.26) ftype = 'metal';
+    }
+
+    var targetRooms = ftype === 'house' ? 4 : 5;
+    for (i = 0; i < 28 && rooms.length < targetRooms; i++) {
+      var rw = (ftype === 'house' && rooms.length === 1) ? 6 : 3 + rnd(3);
+      var rh = (ftype === 'house' && rooms.length === 1) ? 5 : 3 + rnd(2);
+      var rx = 1 + rnd(MAP_W - rw - 2), ry = 1 + rnd(MAP_H - rh - 2);
       var ok = true;
       rooms.forEach(function (r) { if (rx <= r.x + r.w && rx + rw >= r.x && ry <= r.y + r.h && ry + rh >= r.y) ok = false; });
       if (!ok) continue;
@@ -474,18 +679,13 @@
 
     var start = rooms[0], end = rooms[rooms.length - 1];
     var mobs = [], objs = [];
-    var isBossFloor = fl % 5 === 0;
-
-    // 階段配置
     objs.push({ x: end.cx, y: end.cy, t: 'stairs' });
 
-    // ボス階は階段付近にボス配置
     if (isBossFloor) {
       var bx = end.cx > end.x ? end.cx - 1 : end.cx + 1;
-      mobs.push(mkMob(bx, end.cy, fl, true));
+      mobs.push(mkMob(bx, end.cy, fl, true, false));
     }
 
-    // 雑魚・宝箱・泉を空き床に配置
     var free = [];
     for (y = 1; y < MAP_H - 1; y++) for (x = 1; x < MAP_W - 1; x++) {
       if (grid[y][x] === 0 && !(x === start.cx && y === start.cy) && !(x === end.cx && y === end.cy) && !mobs.some(function (m) { return m.x === x && m.y === y; })) {
@@ -494,22 +694,55 @@
     }
     free.sort(function () { return Math.random() - 0.5; });
 
-    var mobCount = Math.min(free.length, 4 + Math.floor(fl / 6));
-    for (i = 0; i < mobCount; i++) { var p = free.pop(); mobs.push(mkMob(p.x, p.y, fl, false)); }
+    var mobCount = ftype === 'vault' ? 2 : ftype === 'house' ? Math.min(free.length, 11 + Math.floor(fl / 8)) : Math.min(free.length, 4 + Math.floor(fl / 6));
+    for (i = 0; i < mobCount && free.length; i++) {
+      var p = free.pop();
+      var isMet = ftype === 'metal' ? Math.random() < 0.75 : Math.random() < 0.04;
+      mobs.push(mkMob(p.x, p.y, fl, false, isMet));
+    }
 
-    var chestCount = Math.min(free.length, 1 + rnd(3));
-    for (i = 0; i < chestCount; i++) { var c = free.pop(); objs.push({ x: c.x, y: c.y, t: 'chest' }); }
+    var chestCount = ftype === 'vault' ? Math.min(free.length, 5 + rnd(3)) : ftype === 'house' ? Math.min(free.length, 3 + rnd(2)) : Math.min(free.length, 1 + rnd(3));
+    for (i = 0; i < chestCount && free.length; i++) {
+      var c = free.pop();
+      objs.push({ x: c.x, y: c.y, t: 'chest' });
+    }
 
     if (free.length && Math.random() < 0.55) { var f = free.pop(); objs.push({ x: f.x, y: f.y, t: 'fountain' }); }
 
-    D = { grid: grid, seen: seen, px: start.cx, py: start.cy, mobs: mobs, objs: objs };
+    D = { grid: grid, seen: seen, px: start.cx, py: start.cy, mobs: mobs, objs: objs, ftype: ftype };
     S.shield = Math.round(P.hp * P.a.shield / 100);
     reveal();
+
+    if (ftype === 'vault') say('💎 なんとここは【宝物庫】だ！宝箱が大量に眠っている！');
+    else if (ftype === 'house') say('😱 気をつけろ！ここは【モンスターハウス】だ！（レア率2倍）');
+    else if (ftype === 'metal') say('✨ キラリと光る気配……ここは【メタルフロア】だ！');
   }
 
-  function mkMob(x, y, fl, boss) {
-    var max = Math.round((22 + 9 * Math.pow(fl, 1.4)) * (boss ? 3.5 : 1));
-    return { x: x, y: y, boss: boss, sleep: 0, hp: max, max: max, atk: (4 + 1.5 * Math.pow(fl, 1.2)) * (boss ? 1.5 : 1), def: 1 + 1.4 * fl, name: boss ? '👹 階層ボス' : '👾 魔物' };
+  function mkMob(x, y, fl, boss, metal) {
+    var pick, icon, rawName, max, atk, def;
+    if (boss) {
+      pick = BOSS_LIST[(Math.floor(fl / 10) - 1) % BOSS_LIST.length];
+      icon = pick[0]; rawName = pick[1];
+      max = Math.round((22 + 9 * Math.pow(fl, 1.4)) * 4.2);
+      atk = (4 + 1.5 * Math.pow(fl, 1.2)) * 1.6;
+      def = 1 + 1.4 * fl;
+    } else if (metal) {
+      var mIdx = fl >= 25 ? 2 : fl >= 10 ? 1 : 0;
+      pick = METAL_MOBS[mIdx];
+      icon = pick[0]; rawName = pick[1];
+      max = mIdx === 2 ? 12 : mIdx === 1 ? 7 : 4;
+      atk = (4 + 1.5 * Math.pow(fl, 1.2)) * 1.1;
+      def = 99999;
+    } else {
+      var tier = fl >= 50 ? 3 : fl >= 25 ? 2 : fl >= 10 ? 1 : 0;
+      var pool = MOB_TIERS[tier];
+      pick = pool[rnd(pool.length)];
+      icon = pick[0]; rawName = pick[1];
+      max = Math.round(22 + 9 * Math.pow(fl, 1.4));
+      atk = 4 + 1.5 * Math.pow(fl, 1.2);
+      def = 1 + 1.4 * fl;
+    }
+    return { x: x, y: y, boss: !!boss, metal: !!metal, sleep: 0, hp: max, max: max, atk: atk, def: def, icon: icon, rawName: rawName, name: icon + ' ' + rawName };
   }
 
   function reveal() {
@@ -525,60 +758,110 @@
   function mobAt(x, y) { for (var i = 0; i < D.mobs.length; i++) if (D.mobs[i].x === x && D.mobs[i].y === y) return D.mobs[i]; return null; }
   function objAt(x, y) { for (var i = 0; i < D.objs.length; i++) if (D.objs[i].x === x && D.objs[i].y === y) return D.objs[i]; return null; }
 
+  function adjacentMobs() {
+    var dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]], res = [];
+    for (var i = 0; i < dirs.length; i++) {
+      var m = mobAt(D.px + dirs[i][0], D.py + dirs[i][1]);
+      if (m) res.push(m);
+    }
+    res.sort(function (a, b) {
+      if (a.boss !== b.boss) return a.boss ? -1 : 1;
+      return a.hp - b.hp;
+    });
+    return res;
+  }
+
   function strike(m) {
     var hits = 1 + (Math.random() * 100 < P.dbl ? 1 : 0) + (Math.random() * 100 < P.spd / 2 ? 1 : 0);
     var total = 0, critHit = false;
     for (var h = 0; h < hits && m.hp > 0; h++) {
       var d = P.atk * (0.9 + Math.random() * 0.2), a = P.a;
-      if (Math.random() * 100 < P.crit) { d *= P.critd / 100; critHit = true; }
+      var isCrit = Math.random() * 100 < P.crit;
+      if (isCrit) { d *= P.critd / 100; critHit = true; }
       if (Math.random() * 100 < P.burst) d *= 3;
       if (m.hp < m.max * 0.3) d *= 1 + a.exec / 100;
       if (m.boss) d *= 1 + a.boss / 100;
-      d = Math.max(1, Math.round(d * 100 / (100 + m.def * (1 - P.pierce / 100))));
+
+      if (m.metal) {
+        d = isCrit ? Math.max(5, Math.round(m.max)) : (Math.random() < 0.65 ? 1 : 0);
+      } else {
+        d = Math.max(1, Math.round(d * 100 / (100 + m.def * (1 - P.pierce / 100))));
+      }
       m.hp -= d; total += d;
-      if (a.ls) S.php = Math.min(P.hp, S.php + Math.ceil(d * a.ls / 100));
+      if (a.ls && d > 0) S.php = Math.min(P.hp, S.php + Math.ceil(d * a.ls / 100));
     }
     m.sleep = 0;
-    say('⚔️ ' + m.name + 'に ' + fmt(total) + ' ダメージ' + (critHit ? '（会心！）' : '') + (hits > 1 ? ' ×' + hits + '連撃' : ''));
+    if (m.metal && total === 0) {
+      say('⚔️ ' + m.name + 'に攻撃！ ……ミス！素早くかわされた！');
+    } else {
+      say('⚔️ ' + m.name + 'に ' + fmt(total) + ' ダメージ' + (critHit ? '（会心の一撃！）' : '') + (hits > 1 ? ' ×' + hits + '連撃' : ''));
+    }
     if (m.hp <= 0) {
       D.mobs.splice(D.mobs.indexOf(m), 1);
-      killMob(m.boss);
+      killMob(m);
     }
   }
 
-  function killMob(boss) {
+  function killMob(m) {
+    var boss = m.boss, metal = m.metal;
     var fl = S.floor, a = P.a;
     S.rec.kills++;
-    var g = Math.round((6 + 3.5 * fl) * (boss ? 5 : 1) * (1 + a.gold / 100));
-    var e = Math.round((4 + 2.5 * fl) * (boss ? 4 : 1) * (1 + a.exp / 100));
+    if (!S.rec.seenE) S.rec.seenE = {};
+    if (m.rawName) S.rec.seenE[m.rawName] = (S.rec.seenE[m.rawName] || 0) + 1;
+
+    var g = Math.round((6 + 3.5 * fl) * (boss ? 6 : metal ? 12 : 1) * (1 + a.gold / 100));
+    var e = Math.round((4 + 2.5 * fl) * (boss ? 5 : metal ? 25 : 1) * (1 + a.exp / 100));
     S.gold += g; S.exp += e;
-    say('💥 倒した！（💰+' + fmt(g) + ' / EXP+' + fmt(e) + '）');
-    if (boss) say('🔓 階層ボスを倒し、階段の封印が解けた！');
+    say('💥 ' + m.name + 'を倒した！（💰+' + fmt(g) + ' / EXP+' + fmt(e) + '）');
+    if (boss) say('🔓 階層ボスを倒した！魔物の増殖が止まり、階段の封印が解けた！');
     var need;
     while (S.exp >= (need = Math.round(20 * Math.pow(S.lv, 1.4)))) {
       S.exp -= need; S.lv++;
       calc(); S.php = P.hp; S.pmp = P.mp;
       say('🎉 レベル' + S.lv + 'に上がった！HP・MP全快！');
-      if (S.lv === 2) say('🪄 新しい呪文「ホイミ」を覚えた！');
-      else if (S.lv === 4) say('🪄 新しい呪文「ラリホー」を覚えた！');
-      else if (S.lv === 6) say('🪄 新しい呪文「イオ」を覚えた！');
-      else if (S.lv === 8) say('🪄 新しい呪文「バイキルト」を覚えた！');
-      else if (S.lv === 10) say('🪄 新しい呪文「スクルト」を覚えた！');
-      else if (S.lv === 11) say('🪄 新しい呪文「マホトラ」を覚えた！');
-      else if (S.lv === 12) say('🪄 呪文が「メラミ」に進化した！');
-      else if (S.lv === 14) say('🪄 呪文が「ベホイミ」に進化した！');
-      else if (S.lv === 16) say('🪄 呪文が「イオラ」に進化した！');
-      else if (S.lv === 25) say('🪄 呪文が「メラゾーマ」に進化した！');
-      else if (S.lv === 28) say('🪄 呪文が「ベホマ」に進化した！');
-      else if (S.lv === 30) say('🪄 呪文が「イオナズン」に進化した！');
+      var unlocks = {
+        2: '「ホイミ」を覚えた！', 4: '「ラリホー」を覚えた！', 5: '「ルーラ」を覚えた！',
+        6: '「イオ」を覚えた！', 8: '「バイキルト」を覚えた！', 10: '「スクルト」を覚えた！',
+        11: '「マホトラ」を覚えた！', 12: '呪文が「メラミ」に進化した！', 14: '呪文が「ベホイミ」に進化した！',
+        15: '「ザキ」を覚えた！', 16: '呪文が「イオラ」に進化した！', 22: '究極呪文「マダンテ」を覚えた！',
+        25: '呪文が「メラゾーマ」に進化した！', 28: '呪文が「ベホマ」に進化した！', 30: '呪文が「イオナズン」に進化した！'
+      };
+      if (unlocks[S.lv]) say('🪄 ' + unlocks[S.lv]);
     }
-    if (boss || Math.random() < 0.45 * (1 + a.drop / 100)) dropItem(fl, boss);
+    var houseBonus = (D && D.ftype === 'house') ? 2 : 1;
+    if (boss || Math.random() < 0.45 * (1 + a.drop / 100) * houseBonus) dropItem(fl, boss);
     dirty = true;
+  }
+
+  function smartAction() {
+    var onStairs = objAt(D.px, D.py);
+    var hasBoss = D.mobs.some(function (m) { return m.boss; });
+    if (onStairs && onStairs.t === 'stairs' && !hasBoss) {
+      descendStairs();
+      return;
+    }
+    var adj = adjacentMobs();
+    if (adj.length > 0) {
+      strike(adj[0]);
+      tickBuffs();
+      enemyTurn();
+      renderLive();
+      save();
+      return;
+    }
+    step(0, 0);
+  }
+
+  function descendStairs() {
+    if (D.mobs.some(function (m) { return m.boss; })) return;
+    S.floor++;
+    if (S.floor > S.rec.max) S.rec.max = S.floor;
+    say('🪜 地下' + S.floor + '階へ降りた！' + (S.floor % 10 === 0 ? '（⚠️ ボス階・ザコ無限湧き！）' : ''));
+    buildFloor(S.floor); dirty = true; renderLive(); save();
   }
 
   function step(dx, dy) {
     if (dx === 0 && dy === 0) {
-      // 待機（少し自然回復）
       var heal = Math.max(1, Math.round(P.hp * 0.03 + P.a.regen));
       var mpHeal = Math.max(1, Math.round(P.mp * 0.06));
       S.php = Math.min(P.hp, S.php + heal);
@@ -605,7 +888,7 @@
       if (o && o.t === 'chest') {
         D.objs.splice(D.objs.indexOf(o), 1);
         say('📦 宝箱を開けた！');
-        dropItem(S.floor, Math.random() < 0.25);
+        dropItem(S.floor, Math.random() < (D.ftype === 'vault' ? 0.45 : 0.25));
         S.gold += Math.round((10 + S.floor * 5) * (1 + P.a.gold / 100));
         dirty = true;
       } else if (o && o.t === 'fountain') {
@@ -617,7 +900,7 @@
         say('⛲ 癒やしの泉を飲んだ！HP ' + fmt(rec) + '・MP ' + fmt(mrec) + ' 回復した');
       } else if (o && o.t === 'stairs') {
         var hasBoss = D.mobs.some(function (x) { return x.boss; });
-        say(hasBoss ? '🪜 下り階段を見つけた！……しかし階層ボスの魔力で封印されている！' : '🪜 下り階段を見つけた！');
+        say(hasBoss ? '🪜 下り階段を見つけた！……しかし階層ボスの魔力で封印されている！' : '🪜 下り階段を見つけた！（Spaceキーでも降りられるよ）');
       }
     }
     tickBuffs();
@@ -625,11 +908,33 @@
     renderLive(); save();
   }
 
+  function spawnBossMinion() {
+    if (S.floor % 10 !== 0) return;
+    if (!D.mobs.some(function (m) { return m.boss; })) return;
+    if (D.mobs.length >= 10 || Math.random() >= 0.35) return;
+
+    var cand = [];
+    for (var y = 1; y < MAP_H - 1; y++) {
+      for (var x = 1; x < MAP_W - 1; x++) {
+        var dist = Math.abs(x - D.px) + Math.abs(y - D.py);
+        if (D.grid[y][x] === 0 && dist >= 2 && !mobAt(x, y)) {
+          cand.push({ x: x, y: y });
+        }
+      }
+    }
+    if (cand.length === 0) return;
+    var p = cand[rnd(cand.length)];
+    D.mobs.push(mkMob(p.x, p.y, S.floor, false, false));
+    say('🌀 ボスの魔力で新たな魔物が湧き出た！');
+  }
+
   function enemyTurn() {
     for (var i = 0; i < D.mobs.length; i++) {
       var m = D.mobs[i];
-      if (m.sleep > 0) {
-        m.sleep--;
+      if (m.sleep > 0) { m.sleep--; continue; }
+      if (m.metal && Math.random() < 0.22) {
+        say('💨 ' + m.name + 'は逃げ出した！');
+        D.mobs.splice(i, 1); i--;
         continue;
       }
       var dist = Math.abs(m.x - D.px) + Math.abs(m.y - D.py);
@@ -641,19 +946,22 @@
           if (S.shield > 0) { var s = Math.min(S.shield, d); S.shield -= s; d -= s; }
           S.php -= d;
           say('💢 ' + m.name + 'から ' + fmt(d) + ' ダメージ！');
-          if (P.a.thorn > 0 && d > 0) {
+          if (P.a.thorn > 0 && d > 0 && !m.metal) {
             var th = Math.max(1, Math.round(d * P.a.thorn / 100));
             m.hp -= th;
-            if (m.hp <= 0) { D.mobs.splice(i, 1); i--; killMob(m.boss); continue; }
+            if (m.hp <= 0) { D.mobs.splice(i, 1); i--; killMob(m); continue; }
           }
           if (S.php <= 0) {
             S.floor = Math.max(1, S.floor - 1);
             S.buff = { atk: 0, def: 0 };
+            S.meal = null;
+            S.inTown = true;
+            slotSpinning = false;
             calc();
             S.php = P.hp;
             S.pmp = P.mp;
-            say('💀 力尽きた……地下' + S.floor + '階まで押し戻された');
-            buildFloor(S.floor);
+            refreshShop();
+            say('💀 力尽きた……うさぎの街まで運ばれ、地下' + S.floor + '階まで押し戻された');
             dirty = true;
             return;
           }
@@ -664,6 +972,428 @@
         else if (sy !== m.y && D.grid[sy][m.x] === 0 && !mobAt(m.x, sy) && !(m.x === D.px && sy === D.py)) m.y = sy;
       }
     }
+    spawnBossMinion();
+  }
+
+  // ===== 街システム（宿屋・道具屋・装備屋・錬金釜・ガチャ＆スロット） =====
+  function enterTown() {
+    S.inTown = true;
+    S.buff = { atk: 0, def: 0 };
+    S.meal = null;
+    slotSpinning = false;
+    calc();
+    S.php = P.hp;
+    S.pmp = P.mp;
+    refreshShop();
+    say('🏘️ うさぎの街へ帰還した！（HP・MP全快）');
+    dirty = true;
+    renderLive();
+    save();
+  }
+
+  function departDungeon(fl) {
+    if (slotSpinning) return;
+    S.floor = Math.max(1, fl);
+    if (S.floor > S.rec.max) S.rec.max = S.floor;
+    S.inTown = false;
+    calc();
+    S.php = P.hp;
+    S.pmp = P.mp;
+    say('🧭 地下' + S.floor + '階へ出発した！' + (S.floor % 10 === 0 ? '（⚠️ ボス階・ザコ無限湧き！）' : ''));
+    buildFloor(S.floor);
+    dirty = true;
+    renderLive();
+    save();
+  }
+
+  function refreshShop() {
+    var fl = Math.max(1, S.rec.max);
+    S.shop = [];
+    for (var i = 0; i < 4; i++) {
+      var r = Math.min(5, Math.max(1, rollRar(false, 80) + (Math.random() < 0.35 ? 1 : 0)));
+      var it = mkItem(Math.floor(Math.random() * 2147483647), rnd(K.length), fl + rnd(3), r);
+      S.shop.push(it);
+    }
+  }
+
+  function shopPrice(it) {
+    return Math.round(sellValue(it) * 3.2);
+  }
+
+  function getAlchItem(ref) {
+    if (!ref) return null;
+    if (ref.indexOf('eq:') === 0) return S.eq[ref.slice(3)] || null;
+    if (ref.indexOf('bag:') === 0) return find(+ref.slice(4));
+    return null;
+  }
+
+  // ===== ガチャ・スロット処理 =====
+  function gachaBaseCost() {
+    return Math.max(50, S.rec.max * 25);
+  }
+
+  function rollGachaRarity(tier, isGuaranteedSlot) {
+    // 天井（50連目）はミシック確定
+    if ((S.gachaPity || 0) >= 49) return 5;
+    var r = Math.random() * 100;
+    if (tier === 'normal') {
+      if (isGuaranteedSlot) {
+        // 10連確定枠：エピック以上
+        if (r < 4) return 5;
+        if (r < 22) return 4;
+        return 3;
+      }
+      // 通常：レア以上確定
+      if (r < 2) return 5;
+      if (r < 10) return 4;
+      if (r < 32) return 3;
+      return 2;
+    } else {
+      // 伝説ガチャ：エピック以上確定
+      if (isGuaranteedSlot) {
+        // 10連確定枠：レジェンド以上
+        if (r < 22) return 5;
+        return 4;
+      }
+      if (r < 10) return 5;
+      if (r < 42) return 4;
+      return 3;
+    }
+  }
+
+  function pullGacha(tier, count) {
+    var base = gachaBaseCost();
+    var unit = tier === 'mythic' ? base * 4 : base;
+    var cost = count === 10 ? unit * 9 : unit;
+    if (S.gold < cost) return;
+
+    S.gold -= cost;
+    var fl = Math.max(1, S.rec.max);
+    var pulled = [];
+
+    for (var i = 0; i < count; i++) {
+      var rar = rollGachaRarity(tier, count === 10 && i === count - 1);
+      if (rar === 5) S.gachaPity = 0;
+      else S.gachaPity = (S.gachaPity || 0) + 1;
+
+      var it = mkItem(Math.floor(Math.random() * 2147483647), rnd(K.length), fl + rnd(3), rar);
+      var g = gen(it);
+      var isNew = !S.rec.seenB[g.bi];
+      S.rec.drops++;
+      if (rar > S.rec.best) S.rec.best = rar;
+      S.rec.seenB[g.bi] = 1;
+      S.rec.seenM[g.mat] = 1;
+
+      S.bag.push(it);
+      pulled.push({ it: it, isNew: isNew });
+    }
+    trim();
+    lastGacha = pulled;
+
+    var bestPull = pulled.slice().sort(function (a, b) { return b.it.r - a.it.r || gen(b.it).score - gen(a.it).score; })[0];
+    say('🎁 ' + (tier === 'mythic' ? '伝説ガチャ' : '冒険者ガチャ') + count + '連！目玉：[' + RAR[bestPull.it.r] + '] ' + gen(bestPull.it).name);
+    dirty = true;
+    renderLive();
+    save();
+  }
+
+  function spinSlot() {
+    if (slotSpinning) return;
+    var bet = SLOT_BETS[S.slotBetIdx || 0] || 50;
+    if (S.gold < bet) {
+      say('🎰 ゴールドが足りない！');
+      renderLive();
+      return;
+    }
+    S.gold -= bet;
+    slotSpinning = true;
+    slotWinState = [false, false, false];
+    renderLive();
+
+    // 最終出目を決定
+    var finalSyms = [
+      SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)],
+      SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)],
+      SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)]
+    ];
+
+    var ticks = 0;
+    var timer = setInterval(function () {
+      ticks++;
+      if (ticks < 7) slotReels[0] = SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)];
+      else slotReels[0] = finalSyms[0];
+
+      if (ticks < 11) slotReels[1] = SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)];
+      else slotReels[1] = finalSyms[1];
+
+      if (ticks < 15) slotReels[2] = SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)];
+      else slotReels[2] = finalSyms[2];
+
+      var rEls = document.querySelectorAll('#slotReels .reel');
+      if (rEls.length === 3) {
+        for (var i = 0; i < 3; i++) {
+          rEls[i].textContent = slotReels[i];
+          var stopped = (i === 0 && ticks >= 7) || (i === 1 && ticks >= 11) || (i === 2 && ticks >= 15);
+          rEls[i].className = 'reel' + (stopped ? '' : ' spin');
+        }
+      }
+
+      if (ticks >= 15) {
+        clearInterval(timer);
+        slotSpinning = false;
+        resolveSlot(finalSyms, bet);
+      }
+    }, 55);
+  }
+
+  function awardSlotItem(minRar, maxRar) {
+    var rar = minRar + rnd(maxRar - minRar + 1);
+    var fl = Math.max(1, S.rec.max);
+    var it = mkItem(Math.floor(Math.random() * 2147483647), rnd(K.length), fl + rnd(3), rar);
+    var g = gen(it);
+    S.rec.drops++;
+    if (rar > S.rec.best) S.rec.best = rar;
+    S.rec.seenB[g.bi] = 1;
+    S.rec.seenM[g.mat] = 1;
+    S.bag.push(it);
+    trim();
+    return it;
+  }
+
+  function resolveSlot(syms, bet) {
+    var a = syms[0], b = syms[1], c = syms[2];
+    var payout = 0;
+    if (a === b && b === c) {
+      slotWinState = [true, true, true];
+      if (a === '🐰') {
+        payout = bet * 30;
+        var it1 = awardSlotItem(4, 5);
+        say('🎊 JACKPOT!! 🐰🐰🐰 うさぎ揃い！💰+' + fmt(payout) + ' ＆ [' + RAR[it1.r] + '] ' + gen(it1).name + ' を獲得！');
+      } else if (a === '💎') {
+        payout = bet * 12;
+        var it2 = awardSlotItem(3, 5);
+        say('💎 大当たり！ダイヤ揃い！💰+' + fmt(payout) + ' ＆ [' + RAR[it2.r] + '] ' + gen(it2).name + ' を獲得！');
+      } else if (a === '💰') {
+        payout = bet * 7;
+        say('💰 コインラッシュ！金貨揃い！💰+' + fmt(payout) + ' を獲得！');
+      } else if (a === '⚔️') {
+        payout = bet * 5;
+        var w1 = awardSlotItem(2, 4), w2 = awardSlotItem(2, 4);
+        say('⚔️ トレジャー揃い！💰+' + fmt(payout) + ' ＆ 装備2個（[' + RAR[w1.r] + ']・[' + RAR[w2.r] + ']）獲得！');
+      } else if (a === '🥕') {
+        payout = bet * 3;
+        S.items.elixir = (S.items.elixir || 0) + 1;
+        say('🥕 にんじん揃い！💰+' + fmt(payout) + ' ＆ 💎エリクサー1個を獲得！');
+      }
+    } else if (a === b || b === c || a === c) {
+      var pair = (a === b || a === c) ? a : b;
+      if (pair === '🐰' || pair === '💰' || pair === '💎') {
+        payout = Math.round(bet * 1.5);
+        slotWinState = [a === pair, b === pair, c === pair];
+        say('✨ ' + pair + 'が2つ揃った！小当たり 💰+' + fmt(payout) + ' 獲得！');
+      } else {
+        say('🎰 惜しい！ハズレ……');
+      }
+    } else {
+      say('🎰 ハズレ……次はきっと当たる！');
+    }
+
+    S.gold += payout;
+    dirty = true;
+    renderLive();
+    save();
+  }
+
+  function renderTownPanel() {
+    var box = $('townPanel');
+    var tabs = $('townTabs').querySelectorAll('button');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].className = 'b sub mini' + (tabs[i].getAttribute('data-ttab') === townTab ? ' active' : '');
+    }
+
+    if (townTab === 'inn') {
+      var html = '<div class="row" style="margin-bottom:6px"><b>🏨 宿屋・冒険の弁当</b><button class="b mini sub" data-tact="rest" type="button">🛏️ 休憩する（無料）</button></div>';
+      html += '<small class="lead">出発前に弁当を食べると、次に街へ戻るまで強化効果がつくよ（1つまで）。</small>';
+      MEALS.forEach(function (m) {
+        var active = S.meal === m.id;
+        html += '<div class="it ' + (active ? 'r1' : 'r0') + '"><div class="row"><b>' + m.icon + ' ' + m.name + (active ? '（効果中！）' : '') + '</b>' +
+          '<button class="b mini' + (active ? ' on' : '') + '" data-tact="meal" data-id="' + m.id + '" type="button"' + (active || S.gold < m.cost ? ' disabled' : '') + '>' + (active ? '満腹' : '食べる 💰' + fmt(m.cost)) + '</button></div>' +
+          '<small>' + m.desc + '</small></div>';
+      });
+      box.innerHTML = html;
+    } else if (townTab === 'item') {
+      var html2 = '<div style="margin-bottom:4px"><b>🏪 道具屋（持ち込み消耗品）</b></div>';
+      CONS.forEach(function (c) {
+        var cnt = (S.items && S.items[c.id]) || 0;
+        html2 += '<div class="it r2"><div class="row"><b>' + c.icon + ' ' + c.name + ' <small style="display:inline">(所持 ' + cnt + '個)</small></b>' +
+          '<button class="b mini" data-tact="buyitem" data-id="' + c.id + '" type="button"' + (S.gold < c.price ? ' disabled' : '') + '>買う 💰' + fmt(c.price) + '</button></div>' +
+          '<small>' + c.desc + '</small></div>';
+      });
+      box.innerHTML = html2;
+    } else if (townTab === 'shop') {
+      var refCost = Math.max(30, S.rec.max * 15);
+      var html3 = '<div class="row" style="margin-bottom:4px"><b>⚔️ 武器・防具屋（掘り出し物）</b>' +
+        '<button class="b mini sub" data-tact="refshop" type="button"' + (S.gold < refCost ? ' disabled' : '') + '>🔄 品揃え更新 💰' + fmt(refCost) + '</button></div>';
+      if (!S.shop || S.shop.length === 0) refreshShop();
+      S.shop.forEach(function (it, idx) {
+        if (!it) {
+          html3 += '<div class="it r0"><small>（売り切れ）</small></div>';
+          return;
+        }
+        var g = gen(it), price = shopPrice(it);
+        var cur = S.eq[worst(slotOf(it))], d = g.score - (cur ? gen(cur).score : 0);
+        var cmp = d >= 0 ? '<span class="up">▲+' + d + '</span>' : '<span class="down">▼' + d + '</span>';
+        html3 += '<div class="it r' + it.r + '"><b>[' + RAR[it.r] + '] ' + esc(g.name) + '</b>' +
+          '<small>強さ ' + g.score + ' ' + cmp + '｜Lv' + it.l + '｜' + statLine(g) + '</small>' +
+          '<div class="acts"><button class="b mini" data-tact="buyeq" data-idx="' + idx + '" type="button"' + (S.gold < price ? ' disabled' : '') + '>購入する 💰' + fmt(price) + '</button></div></div>';
+      });
+      box.innerHTML = html3;
+    } else if (townTab === 'alch') {
+      var targetOpts = [];
+      SLOTS.forEach(function (sl) {
+        if (S.eq[sl[0]]) targetOpts.push({ v: 'eq:' + sl[0], label: '[装備中:' + sl[1] + '] ' + gen(S.eq[sl[0]]).name });
+      });
+      S.bag.forEach(function (it) {
+        targetOpts.push({ v: 'bag:' + it.id, label: '[バッグ] ' + gen(it).name });
+      });
+      if (!targetOpts.some(function (o) { return o.v === alchTarget; })) {
+        alchTarget = targetOpts.length ? targetOpts[0].v : '';
+      }
+      var baseIt = getAlchItem(alchTarget);
+
+      var matOpts = S.bag.filter(function (it) {
+        return !it.x && ('bag:' + it.id) !== alchTarget && gen(it).af.length > 0;
+      });
+      if (!matOpts.some(function (it) { return String(it.id) === String(alchMatId); })) {
+        alchMatId = matOpts.length ? String(matOpts[0].id) : '';
+      }
+      var matIt = alchMatId ? find(+alchMatId) : null;
+
+      var h4 = '<div class="alch-box"><b>⚗️ 錬金釜（特性継承・合成）</b><small class="lead">素材装備の特殊効果（AF）を1つ選び、ベース装備へ移植・数値合算します（素材は消滅）。</small>';
+      h4 += '<label><small class="lead">① ベース装備（強化する側）</small><select id="alchBaseSel">' +
+        (targetOpts.length ? targetOpts.map(function (o) { return '<option value="' + o.v + '"' + (o.v === alchTarget ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') : '<option value="">装備がありません</option>') +
+        '</select></label>';
+
+      h4 += '<label><small class="lead">② 素材装備（ロックなし・特性あり）</small><select id="alchMatSel">' +
+        (matOpts.length ? matOpts.map(function (it) { return '<option value="' + it.id + '"' + (String(it.id) === String(alchMatId) ? ' selected' : '') + '>' + esc(gen(it).name) + '</option>'; }).join('') : '<option value="">素材にできる装備がバッグにありません</option>') +
+        '</select></label>';
+
+      if (baseIt && matIt) {
+        var bg = gen(baseIt), mg = gen(matIt);
+        var cost = Math.round(120 + (baseIt.l + matIt.l) * 18 * (baseIt.r + 1));
+        h4 += '<div class="alch-preview"><div><b>ベース現在特性（' + bg.af.length + '/6）：</b>' + (bg.af.length ? bg.af.map(function (a) { return a.n + '+' + a.v + '%'; }).join(' / ') : 'なし') + '</div>';
+        h4 += '<div style="margin-top:4px"><b>継承する特性をタップ（費用 💰' + fmt(cost) + '）：</b></div><div class="acts">';
+        mg.af.forEach(function (af, idx) {
+          var already = bg.af.some(function (x) { return x.k === af.k; });
+          var full = !already && bg.af.length >= 6;
+          var dis = (S.gold < cost || full) ? ' disabled' : '';
+          h4 += '<button class="b mini' + (already ? ' on' : '') + '" data-tact="fuse" data-af="' + idx + '" type="button"' + dis + '>' +
+            af.n + ' +' + af.v + '% ' + (already ? '(合算!)' : full ? '(枠満杯)' : '(移植)') + '</button>';
+        });
+        h4 += '</div></div>';
+      }
+      h4 += '</div>';
+      box.innerHTML = h4;
+
+      var bSel = $('alchBaseSel'), mSel = $('alchMatSel');
+      if (bSel) bSel.onchange = function () { alchTarget = bSel.value; renderTownPanel(); };
+      if (mSel) mSel.onchange = function () { alchMatId = mSel.value; renderTownPanel(); };
+    } else if (townTab === 'gacha') {
+      // ガチャ・スロット遊技場
+      var base = gachaBaseCost();
+      var n1 = base, n10 = base * 9;
+      var m1 = base * 4, m10 = base * 36;
+      var pityLeft = 50 - (S.gachaPity || 0);
+      var bet = SLOT_BETS[S.slotBetIdx || 0] || 50;
+
+      var h5 = '';
+      // スロットセクション
+      h5 += '<div class="casino-sec">';
+      h5 += '<div class="row"><b>🎰 うさぎスロット</b><span style="font-size:11.5px;color:var(--gold)">賭け金：💰' + fmt(bet) + '</span></div>';
+      h5 += '<div class="reels" id="slotReels">' +
+        slotReels.map(function (sym, idx) {
+          return '<div class="reel' + (slotSpinning ? ' spin' : '') + (slotWinState[idx] ? ' win' : '') + '">' + sym + '</div>';
+        }).join('') + '</div>';
+      h5 += '<div class="grid g4" style="margin-bottom:6px">' +
+        SLOT_BETS.map(function (bVal, idx) {
+          var active = (S.slotBetIdx || 0) === idx;
+          return '<button class="b mini ' + (active ? 'on' : 'sub') + '" data-tact="sbet" data-idx="' + idx + '" type="button"' + (slotSpinning ? ' disabled' : '') + '>💰' + fmt(bVal) + '</button>';
+        }).join('') + '</div>';
+      h5 += '<button class="b" style="width:100%" data-tact="spin" type="button"' + (slotSpinning || S.gold < bet ? ' disabled' : '') + '>' +
+        (slotSpinning ? '🎰 回転中……！' : '🎰 スロットを回す（💰' + fmt(bet) + '）') + '</button>';
+      h5 += '<div class="paytable">' +
+        '<span>🐰🐰🐰：30倍＋伝説装備</span><span>💎💎💎：12倍＋紫以上装備</span>' +
+        '<span>💰💰💰：7倍ゴールド</span><span>⚔️⚔️⚔️：5倍＋装備2個</span>' +
+        '<span>🥕🥕🥕：3倍＋エリクサー</span><span>🐰/💎/💰 2個：1.5倍</span>' +
+        '</div></div>';
+
+      // 装備ガチャセクション
+      h5 += '<div class="casino-sec">';
+      h5 += '<div class="row"><b>🎁 装備ガチャ（Lv' + S.rec.max + '基準）</b><span style="font-size:11.5px;color:#fda4af">ミシック天井まであと <b>' + pityLeft + '</b> 回</span></div>';
+      h5 += '<small class="lead">冒険者ガチャは青以上確定、伝説ガチャは紫以上確定＆高レア率UP！</small>';
+      h5 += '<div class="grid g2" style="margin-top:6px">' +
+        '<button class="b mini sub" data-tact="gacha" data-tier="normal" data-cnt="1" type="button"' + (S.gold < n1 ? ' disabled' : '') + '>🎁 冒険者1回 💰' + fmt(n1) + '</button>' +
+        '<button class="b mini" data-tact="gacha" data-tier="normal" data-cnt="10" type="button"' + (S.gold < n10 ? ' disabled' : '') + '>🎁 冒険者10連 💰' + fmt(n10) + '</button>' +
+        '<button class="b mini mythic" data-tact="gacha" data-tier="mythic" data-cnt="1" type="button"' + (S.gold < m1 ? ' disabled' : '') + '>👑 伝説1回 💰' + fmt(m1) + '</button>' +
+        '<button class="b mini mythic" data-tact="gacha" data-tier="mythic" data-cnt="10" type="button"' + (S.gold < m10 ? ' disabled' : '') + '>👑 伝説10連 💰' + fmt(m10) + '</button>' +
+        '</div>';
+
+      if (lastGacha.length > 0) {
+        h5 += '<div class="gacha-res"><small class="lead">直近のガチャ結果（バッグへ送られました）：</small>';
+        lastGacha.forEach(function (entry) {
+          var it = entry.it, g = gen(it);
+          h5 += '<div class="it r' + it.r + '"><b>[' + RAR[it.r] + '] ' + esc(g.name) + (entry.isNew ? '<span class="new-badge">NEW!</span>' : '') + '</b>' +
+            '<small>強さ ' + g.score + '｜Lv' + it.l + '｜' + statLine(g) + '</small></div>';
+        });
+        h5 += '</div>';
+      }
+      h5 += '</div>';
+
+      box.innerHTML = h5;
+    }
+
+    // 出発階セレクター更新
+    var depSel = $('departFloor');
+    var curVal = depSel.value;
+    var opts = [];
+    var seenFl = {};
+    function addFl(f, lbl) {
+      if (f < 1 || f > S.rec.max || seenFl[f]) return;
+      seenFl[f] = 1;
+      opts.push('<option value="' + f + '">' + lbl + '</option>');
+    }
+    addFl(S.rec.max, '最高到達：地下 ' + S.rec.max + ' 階へ');
+    addFl(S.floor, '帰還前：地下 ' + S.floor + ' 階へ');
+    for (var f = Math.floor(S.rec.max / 10) * 10; f >= 10; f -= 10) {
+      addFl(f, '地下 ' + f + ' 階（ボス階）へ');
+    }
+    addFl(1, '地下 1 階（最初から）へ');
+    depSel.innerHTML = opts.join('');
+    if (curVal && seenFl[+curVal]) depSel.value = curVal;
+  }
+
+  function doAlchemy(afIdx) {
+    var baseIt = getAlchItem(alchTarget);
+    var matIt = alchMatId ? find(+alchMatId) : null;
+    if (!baseIt || !matIt) return;
+    var bg = gen(baseIt), mg = gen(matIt);
+    var af = mg.af[afIdx];
+    if (!af) return;
+    var cost = Math.round(120 + (baseIt.l + matIt.l) * 18 * (baseIt.r + 1));
+    if (S.gold < cost) return;
+    var already = bg.af.some(function (x) { return x.k === af.k; });
+    if (!already && bg.af.length >= 6) return;
+
+    S.gold -= cost;
+    if (!baseIt.ex) baseIt.ex = [];
+    baseIt.ex.push({ k: af.k, v: af.v });
+    baseIt._g = null;
+    S.bag.splice(S.bag.indexOf(matIt), 1);
+    calc(true);
+    say('⚗️ 錬金成功！「' + gen(baseIt).name + '」に【' + af.n + ' +' + af.v + '%】を継承した！');
+    dirty = true;
+    renderLive();
+    save();
   }
 
   // ===== ドロップ・装備管理 =====
@@ -725,23 +1455,73 @@
   }
 
   // ===== セーブ・ロード =====
-  function pack(it) { return [it.s, it.k, it.l, it.r, it.p, it.x]; }
-  function unpack(a) { return { s: a[0], k: a[1], l: a[2], r: a[3], p: a[4] || 0, x: a[5] || 0, id: uid++ }; }
+  function pack(it) { return [it.s, it.k, it.l, it.r, it.p, it.x, it.ex || []]; }
+  function unpack(a) { return { s: a[0], k: a[1], l: a[2], r: a[3], p: a[4] || 0, x: a[5] || 0, ex: a[6] || [], id: uid++ }; }
   function save() {
     try {
-      var o = JSON.parse(JSON.stringify(S, function (k, v) { return (k === 'bag' || k === 'eq') ? undefined : v; }));
-      o.bag = S.bag.map(pack); o.eq = {}; Object.keys(S.eq).forEach(function (k) { o.eq[k] = S.eq[k] ? pack(S.eq[k]) : null; });
+      var o = JSON.parse(JSON.stringify(S, function (k, v) { return (k === 'bag' || k === 'eq' || k === 'shop') ? undefined : v; }));
+      o.bag = S.bag.map(pack);
+      o.shop = (S.shop || []).map(function (it) { return it ? pack(it) : null; });
+      o.eq = {}; Object.keys(S.eq).forEach(function (k) { o.eq[k] = S.eq[k] ? pack(S.eq[k]) : null; });
       localStorage.setItem(SAVE, JSON.stringify(o));
     } catch (e) {}
   }
   function load() {
     try {
       var o = JSON.parse(localStorage.getItem(SAVE)); if (!o || !o.bag) return newState();
-      var s = Object.assign(newState(), o); s.bag = o.bag.map(unpack);
+      var s = Object.assign(newState(), o);
+      s.bag = o.bag.map(unpack);
+      s.shop = (o.shop || []).map(function (a) { return a ? unpack(a) : null; });
       if (!s.buff) s.buff = { atk: 0, def: 0 };
-      s.eq = { w: null, h: null, b: null, f: null, a1: null, a2: null }; Object.keys(o.eq || {}).forEach(function (k) { if (o.eq[k]) s.eq[k] = unpack(o.eq[k]); });
+      if (!s.items) s.items = { potion: 2, ether: 1, elixir: 0, bomb: 0 };
+      if (!s.rec.seenE) s.rec.seenE = {};
+      if (s.gachaPity === undefined) s.gachaPity = 0;
+      if (s.slotBetIdx === undefined) s.slotBetIdx = 0;
+      s.eq = { w: null, h: null, b: null, f: null, a1: null, a2: null };
+      Object.keys(o.eq || {}).forEach(function (k) { if (o.eq[k]) s.eq[k] = unpack(o.eq[k]); });
       return s;
     } catch (e) { return newState(); }
+  }
+
+  // ===== 図鑑モーダル描画 =====
+  function renderDex() {
+    var tabs = $('dexTabs').querySelectorAll('button');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].className = 'b sub mini' + (tabs[i].getAttribute('data-dtab') === dexTab ? ' active' : '');
+    }
+    var bd = $('dexBody');
+    if (dexTab === 'equip') {
+      var gotB = Object.keys(S.rec.seenB).length;
+      var h = '<p style="margin-bottom:6px"><b>装備ベース収集率：' + gotB + ' / ' + BASE_TOTAL + '（' + Math.round(gotB / BASE_TOTAL * 100) + '%）</b></p>';
+      K.forEach(function (k) {
+        h += '<div style="margin-top:6px"><b style="color:var(--orange)">' + k.n + '</b><div class="dex-chips">';
+        k.b.forEach(function (bName, idx) {
+          var g = !!S.rec.seenB[k._off + idx];
+          h += '<span class="chip ' + (g ? 'got' : 'unk') + '">' + (g ? esc(bName) : '？？？') + '</span>';
+        });
+        h += '</div></div>';
+      });
+      bd.innerHTML = h;
+    } else if (dexTab === 'mat') {
+      var gotM = Object.keys(S.rec.seenM).length;
+      var h2 = '<p style="margin-bottom:6px"><b>素材収集率：' + gotM + ' / ' + MAT.length + '（' + Math.round(gotM / MAT.length * 100) + '%）</b></p><div class="dex-chips">';
+      MAT.forEach(function (mName, idx) {
+        var g = !!S.rec.seenM[idx];
+        h2 += '<span class="chip ' + (g ? 'got' : 'unk') + '">' + (g ? esc(mName) : '？？？') + '</span>';
+      });
+      h2 += '</div>';
+      bd.innerHTML = h2;
+    } else if (dexTab === 'mob') {
+      var seenE = S.rec.seenE || {};
+      var gotE = ALL_MOB_NAMES.filter(function (m) { return seenE[m[1]]; }).length;
+      var h3 = '<p style="margin-bottom:6px"><b>討伐魔物図鑑：' + gotE + ' / ' + ALL_MOB_NAMES.length + '（' + Math.round(gotE / ALL_MOB_NAMES.length * 100) + '%）</b></p><div class="dex-chips">';
+      ALL_MOB_NAMES.forEach(function (m) {
+        var cnt = seenE[m[1]] || 0;
+        h3 += '<span class="chip ' + (cnt ? 'got' : 'unk') + '">' + (cnt ? m[0] + ' ' + esc(m[1]) + ' (' + cnt + ')' : '❓ ？？？') + '</span>';
+      });
+      h3 += '</div>';
+      bd.innerHTML = h3;
+    }
   }
 
   // ===== 描画 =====
@@ -758,7 +1538,7 @@
     var g = gen(it), cmp = '';
     if (!eqSlot) { var cur = S.eq[worst(slotOf(it))]; var d = g.score - (cur ? gen(cur).score : 0); cmp = d >= 0 ? '<span class="up">▲+' + d + '</span>' : '<span class="down">▼' + d + '</span>'; }
     var a = eqSlot ? 'data-s="' + eqSlot + '"' : 'data-i="' + it.id + '"';
-    return '<div class="it r' + it.r + '"><b>[' + RAR[it.r] + '] ' + g.name + (it.x ? ' 🔒' : '') + '</b><small>強さ ' + g.score + ' ' + cmp + '｜Lv' + it.l + '｜' + statLine(g) + '</small><div class="acts">' +
+    return '<div class="it r' + it.r + '"><b>[' + RAR[it.r] + '] ' + esc(g.name) + (it.x ? ' 🔒' : '') + '</b><small>強さ ' + g.score + ' ' + cmp + '｜Lv' + it.l + '｜' + statLine(g) + '</small><div class="acts">' +
       (eqSlot ? '' : '<button class="b mini" ' + a + ' data-a="eq" type="button">装備</button><button class="b mini sub" ' + a + ' data-a="sell" type="button">売る 💰' + fmt(sellValue(it)) + '</button>') +
       '<button class="b mini sub" ' + a + ' data-a="enh" type="button"' + (it.p >= 10 || S.gold < enhCost(it) ? ' disabled' : '') + '>強化 💰' + fmt(enhCost(it)) + '</button>' +
       (eqSlot ? '' : '<button class="b mini sub" ' + a + ' data-a="lock" type="button">' + (it.x ? '🔓' : '🔒') + '</button>') + '</div></div>';
@@ -776,6 +1556,7 @@
       '拾った装備：' + fmt(r.drops) + '個／最高レア：' + RAR[r.best] + '／図鑑：ベース ' + Object.keys(r.seenB).length + '/' + BASE_TOTAL + '・素材 ' + Object.keys(r.seenM).length + '/' + MAT.length;
     $('auto').textContent = S.auto ? '⚡ 自動装備ON' : '自動装備OFF';
     $('auto').className = 'b sub mini' + (S.auto ? ' on' : '');
+    if (S.inTown) renderTownPanel();
     dirty = false;
   }
   function renderMap() {
@@ -794,7 +1575,7 @@
           html += '<div class="cell c-wall' + (inSight ? '' : ' dim') + '"></div>';
         } else {
           var icon = '', m = inSight ? mobAt(mx, my) : null, o = objAt(mx, my);
-          if (m) icon = (m.boss ? '👹' : '👾') + (m.sleep > 0 ? '<span class="slp">💤</span>' : '');
+          if (m) icon = (m.icon || (m.boss ? '👹' : '👾')) + (m.sleep > 0 ? '<span class="slp">💤</span>' : '');
           else if (o) icon = o.t === 'stairs' ? '🪜' : o.t === 'chest' ? '📦' : '⛲';
           html += '<div class="cell c-floor' + (inSight ? '' : ' dim') + '">' + icon + '</div>';
         }
@@ -810,7 +1591,13 @@
       var noMp = S.pmp < sp.realCost;
       var noTarget = (sp.type === 'single' || sp.type === 'aoe') && visCount === 0;
       var dis = (noMp || noTarget) ? ' disabled' : '';
-      return '<button class="b sp" data-spell="' + sp.id + '" title="' + sp.desc + '" type="button"' + dis + '>' + sp.name + ' <small>(' + sp.realCost + ')</small></button>';
+      var costLbl = sp.allMp ? '全MP' : sp.realCost;
+      return '<button class="b sp" data-spell="' + sp.id + '" title="' + sp.desc + '" type="button"' + dis + '>' + sp.name + ' <small>(' + costLbl + ')</small></button>';
+    }).join('');
+
+    $('itemsBar').innerHTML = CONS.map(function (c) {
+      var cnt = (S.items && S.items[c.id]) || 0;
+      return '<button class="b use" data-use="' + c.id + '" title="' + c.desc + '" type="button"' + (cnt <= 0 ? ' disabled' : '') + '>' + c.icon + c.name.slice(0, 4) + '(' + cnt + ')</button>';
     }).join('');
   }
   function renderLive() {
@@ -819,8 +1606,7 @@
     $('lv').textContent = 'Lv' + S.lv + '（EXP ' + fmt(S.exp) + '/' + fmt(need) + '）';
     $('gold').textContent = '💰 ' + fmt(S.gold);
     $('expbar').style.width = Math.min(100, S.exp / need * 100) + '%';
-    $('floor').textContent = '🧭 地下 ' + S.floor + ' 階' + (S.floor % 5 === 0 ? '（ボス階）' : '');
-    $('remain').textContent = '魔物 残り ' + D.mobs.length + ' 体';
+
     $('shd').textContent = S.shield > 0 ? '🛡️' + fmt(S.shield) : '';
     $('php').textContent = fmt(Math.max(0, S.php)) + '/' + fmt(P.hp);
     $('pbar').style.width = Math.max(0, S.php / P.hp * 100) + '%';
@@ -829,46 +1615,164 @@
     $('pst').textContent = 'ATK ' + fmt(P.atk) + ' DEF ' + fmt(P.def) + ' SPD +' + fmt(P.spd) + ' 会心 ' + P.crit.toFixed(0) + '%';
 
     var bf = [];
+    if (S.meal) {
+      var ml = MEALS.filter(function (x) { return x.id === S.meal; })[0];
+      if (ml) bf.push(ml.icon + '弁当中');
+    }
     if (S.buff.atk > 0) bf.push('⚔️バイキルト(' + S.buff.atk + ')');
     if (S.buff.def > 0) bf.push('🛡️スクルト(' + S.buff.def + ')');
     $('buffs').textContent = bf.join(' ');
 
-    var onStairs = objAt(D.px, D.py);
-    var hasBoss = D.mobs.some(function (m) { return m.boss; });
-    var stBtn = $('stairs');
-    if (onStairs && onStairs.t === 'stairs') {
-      stBtn.style.display = 'block';
-      if (hasBoss) {
-        stBtn.disabled = true;
-        stBtn.className = 'b lock';
-        stBtn.textContent = '🔒 ボスを倒すまで降りられない';
-      } else {
-        stBtn.disabled = false;
-        stBtn.className = 'b on';
-        stBtn.textContent = '🪜 次の階へ降りる';
-      }
+    if (S.inTown) {
+      $('dungeonView').style.display = 'none';
+      $('townView').style.display = 'block';
+      $('floor').innerHTML = '🏘️ <b>うさぎの街</b>';
+      $('remain').textContent = '最高到達：地下 ' + S.rec.max + ' 階';
+      var curMeal = MEALS.filter(function (x) { return x.id === S.meal; })[0];
+      $('mealStatus').textContent = curMeal ? (curMeal.icon + curMeal.name + ' 発動中') : '';
     } else {
-      stBtn.style.display = 'none';
+      $('dungeonView').style.display = 'block';
+      $('townView').style.display = 'none';
+      var hasBoss = D.mobs.some(function (m) { return m.boss; });
+      var badge = '';
+      if (D.ftype === 'boss') badge = '<span class="ftag ft-boss">ボス階' + (hasBoss ? '・無限湧き' : '') + '</span>';
+      else if (D.ftype === 'vault') badge = '<span class="ftag ft-vault">💎 宝物庫</span>';
+      else if (D.ftype === 'house') badge = '<span class="ftag ft-house">😱 モンスターハウス</span>';
+      else if (D.ftype === 'metal') badge = '<span class="ftag ft-metal">✨ メタルフロア</span>';
+      $('floor').innerHTML = '🧭 地下 ' + S.floor + ' 階' + badge;
+      $('remain').textContent = '魔物 残り ' + D.mobs.length + ' 体';
+
+      var onStairs = objAt(D.px, D.py);
+      var stBtn = $('stairs');
+      if (onStairs && onStairs.t === 'stairs') {
+        stBtn.style.display = 'block';
+        if (hasBoss) {
+          stBtn.disabled = true;
+          stBtn.className = 'b lock';
+          stBtn.textContent = '🔒 ボスを倒すまで降りられない';
+        } else {
+          stBtn.disabled = false;
+          stBtn.className = 'b on';
+          stBtn.textContent = '🪜 次の階へ降りる';
+        }
+      } else {
+        stBtn.style.display = 'none';
+      }
+
+      var wBtn = $('wait');
+      var adj = adjacentMobs();
+      if (onStairs && onStairs.t === 'stairs' && !hasBoss) {
+        wBtn.textContent = '🪜降りる';
+        wBtn.className = 'b wait act-st';
+      } else if (adj.length > 0) {
+        wBtn.textContent = '⚔️攻撃';
+        wBtn.className = 'b wait act-atk';
+      } else {
+        wBtn.textContent = '待機';
+        wBtn.className = 'b wait';
+      }
+
+      renderSpells();
+      renderMap();
     }
 
     $('log').textContent = logs.slice(-6).join('\n') || 'ダンジョンを歩いて探索しよう！';
-    renderSpells();
-    renderMap();
   }
 
   // ===== 操作イベント =====
   document.addEventListener('click', function (e) {
+    if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+      document.activeElement.blur();
+    }
     var dirBtn = e.target.closest ? e.target.closest('[data-dir]') : null;
-    if (dirBtn) {
+    if (dirBtn && !S.inTown) {
       var d = dirBtn.getAttribute('data-dir').split(',');
       step(+d[0], +d[1]);
       return;
     }
     var spBtn = e.target.closest ? e.target.closest('[data-spell]') : null;
-    if (spBtn) {
+    if (spBtn && !S.inTown) {
       castSpell(spBtn.getAttribute('data-spell'));
       return;
     }
+    var useBtn = e.target.closest ? e.target.closest('[data-use]') : null;
+    if (useBtn && !S.inTown) {
+      useConsumable(useBtn.getAttribute('data-use'));
+      return;
+    }
+    var tTab = e.target.closest ? e.target.closest('[data-ttab]') : null;
+    if (tTab) {
+      if (slotSpinning) return;
+      townTab = tTab.getAttribute('data-ttab');
+      renderTownPanel();
+      return;
+    }
+    var dTab = e.target.closest ? e.target.closest('[data-dtab]') : null;
+    if (dTab) {
+      dexTab = dTab.getAttribute('data-dtab');
+      renderDex();
+      return;
+    }
+    var tAct = e.target.closest ? e.target.closest('[data-tact]') : null;
+    if (tAct) {
+      if (slotSpinning) return;
+      var act = tAct.getAttribute('data-tact');
+      if (act === 'rest') {
+        S.php = P.hp; S.pmp = P.mp;
+        say('🏨 宿屋でぐっすり休んだ！HP・MPが全快！');
+      } else if (act === 'meal') {
+        var mId = tAct.getAttribute('data-id');
+        var ml = MEALS.filter(function (x) { return x.id === mId; })[0];
+        if (ml && S.gold >= ml.cost) {
+          S.gold -= ml.cost; S.meal = ml.id; calc(true); S.php = P.hp;
+          say(ml.icon + ' 「' + ml.name + '」を食べた！（' + ml.desc + '）');
+        }
+      } else if (act === 'buyitem') {
+        var cId = tAct.getAttribute('data-id');
+        var ci = CONS.filter(function (x) { return x.id === cId; })[0];
+        if (ci && S.gold >= ci.price) {
+          S.gold -= ci.price;
+          S.items[cId] = (S.items[cId] || 0) + 1;
+          say(ci.icon + ' ' + ci.name + 'を購入した！（所持 ' + S.items[cId] + '個）');
+        }
+      } else if (act === 'refshop') {
+        var refCost = Math.max(30, S.rec.max * 15);
+        if (S.gold >= refCost) {
+          S.gold -= refCost;
+          refreshShop();
+          say('🔄 装備屋の品揃えが新しくなった！');
+        }
+      } else if (act === 'buyeq') {
+        var idx = +tAct.getAttribute('data-idx');
+        var sit = S.shop[idx];
+        if (sit && S.gold >= shopPrice(sit)) {
+          S.gold -= shopPrice(sit);
+          S.shop[idx] = null;
+          S.bag.push(sit);
+          var sg = gen(sit);
+          S.rec.seenB[sg.bi] = 1; S.rec.seenM[sg.mat] = 1;
+          say('⚔️ [' + RAR[sit.r] + '] ' + sg.name + ' を購入した！');
+        }
+      } else if (act === 'fuse') {
+        doAlchemy(+tAct.getAttribute('data-af'));
+        return;
+      } else if (act === 'gacha') {
+        pullGacha(tAct.getAttribute('data-tier'), +tAct.getAttribute('data-cnt'));
+        return;
+      } else if (act === 'sbet') {
+        S.slotBetIdx = +tAct.getAttribute('data-idx');
+        slotWinState = [false, false, false];
+        renderTownPanel();
+        save();
+        return;
+      } else if (act === 'spin') {
+        spinSlot();
+        return;
+      }
+      dirty = true; renderLive(); save();
+      return;
+    }
+
     var el = e.target.closest ? e.target.closest('[data-a]') : null;
     if (!el) return;
     var a = el.getAttribute('data-a'), it = el.getAttribute('data-i') ? find(+el.getAttribute('data-i')) : S.eq[el.getAttribute('data-s')];
@@ -881,41 +1785,49 @@
   });
 
   $('map').onclick = function (e) {
+    if (S.inTown) return;
     var rect = $('map').getBoundingClientRect();
     var dx = (e.clientX - rect.left) - rect.width / 2;
     var dy = (e.clientY - rect.top) - rect.height / 2;
-    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) step(0, 0);
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) smartAction();
     else if (Math.abs(dx) > Math.abs(dy)) step(dx > 0 ? 1 : -1, 0);
     else step(0, dy > 0 ? 1 : -1);
   };
 
   document.addEventListener('keydown', function (e) {
+    if ($('dexModal').classList.contains('open')) {
+      if (e.key === 'Escape') $('dexModal').classList.remove('open');
+      return;
+    }
+    if (S.inTown) return;
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
     var k = e.key;
     if (k === 'ArrowUp' || k === 'w' || k === 'W') { e.preventDefault(); step(0, -1); }
     else if (k === 'ArrowDown' || k === 's' || k === 'S') { e.preventDefault(); step(0, 1); }
     else if (k === 'ArrowLeft' || k === 'a' || k === 'A') { e.preventDefault(); step(-1, 0); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { e.preventDefault(); step(1, 0); }
-    else if (k === ' ' || k === '.') { e.preventDefault(); step(0, 0); }
-    else if (k === 'Enter' && $('stairs').style.display !== 'none' && !$('stairs').disabled) { e.preventDefault(); $('stairs').click(); }
+    else if (k === ' ' || k === '.') { e.preventDefault(); smartAction(); }
+    else if (k === 'Enter' && $('stairs').style.display !== 'none' && !$('stairs').disabled) { e.preventDefault(); descendStairs(); }
   });
 
-  $('wait').onclick = function () { step(0, 0); };
-  $('stairs').onclick = function () {
-    if (D.mobs.some(function (m) { return m.boss; })) return;
-    S.floor++;
-    if (S.floor > S.rec.max) S.rec.max = S.floor;
-    say('🪜 地下' + S.floor + '階へ降りた！');
-    buildFloor(S.floor); dirty = true; renderLive(); save();
+  $('wait').onclick = function () { if (!S.inTown) smartAction(); };
+  $('stairs').onclick = function () { if (!S.inTown) descendStairs(); };
+  $('town').onclick = function () { enterTown(); };
+  $('departBtn').onclick = function () { departDungeon(+$('departFloor').value || S.floor); };
+  $('quickAlch').onclick = function () {
+    if (slotSpinning) return;
+    townTab = 'alch';
+    if (!S.inTown) enterTown();
+    else renderTownPanel();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  $('town').onclick = function () {
-    S.buff = { atk: 0, def: 0 };
-    calc();
-    S.php = P.hp;
-    S.pmp = P.mp;
-    say('⛺ 入口へ戻って体制を立て直した（HP・MP全快・地下' + S.floor + '階を再生成）');
-    buildFloor(S.floor); dirty = true; renderLive(); save();
+  $('opendex').onclick = $('opendex2').onclick = function () {
+    $('dexModal').classList.add('open');
+    renderDex();
   };
+  $('closedex').onclick = function () { $('dexModal').classList.remove('open'); };
+  $('dexModal').onclick = function (e) { if (e.target === $('dexModal')) $('dexModal').classList.remove('open'); };
+
   $('auto').onclick = function () { S.auto = !S.auto; dirty = true; renderLive(); save(); };
   $('best').onclick = function () { best(); say('⚡ ベスト装備にした！'); renderLive(); save(); };
   $('sellall').onclick = function () {
@@ -927,12 +1839,16 @@
   $('fsell').onchange = function () { S.sell = +$('fsell').value; save(); };
   $('reset').onclick = function () {
     if (confirm('最初からやり直すよ。集めた装備も消えるけど、いいかな？')) {
-      S = newState(); logs = []; calc(); S.php = P.hp; S.pmp = P.mp; buildFloor(1); dirty = true; renderLive(); save();
+      slotSpinning = false;
+      lastGacha = [];
+      S = newState(); logs = []; calc(); S.php = P.hp; S.pmp = P.mp; refreshShop(); buildFloor(1); dirty = true; renderLive(); save();
     }
   };
 
   // ===== 起動 =====
-  S = load(); calc(); $('fsell').value = S.sell; buildFloor(S.floor);
+  S = load(); calc(); $('fsell').value = S.sell;
+  if (!S.shop || S.shop.length === 0) refreshShop();
+  buildFloor(S.floor);
   renderLive();
 })();
 </script>
