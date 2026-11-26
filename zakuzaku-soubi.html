@@ -126,6 +126,7 @@
     <h1>🐰 雑にダンジョン行くやつ</h1>
     <div>
       <button id="opendbg" class="dbg-btn" type="button" style="display:none">🛠️ デバッグ</button>
+      <button id="muteBtn" type="button">🔊 音ON</button>
       <button id="opendex" type="button">📖 図鑑</button>
       <button id="reset" type="button">🔄 最初から</button>
       <a href="./index.html">🏠</a>
@@ -327,6 +328,82 @@
   var $ = function (i) { return document.getElementById(i); };
   var SAVE = 'zakuzaku_dungeon_v1';
 
+  // ===== Web Audio API レトロサウンドエンジン =====
+  var actx = null;
+  function tone(type, f1, f2, dur, delay, vol) {
+    if (!actx) return;
+    var t0 = actx.currentTime + (delay || 0);
+    var osc = actx.createOscillator();
+    var gain = actx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(f1, t0);
+    if (f2 && f2 !== f1) osc.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t0 + dur);
+    var v = vol || 0.08;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.linearRampToValueAtTime(v, t0 + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain);
+    gain.connect(actx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.01);
+  }
+
+  function sfx(name, arg) {
+    if (S && S.mute) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!actx) actx = new AC();
+    if (actx.state === 'suspended') actx.resume();
+
+    if (name === 'atk') {
+      tone('square', 440, 110, 0.09, 0, 0.08);
+    } else if (name === 'crit') {
+      tone('square', 988, 1319, 0.05, 0, 0.09);
+      tone('square', 1175, 180, 0.12, 0.05, 0.1);
+    } else if (name === 'miss') {
+      tone('triangle', 320, 220, 0.07, 0, 0.07);
+    } else if (name === 'hit') {
+      tone('sawtooth', 150, 48, 0.14, 0, 0.11);
+    } else if (name === 'spell') {
+      [523, 659, 784, 1047, 1319].forEach(function (f, i) {
+        tone('triangle', f, f * 1.12, 0.06, i * 0.04, 0.09);
+      });
+    } else if (name === 'heal') {
+      [587, 784, 988, 1175].forEach(function (f, i) {
+        tone('triangle', f, f, 0.08, i * 0.06, 0.09);
+      });
+    } else if (name === 'lvup') {
+      var seq = [
+        [698, 0.10, 0.00], [698, 0.10, 0.11], [698, 0.10, 0.22],
+        [698, 0.28, 0.33], [622, 0.26, 0.64], [784, 0.26, 0.92], [698, 0.48, 1.20]
+      ];
+      seq.forEach(function (n) { tone('square', n[0], n[0], n[1], n[2], 0.08); });
+    } else if (name === 'reel') {
+      var pitches = [440, 523, 659, 587];
+      var f = pitches[(arg || 0) % pitches.length];
+      tone('square', f, f * 1.05, 0.032, 0, 0.045);
+    } else if (name === 'stop') {
+      tone('square', 310, 140, 0.065, 0, 0.09);
+    } else if (name === 'win') {
+      [523, 659, 784, 1047].forEach(function (f, i) {
+        tone('square', f, f, 0.09, i * 0.075, 0.08);
+      });
+    } else if (name === 'jackpot') {
+      var jp = [
+        [523, 0.09, 0.00], [659, 0.09, 0.10], [784, 0.09, 0.20],
+        [1047, 0.20, 0.30], [784, 0.12, 0.52], [1047, 0.42, 0.66]
+      ];
+      jp.forEach(function (n) { tone('square', n[0], n[0], n[1], n[2], 0.09); });
+    } else if (name === 'stairs') {
+      [330, 262, 196].forEach(function (f, i) {
+        tone('triangle', f, f * 0.92, 0.08, i * 0.07, 0.08);
+      });
+    } else if (name === 'chest') {
+      tone('square', 784, 784, 0.07, 0, 0.08);
+      tone('square', 1047, 1047, 0.18, 0.08, 0.08);
+    }
+  }
+
   // ===== データ =====
   var RAR = ['コモン', 'アンコモン', 'レア', 'エピック', 'レジェンド', 'ミシック'];
   var RM = [1, 1.15, 1.35, 1.6, 2, 2.6];
@@ -517,7 +594,7 @@
   var lastGacha = [], slotReels = ['🐰', '💎', '⚔️'], slotSpinning = false, slotWinState = [false, false, false];
 
   function newState() {
-    return { name: '', lv: 1, exp: 0, gold: 100, floor: 1, auto: true, sell: 0, inTown: false, meal: null,
+    return { name: '', mute: false, lv: 1, exp: 0, gold: 100, floor: 1, auto: true, sell: 0, inTown: false, meal: null,
       gachaPity: 0, slotBetIdx: 0,
       items: { potion: 2, ether: 1, elixir: 0, bomb: 0 },
       shop: [],
@@ -631,6 +708,7 @@
       renderLive();
       return;
     }
+    sfx(sp.id === 'hoimi' ? 'heal' : 'spell');
     var spentMp = sp.allMp ? S.pmp : sp.realCost;
     S.pmp -= spentMp;
     var m, dmg, heal;
@@ -721,21 +799,25 @@
       S.items.potion--;
       var h = Math.round(P.hp * 0.6);
       S.php = Math.min(P.hp, S.php + h);
+      sfx('heal');
       say('🧪 上やくそうを使った！ HPが ' + fmt(h) + ' 回復した！');
     } else if (id === 'ether') {
       if (S.pmp >= P.mp) { say('💧 MPはすでに満タンだ！'); renderLive(); return; }
       S.items.ether--;
       var m = Math.round(P.mp * 0.6);
       S.pmp = Math.min(P.mp, S.pmp + m);
+      sfx('heal');
       say('💧 まほうのせいすいを使った！ MPが ' + fmt(m) + ' 回復した！');
     } else if (id === 'elixir') {
       S.items.elixir--;
       S.php = P.hp; S.pmp = P.mp;
+      sfx('heal');
       say('💎 エリクサーを飲み干した！ HP・MPが完全回復！');
     } else if (id === 'bomb') {
       var vis = visibleMobs();
       if (vis.length === 0) { say('💣 視界内に魔物がいない！'); renderLive(); return; }
       S.items.bomb--;
+      sfx('spell');
       say('💣 ばくだん石を投げつけた！ 大爆発が魔物を襲う！');
       vis.slice().forEach(function (target) {
         var d = target.metal ? 3 : Math.max(15, Math.round((P.atk + P.mag) * 1.4));
@@ -907,8 +989,10 @@
     }
     m.sleep = 0;
     if (m.metal && total === 0) {
+      sfx('miss');
       say('⚔️ ' + m.name + 'に攻撃！ ……ミス！素早くかわされた！');
     } else {
+      sfx(critHit ? 'crit' : 'atk');
       say('⚔️ ' + m.name + 'に ' + fmt(total) + ' ダメージ' + (critHit ? '（会心の一撃！）' : '') + (hits > 1 ? ' ×' + hits + '連撃' : ''));
     }
     if (m.hp <= 0) {
@@ -934,7 +1018,10 @@
       };
       if (unlocks[S.lv]) say('🪄 ' + unlocks[S.lv]);
     }
-    if (leveled) dirty = true;
+    if (leveled) {
+      sfx('lvup');
+      dirty = true;
+    }
   }
 
   function killMob(m) {
@@ -976,6 +1063,7 @@
 
   function descendStairs() {
     if (D.mobs.some(function (m) { return m.boss; })) return;
+    sfx('stairs');
     S.floor++;
     if (S.floor > S.rec.max) S.rec.max = S.floor;
     say('🪜 地下' + S.floor + '階へ降りた！' + (S.floor % 10 === 0 ? '（⚠️ ボス階・ザコ無限湧き！）' : ''));
@@ -1009,12 +1097,14 @@
       var o = objAt(nx, ny);
       if (o && o.t === 'chest') {
         D.objs.splice(D.objs.indexOf(o), 1);
+        sfx('chest');
         say('📦 宝箱を開けた！');
         dropItem(S.floor, Math.random() < (D.ftype === 'vault' ? 0.45 : 0.25));
         S.gold += Math.round((10 + S.floor * 5) * (1 + P.a.gold / 100));
         dirty = true;
       } else if (o && o.t === 'fountain') {
         D.objs.splice(D.objs.indexOf(o), 1);
+        sfx('heal');
         var rec = Math.round(P.hp * 0.5);
         var mrec = Math.round(P.mp * 0.5);
         S.php = Math.min(P.hp, S.php + rec);
@@ -1062,8 +1152,10 @@
       var dist = Math.abs(m.x - D.px) + Math.abs(m.y - D.py);
       if (dist === 1) {
         if (Math.random() * 100 < P.dodge) {
+          sfx('miss');
           say('💨 ' + m.name + 'の攻撃を回避！');
         } else {
+          sfx('hit');
           var d = Math.max(1, Math.round(m.atk * 100 / (100 + P.def) * (1 - P.block / 100)));
           if (S.shield > 0) { var s = Math.min(S.shield, d); S.shield -= s; d -= s; }
           S.php -= d;
@@ -1107,6 +1199,7 @@
     S.php = P.hp;
     S.pmp = P.mp;
     refreshShop();
+    sfx('heal');
     say('🏘️ うさぎの街へ帰還した！（HP・MP全快）');
     dirty = true;
     renderLive();
@@ -1121,6 +1214,7 @@
     calc();
     S.php = P.hp;
     S.pmp = P.mp;
+    sfx('stairs');
     say('🧭 地下' + S.floor + '階へ出発した！' + (S.floor % 10 === 0 ? '（⚠️ ボス階・ザコ無限湧き！）' : ''));
     buildFloor(S.floor);
     dirty = true;
@@ -1208,6 +1302,7 @@
     lastGacha = pulled;
 
     var bestPull = pulled.slice().sort(function (a, b) { return b.it.r - a.it.r || gen(b.it).score - gen(a.it).score; })[0];
+    sfx(bestPull.it.r >= 5 ? 'jackpot' : 'chest');
     say('🎁 ' + (tier === 'mythic' ? '伝説ガチャ' : '冒険者ガチャ') + count + '連！目玉：[' + RAR[bestPull.it.r] + '] ' + gen(bestPull.it).name);
     dirty = true;
     renderLive();
@@ -1225,6 +1320,7 @@
     S.gold -= bet;
     slotSpinning = true;
     slotWinState = [false, false, false];
+    sfx('reel', 0);
     renderLive();
 
     var finalSyms = [
@@ -1244,6 +1340,12 @@
 
       if (ticks < 15) slotReels[2] = SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)];
       else slotReels[2] = finalSyms[2];
+
+      if (ticks === 7 || ticks === 11 || ticks === 15) {
+        sfx('stop');
+      } else if (ticks % 2 === 1) {
+        sfx('reel', ticks);
+      }
 
       var rEls = document.querySelectorAll('#slotReels .reel');
       if (rEls.length === 3) {
@@ -1313,6 +1415,9 @@
     } else {
       say('🎰 ハズレ……次はきっと当たる！');
     }
+
+    if (payout >= bet * 12) sfx('jackpot');
+    else if (payout > 0) sfx('win');
 
     S.gold += payout;
     dirty = true;
@@ -1502,6 +1607,7 @@
     baseIt._g = null;
     S.bag.splice(S.bag.indexOf(matIt), 1);
     calc(true);
+    sfx('chest');
     say('⚗️ 錬金成功！「' + gen(baseIt).name + '」に【' + af.n + ' +' + af.v + '%】を継承した！');
     dirty = true;
     renderLive();
@@ -1520,6 +1626,7 @@
     S.name = val || 'うさぎ';
     $('nameModal').classList.remove('open');
     if (isDebug()) {
+      sfx('jackpot');
       say('🛠️ 隠しコマンド発動！デバッグモードが解放されました！');
     } else {
       say('🐰 冒険者「' + S.name + '」としてダンジョンに挑む！');
@@ -1584,6 +1691,7 @@
       trim();
       say('🛠️ [デバッグ] [' + RAR[rar] + '] ' + g.name + ' をバッグに生成した！');
     }
+    sfx('chest');
     dirty = true;
     renderLive();
     save();
@@ -1592,7 +1700,6 @@
   function equipDebugGodSet() {
     var iLv = Math.max(1, Math.min(99999, +$('dbgItemLv').value || S.floor || 100));
     var plus = Math.max(0, Math.min(99, +$('dbgPlus').value || 99));
-    // 剣・兜・鎧・靴・盾・指輪の最強ベースをミシックで生成
     var presets = [
       ['w', 0, K[0].b.length - 1],
       ['h', 10, K[10].b.length - 1],
@@ -1615,6 +1722,7 @@
     calc(true);
     S.php = P.hp;
     S.pmp = P.mp;
+    sfx('jackpot');
     say('👑 [デバッグ] 全部位ミシック(+' + plus + ')最強装備セットを装着した！');
     dirty = true;
     renderLive();
@@ -1778,6 +1886,7 @@
   function renderStatic() {
     $('pname').textContent = S.name || 'うさぎ';
     $('opendbg').style.display = isDebug() ? 'inline-block' : 'none';
+    $('muteBtn').textContent = S.mute ? '🔇 音OFF' : '🔊 音ON';
 
     var h = '';
     SLOTS.forEach(function (sl) { var it = S.eq[sl[0]]; h += '<div style="margin-top:4px"><small class="lead">' + sl[1] + '</small>' + (it ? itemHtml(it, sl[0]) : '<div class="it r0"><b>（なし）</b></div>') + '</div>'; });
@@ -1929,15 +2038,19 @@
       } else if (da === 'lv') {
         S.lv += dv;
         calc(); S.php = P.hp; S.pmp = P.mp;
+        sfx('lvup');
         say('🛠️ [デバッグ] レベルが ' + S.lv + ' になった！');
       } else if (da === 'gold') {
         S.gold += dv;
+        sfx('chest');
         say('🛠️ [デバッグ] 所持金 +' + fmt(dv) + 'G 獲得！');
       } else if (da === 'heal') {
         calc(); S.php = P.hp; S.pmp = P.mp;
+        sfx('heal');
         say('🛠️ [デバッグ] HP・MPが完全回復した！');
       } else if (da === 'wipe') {
         if (!S.inTown && D && D.mobs.length) {
+          sfx('spell');
           D.mobs.slice().forEach(function (m) { killMob(m); });
           D.mobs = [];
           say('🛠️ [デバッグ] フロアの魔物を一掃した！');
@@ -1951,9 +2064,11 @@
         for (var m = 0; m < MAT.length; m++) S.rec.seenM[m] = 1;
         if (!S.rec.seenE) S.rec.seenE = {};
         ALL_MOB_NAMES.forEach(function (mob) { S.rec.seenE[mob[1]] = Math.max(1, S.rec.seenE[mob[1]] || 0); });
+        sfx('jackpot');
         say('🛠️ [デバッグ] 冒険者の図鑑を100%全開放した！');
       } else if (da === 'items') {
         CONS.forEach(function (c) { S.items[c.id] = (S.items[c.id] || 0) + 99; });
+        sfx('chest');
         say('🛠️ [デバッグ] 全ての消耗品を +99個 補充した！');
       }
       dirty = true; renderLive(); save();
@@ -1995,12 +2110,14 @@
       var act = tAct.getAttribute('data-tact');
       if (act === 'rest') {
         S.php = P.hp; S.pmp = P.mp;
+        sfx('heal');
         say('🏨 宿屋でぐっすり休んだ！HP・MPが全快！');
       } else if (act === 'meal') {
         var mId = tAct.getAttribute('data-id');
         var ml = MEALS.filter(function (x) { return x.id === mId; })[0];
         if (ml && S.gold >= ml.cost) {
           S.gold -= ml.cost; S.meal = ml.id; calc(true); S.php = P.hp;
+          sfx('heal');
           say(ml.icon + ' 「' + ml.name + '」を食べた！（' + ml.desc + '）');
         }
       } else if (act === 'buyitem') {
@@ -2009,6 +2126,7 @@
         if (ci && S.gold >= ci.price) {
           S.gold -= ci.price;
           S.items[cId] = (S.items[cId] || 0) + 1;
+          sfx('chest');
           say(ci.icon + ' ' + ci.name + 'を購入した！（所持 ' + S.items[cId] + '個）');
         }
       } else if (act === 'refshop') {
@@ -2016,6 +2134,7 @@
         if (S.gold >= refCost) {
           S.gold -= refCost;
           refreshShop();
+          sfx('stop');
           say('🔄 装備屋の品揃えが新しくなった！');
         }
       } else if (act === 'buyeq') {
@@ -2027,6 +2146,7 @@
           S.bag.push(sit);
           var sg = gen(sit);
           S.rec.seenB[sg.bi] = 1; S.rec.seenM[sg.mat] = 1;
+          sfx('chest');
           say('⚔️ [' + RAR[sit.r] + '] ' + sg.name + ' を購入した！');
         }
       } else if (act === 'fuse') {
@@ -2038,6 +2158,7 @@
       } else if (act === 'sbet') {
         S.slotBetIdx = +tAct.getAttribute('data-idx');
         slotWinState = [false, false, false];
+        sfx('stop');
         renderTownPanel();
         save();
         return;
@@ -2053,10 +2174,10 @@
     if (!el) return;
     var a = el.getAttribute('data-a'), it = el.getAttribute('data-i') ? find(+el.getAttribute('data-i')) : S.eq[el.getAttribute('data-s')];
     if (!it) return;
-    if (a === 'eq') equip(it);
-    else if (a === 'sell') { S.gold += sellValue(it); S.bag.splice(S.bag.indexOf(it), 1); dirty = true; }
-    else if (a === 'enh') enhance(it);
-    else if (a === 'lock') { it.x = it.x ? 0 : 1; dirty = true; }
+    if (a === 'eq') { equip(it); sfx('stop'); }
+    else if (a === 'sell') { S.gold += sellValue(it); S.bag.splice(S.bag.indexOf(it), 1); sfx('chest'); dirty = true; }
+    else if (a === 'enh') { enhance(it); sfx('win'); }
+    else if (a === 'lock') { it.x = it.x ? 0 : 1; sfx('stop'); dirty = true; }
     renderLive(); save();
   });
 
@@ -2094,6 +2215,13 @@
     else if (k === 'Enter' && $('stairs').style.display !== 'none' && !$('stairs').disabled) { e.preventDefault(); descendStairs(); }
   });
 
+  $('muteBtn').onclick = function () {
+    S.mute = !S.mute;
+    if (!S.mute) sfx('stop');
+    dirty = true;
+    renderLive();
+    save();
+  };
   $('wait').onclick = function () { if (!S.inTown) smartAction(); };
   $('stairs').onclick = function () { if (!S.inTown) descendStairs(); };
   $('town').onclick = function () { enterTown(); };
@@ -2122,6 +2250,7 @@
   $('dbgSetLvBtn').onclick = function () {
     var lv = Math.max(1, Math.min(99999, +$('dbgLvInput').value || 1));
     S.lv = lv; S.exp = 0; calc(); S.php = P.hp; S.pmp = P.mp;
+    sfx('lvup');
     say('🛠️ [デバッグ] レベルを Lv' + S.lv + ' に設定した！');
     dirty = true; renderLive(); save();
   };
@@ -2134,11 +2263,11 @@
   $('dbgMakeEqBtn').onclick = function () { createDebugItem(true); };
   $('dbgGodSetBtn').onclick = function () { equipDebugGodSet(); };
 
-  $('auto').onclick = function () { S.auto = !S.auto; dirty = true; renderLive(); save(); };
-  $('best').onclick = function () { best(); say('⚡ ベスト装備にした！'); renderLive(); save(); };
+  $('auto').onclick = function () { S.auto = !S.auto; sfx('stop'); dirty = true; renderLive(); save(); };
+  $('best').onclick = function () { best(); sfx('win'); say('⚡ ベスト装備にした！'); renderLive(); save(); };
   $('sellall').onclick = function () {
     var g = 0, n = 0; S.bag = S.bag.filter(function (x) { if (!x.x && x.r <= S.sell) { g += sellValue(x); n++; return false; } return true; });
-    S.gold += g; say('💰 ' + n + '個を売って、' + fmt(g) + 'ゴールドになった'); dirty = true; renderLive(); save();
+    S.gold += g; sfx('chest'); say('💰 ' + n + '個を売って、' + fmt(g) + 'ゴールドになった'); dirty = true; renderLive(); save();
   };
   $('fslot').onchange = $('fsort').onchange = function () { dirty = true; renderLive(); };
   $('fsell').innerHTML = '<option value="-1">自動売却しない</option>' + RAR.map(function (r, i) { return '<option value="' + i + '">' + (i === 0 ? 'コモンだけ自動売却' : r + '以下を自動売却') + '</option>'; }).join('');
