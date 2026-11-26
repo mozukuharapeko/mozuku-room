@@ -10,10 +10,11 @@
   body { font-family: "Hiragino Maru Gothic ProN","Yu Gothic",sans-serif; font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--bg); -webkit-tap-highlight-color: transparent;
          padding: calc(10px + env(safe-area-inset-top, 0px)) 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
   #app { max-width: 540px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-  header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  h1 { font-size: 17px; color: #ffbf93; }
-  header div { display: flex; gap: 6px; }
-  header button, header a { font: inherit; font-size: 12px; color: var(--ink); background: var(--card2); border: 2px solid var(--line); border-radius: 99px; padding: 2px 12px; text-decoration: none; cursor: pointer; touch-action: manipulation; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+  h1 { font-size: 16.5px; color: #ffbf93; }
+  header div { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+  header button, header a { font: inherit; font-size: 12px; color: var(--ink); background: var(--card2); border: 2px solid var(--line); border-radius: 99px; padding: 2px 10px; text-decoration: none; cursor: pointer; touch-action: manipulation; }
+  header button.dbg-btn { background: #3b1d5e; border-color: #a855f7; color: #f3e8ff; font-weight: 700; }
   .card { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 10px 12px; }
   .card h2 { font-size: 15px; color: var(--orange); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
   .bar { height: 8px; background: var(--line); border-radius: 5px; overflow: hidden; margin: 3px 0 6px; }
@@ -21,10 +22,10 @@
   .bar.x i { background: #7aa8ff; }
   .bar.m i { background: var(--mp); }
   .bars-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
   #log { white-space: pre-wrap; font-size: 12.5px; min-height: 6.4em; color: var(--soft); }
   .grid { display: grid; gap: 6px; } .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
-  button.b, select { font: inherit; font-weight: 700; min-height: 38px; padding: 4px 8px; border-radius: 12px; border: 2px solid #c4824f; background: var(--orange); color: var(--on); cursor: pointer; touch-action: manipulation; user-select: none; }
+  button.b, select, input[type="text"], input[type="number"] { font: inherit; font-weight: 700; min-height: 38px; padding: 4px 8px; border-radius: 12px; border: 2px solid #c4824f; background: var(--orange); color: var(--on); cursor: pointer; touch-action: manipulation; user-select: none; }
   button.b:disabled { opacity: 0.4; cursor: default; }
   button.b.sub { background: var(--card2); color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 12.5px; }
   button.b.on { background: var(--mint); border-color: #5ba884; color: #193326; font-weight: 700; }
@@ -33,7 +34,9 @@
   button.b.sp { background: #342b47; border-color: #7c5cc4; color: #e9d8fd; font-size: 11.5px; min-height: 32px; padding: 3px 5px; }
   button.b.use { background: #243b35; border-color: #4d9e86; color: #ccfbee; font-size: 11.5px; min-height: 30px; padding: 2px 6px; }
   button.b.mythic { background: linear-gradient(135deg, #581c87, #9f1239); border-color: #f43f5e; color: #ffe4e6; }
-  select { background: #232327; color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 13px; width: 100%; }
+  select, input[type="text"], input[type="number"] { background: #232327; color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 13px; width: 100%; cursor: text; user-select: auto; }
+  select { cursor: pointer; }
+  .name-tag { display: inline-flex; align-items: center; gap: 4px; background: var(--card2); border: 1px solid var(--line); border-radius: 99px; padding: 0 8px; font-size: 12px; cursor: pointer; color: var(--gold); }
 
   /* 特殊フロアバッジ */
   .ftag { display: inline-block; font-size: 11px; padding: 0 7px; border-radius: 99px; font-weight: 700; margin-left: 4px; }
@@ -98,30 +101,42 @@
   .r3 { border-left: 5px solid #c084fc; } .r4 { border-left: 5px solid #fb923c; } .r5 { border-left: 5px solid #f43f5e; }
   .lead { font-size: 12.5px; color: var(--soft); }
 
-  /* 図鑑モーダル */
-  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; padding: 12px; z-index: 50; }
+  /* モーダル共通（図鑑・名前・デバッグ） */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: none; align-items: center; justify-content: center; padding: 12px; z-index: 50; }
   .modal-bg.open { display: flex; }
-  .modal { background: var(--card); border: 2px solid var(--orange); border-radius: 16px; max-width: 520px; width: 100%; max-height: 84vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal { background: var(--card); border: 2px solid var(--orange); border-radius: 16px; max-width: 520px; width: 100%; max-height: 86vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal.dbg-modal { border-color: #a855f7; }
   .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-  .modal-bd { padding: 10px 12px; overflow-y: auto; font-size: 12.5px; }
+  .modal-bd { padding: 10px 12px; overflow-y: auto; font-size: 12.5px; display: flex; flex-direction: column; gap: 8px; }
   .dex-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px 12px 0; }
   .dex-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 10px; }
   .chip { padding: 2px 7px; border-radius: 8px; background: var(--card2); border: 1px solid var(--line); font-size: 11.5px; }
   .chip.got { border-color: var(--mint); color: #d1fae5; }
   .chip.unk { opacity: 0.45; }
+  .dbg-sec { background: #232328; border: 1.5px solid #581c87; border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .dbg-sec b.stitle { color: #d8b4fe; font-size: 13px; }
+  .inline-form { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
 
-  button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <h1>🐰 雑にダンジョン行くやつ</h1>
-    <div><button id="opendex" type="button">📖 図鑑</button><button id="reset" type="button">🔄 最初から</button><a href="./index.html">🏠</a></div>
+    <div>
+      <button id="opendbg" class="dbg-btn" type="button" style="display:none">🛠️ デバッグ</button>
+      <button id="opendex" type="button">📖 図鑑</button>
+      <button id="reset" type="button">🔄 最初から</button>
+      <a href="./index.html">🏠</a>
+    </div>
   </header>
 
   <div class="card">
-    <div class="row"><span id="lv"></span><span id="gold"></span></div>
+    <div class="row">
+      <span><button id="nameBtn" class="name-tag" type="button" title="タップして名前変更">🐰 <span id="pname">うさぎ</span> ✏️</button> <span id="lv"></span></span>
+      <span id="gold"></span>
+    </div>
     <div class="bar x"><i id="expbar"></i></div>
     <div class="row"><span id="floor"></span><span id="remain"></span></div>
 
@@ -203,6 +218,96 @@
   <p class="lead" style="text-align:center">矢印キー / WASD / 十字ボタンで移動。Spaceキーで「階段降りる・隣接攻撃・待機」を自動実行するよ。</p>
 </div>
 
+<!-- 名前入力モーダル -->
+<div class="modal-bg" id="nameModal" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-hd"><b style="color:var(--orange)">🐰 冒険者の名前を決めよう</b></div>
+    <div class="modal-bd">
+      <p class="lead">ダンジョンに挑むうさぎの名前を入力してください（後からステータス欄の ✏️ でも変更できます）。</p>
+      <input type="text" id="nameInput" maxlength="16" placeholder="名前を入力（未入力なら「うさぎ」）" autocomplete="off">
+      <button class="b" id="saveNameBtn" type="button">🧭 この名前で冒険する！</button>
+    </div>
+  </div>
+</div>
+
+<!-- デバッグモードモーダル -->
+<div class="modal-bg" id="debugModal" role="dialog" aria-modal="true">
+  <div class="modal dbg-modal">
+    <div class="modal-hd"><b style="color:#d8b4fe">🛠️ 隠しデバッグメニュー（海蘊専用）</b><button class="b sub mini" id="closedbg" type="button">✕ 閉じる</button></div>
+    <div class="modal-bd" id="dbgBody">
+      <!-- 経験値・レベル・所持金 -->
+      <div class="dbg-sec">
+        <b class="stitle">✨ 経験値・レベル・ステータス操作</b>
+        <div class="grid g3">
+          <button class="b mini sub" data-dbg="exp" data-v="1000" type="button">+1,000 EXP</button>
+          <button class="b mini sub" data-dbg="exp" data-v="100000" type="button">+10万 EXP</button>
+          <button class="b mini sub" data-dbg="exp" data-v="10000000" type="button">+1,000万 EXP</button>
+          <button class="b mini sub" data-dbg="lv" data-v="1" type="button">Lv +1</button>
+          <button class="b mini sub" data-dbg="lv" data-v="10" type="button">Lv +10</button>
+          <button class="b mini sub" data-dbg="lv" data-v="100" type="button">Lv +100</button>
+        </div>
+        <div class="inline-form">
+          <input type="number" id="dbgLvInput" min="1" max="99999" placeholder="指定Lvを入力 (例: 50)">
+          <button class="b mini" id="dbgSetLvBtn" type="button">Lv変更</button>
+        </div>
+        <div class="grid g3">
+          <button class="b mini on" data-dbg="gold" data-v="1000000" type="button">💰 +100万G</button>
+          <button class="b mini on" data-dbg="heal" type="button">💖 HP/MP全快</button>
+          <button class="b mini on" data-dbg="wipe" type="button">💥 フロア敵全滅</button>
+        </div>
+      </div>
+
+      <!-- 階数ワープ -->
+      <div class="dbg-sec">
+        <b class="stitle">🪜 階数自由ワープ</b>
+        <div class="grid g3">
+          <button class="b mini sub" data-dbg="warp" data-v="1" type="button">1階</button>
+          <button class="b mini sub" data-dbg="warp" data-v="10" type="button">10階(ボス)</button>
+          <button class="b mini sub" data-dbg="warp" data-v="50" type="button">50階(ボス)</button>
+          <button class="b mini sub" data-dbg="warp" data-v="100" type="button">100階(ボス)</button>
+          <button class="b mini sub" data-dbg="warp" data-v="500" type="button">500階(ボス)</button>
+          <button class="b mini sub" data-dbg="warp" data-v="999" type="button">999階</button>
+        </div>
+        <div class="inline-form">
+          <input type="number" id="dbgFloorInput" min="1" max="999999" placeholder="行きたい階数を入力 (例: 250)">
+          <button class="b mini" id="dbgWarpBtn" type="button">階へワープ</button>
+        </div>
+      </div>
+
+      <!-- 装備自由生成 -->
+      <div class="dbg-sec">
+        <b class="stitle">⚔️ 装備自由生成クリエイター</b>
+        <div class="grid g2">
+          <label><small class="lead">種類</small><select id="dbgKind"></select></label>
+          <label><small class="lead">ベース装備名</small><select id="dbgBase"></select></label>
+        </div>
+        <div class="grid g2">
+          <label><small class="lead">素材</small><select id="dbgMat"></select></label>
+          <label><small class="lead">レア度</small><select id="dbgRar"></select></label>
+        </div>
+        <div class="grid g2">
+          <label><small class="lead">装備レベル</small><input type="number" id="dbgItemLv" min="1" max="99999" value="10"></label>
+          <label><small class="lead">強化値 (+0〜+99)</small><input type="number" id="dbgPlus" min="0" max="99" value="10"></label>
+        </div>
+        <div class="grid g2">
+          <button class="b mini sub" id="dbgMakeBagBtn" type="button">🎒 バッグに生成</button>
+          <button class="b mini" id="dbgMakeEqBtn" type="button">⚡ 生成して即装備</button>
+        </div>
+        <button class="b mini mythic" id="dbgGodSetBtn" type="button">👑 全部位ミシック(+99)最強セットを一括装備</button>
+      </div>
+
+      <!-- その他チート -->
+      <div class="dbg-sec">
+        <b class="stitle">📖 図鑑・アイテム解放</b>
+        <div class="grid g2">
+          <button class="b mini sub" data-dbg="dex" type="button">📖 図鑑を100%全開放</button>
+          <button class="b mini sub" data-dbg="items" type="button">🧪 消耗品全種 +99個</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 図鑑モーダル -->
 <div class="modal-bg" id="dexModal" role="dialog" aria-modal="true">
   <div class="modal">
@@ -230,7 +335,7 @@
   var ADJ = ['輝く', '燃える', '凍てつく', '古びた', '呪われた', '祝福の', '荒ぶる', '静かな', '歌う', '眠る', '飢えた', '気高い', '狂気の', '忘れられた', '伝説の', '禁じられた', '夜明けの', '黄昏の', '嵐の', '秘められた',
              'しょーもない', 'ありがたい', 'ぬるぬるの', 'きらきらの', 'ふわふわの', 'ごつい', 'とがった', 'まるい', 'おかしな', '最強の', '泣き虫の', '怒りの', '笑う', 'こっそり', '堂々たる', 'ぴかぴかの', 'どっしりした', '軽やかな', '真夜中の', '朝焼けの'];
 
-  // 武器・防具・アクセ（FF・女神転生・ドラクエ・各種有名RPG網羅）
+  // 武器・防具・アクセ
   var K = [
     { s: 'w', n: '剣', m: { atk: 1 }, b: [
       'ブロードソード', 'ロングソード', 'サーベル', 'バスターソード', 'ブラザーフッド', 'ルーンブレイド', 'アイスブランド', 'フレイムタン', 'サンダーブレード',
@@ -365,9 +470,13 @@
   function gen(it) {
     if (it._g) return it._g;
     var r = mulberry(it.s), k = K[it.k % K.length];
-    var t = Math.max(0, Math.min(MAT.length - 1, Math.floor(it.l / 3) + Math.floor(r() * 3) - 1));
+    var t = (it.m !== undefined && it.m !== null)
+      ? Math.max(0, Math.min(MAT.length - 1, it.m))
+      : Math.max(0, Math.min(MAT.length - 1, Math.floor(it.l / 3) + Math.floor(r() * 3) - 1));
     var bLen = k.b.length;
-    var bIdx = Math.min(bLen - 1, Math.max(0, Math.floor((it.r / 5) * (bLen - 1) * 0.75 + r() * bLen * 0.35)));
+    var bIdx = (it.b !== undefined && it.b !== null)
+      ? Math.max(0, Math.min(bLen - 1, it.b))
+      : Math.min(bLen - 1, Math.max(0, Math.floor((it.r / 5) * (bLen - 1) * 0.75 + r() * bLen * 0.35)));
     var base = k.b[bIdx];
     var adj = it.r > 0 ? ADJ[Math.floor(r() * ADJ.length)] : '';
     var ids = [], i;
@@ -408,7 +517,7 @@
   var lastGacha = [], slotReels = ['🐰', '💎', '⚔️'], slotSpinning = false, slotWinState = [false, false, false];
 
   function newState() {
-    return { lv: 1, exp: 0, gold: 100, floor: 1, auto: true, sell: 0, inTown: false, meal: null,
+    return { name: '', lv: 1, exp: 0, gold: 100, floor: 1, auto: true, sell: 0, inTown: false, meal: null,
       gachaPity: 0, slotBetIdx: 0,
       items: { potion: 2, ether: 1, elixir: 0, bomb: 0 },
       shop: [],
@@ -416,9 +525,15 @@
       buff: { atk: 0, def: 0 },
       rec: { drops: 0, kills: 0, max: 1, best: 0, steps: 0, seenB: {}, seenM: {}, seenE: {} } };
   }
+  function isDebug() { return S && S.name === '海蘊'; }
   function say(t) { logs.push(t); if (logs.length > 45) logs.shift(); }
   function fmt(n) { n = Math.round(n); return n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1) + 'k' : String(n); }
-  function mkItem(s, k, l, r) { return { s: s, k: k, l: l, r: r, p: 0, x: 0, ex: [], id: uid++ }; }
+  function mkItem(s, k, l, r, optMat, optBase, optPlus) {
+    var it = { s: s, k: k, l: l, r: r, p: optPlus || 0, x: 0, ex: [], id: uid++ };
+    if (optMat !== undefined && optMat !== null) it.m = optMat;
+    if (optBase !== undefined && optBase !== null) it.b = optBase;
+    return it;
+  }
 
   // ===== プレイヤー能力計算 =====
   function calc(keepRatio) {
@@ -802,21 +917,12 @@
     }
   }
 
-  function killMob(m) {
-    var boss = m.boss, metal = m.metal;
-    var fl = S.floor, a = P.a;
-    S.rec.kills++;
-    if (!S.rec.seenE) S.rec.seenE = {};
-    if (m.rawName) S.rec.seenE[m.rawName] = (S.rec.seenE[m.rawName] || 0) + 1;
-
-    var g = Math.round((6 + 3.5 * fl) * (boss ? 6 : metal ? 12 : 1) * (1 + a.gold / 100));
-    var e = Math.round((4 + 2.5 * fl) * (boss ? 5 : metal ? 25 : 1) * (1 + a.exp / 100));
-    S.gold += g; S.exp += e;
-    say('💥 ' + m.name + 'を倒した！（💰+' + fmt(g) + ' / EXP+' + fmt(e) + '）');
-    if (boss) say('🔓 階層ボスを倒した！魔物の増殖が止まり、階段の封印が解けた！');
-    var need;
+  function addExp(e) {
+    S.exp += e;
+    var need, leveled = false;
     while (S.exp >= (need = Math.round(20 * Math.pow(S.lv, 1.4)))) {
       S.exp -= need; S.lv++;
+      leveled = true;
       calc(); S.php = P.hp; S.pmp = P.mp;
       say('🎉 レベル' + S.lv + 'に上がった！HP・MP全快！');
       var unlocks = {
@@ -828,6 +934,22 @@
       };
       if (unlocks[S.lv]) say('🪄 ' + unlocks[S.lv]);
     }
+    if (leveled) dirty = true;
+  }
+
+  function killMob(m) {
+    var boss = m.boss, metal = m.metal;
+    var fl = S.floor, a = P.a;
+    S.rec.kills++;
+    if (!S.rec.seenE) S.rec.seenE = {};
+    if (m.rawName) S.rec.seenE[m.rawName] = (S.rec.seenE[m.rawName] || 0) + 1;
+
+    var g = Math.round((6 + 3.5 * fl) * (boss ? 6 : metal ? 12 : 1) * (1 + a.gold / 100));
+    var e = Math.round((4 + 2.5 * fl) * (boss ? 5 : metal ? 25 : 1) * (1 + a.exp / 100));
+    S.gold += g;
+    say('💥 ' + m.name + 'を倒した！（💰+' + fmt(g) + ' / EXP+' + fmt(e) + '）');
+    if (boss) say('🔓 階層ボスを倒した！魔物の増殖が止まり、階段の封印が解けた！');
+    addExp(e);
     var houseBonus = (D && D.ftype === 'house') ? 2 : 1;
     if (boss || Math.random() < 0.45 * (1 + a.drop / 100) * houseBonus) dropItem(fl, boss);
     dirty = true;
@@ -1033,25 +1155,20 @@
   }
 
   function rollGachaRarity(tier, isGuaranteedSlot) {
-    // 天井（50連目）はミシック確定
     if ((S.gachaPity || 0) >= 49) return 5;
     var r = Math.random() * 100;
     if (tier === 'normal') {
       if (isGuaranteedSlot) {
-        // 10連確定枠：エピック以上
         if (r < 4) return 5;
         if (r < 22) return 4;
         return 3;
       }
-      // 通常：レア以上確定
       if (r < 2) return 5;
       if (r < 10) return 4;
       if (r < 32) return 3;
       return 2;
     } else {
-      // 伝説ガチャ：エピック以上確定
       if (isGuaranteedSlot) {
-        // 10連確定枠：レジェンド以上
         if (r < 22) return 5;
         return 4;
       }
@@ -1110,7 +1227,6 @@
     slotWinState = [false, false, false];
     renderLive();
 
-    // 最終出目を決定
     var finalSyms = [
       SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)],
       SLOT_SYMBOLS[rnd(SLOT_SYMBOLS.length)],
@@ -1299,7 +1415,6 @@
       if (bSel) bSel.onchange = function () { alchTarget = bSel.value; renderTownPanel(); };
       if (mSel) mSel.onchange = function () { alchMatId = mSel.value; renderTownPanel(); };
     } else if (townTab === 'gacha') {
-      // ガチャ・スロット遊技場
       var base = gachaBaseCost();
       var n1 = base, n10 = base * 9;
       var m1 = base * 4, m10 = base * 36;
@@ -1307,7 +1422,6 @@
       var bet = SLOT_BETS[S.slotBetIdx || 0] || 50;
 
       var h5 = '';
-      // スロットセクション
       h5 += '<div class="casino-sec">';
       h5 += '<div class="row"><b>🎰 うさぎスロット</b><span style="font-size:11.5px;color:var(--gold)">賭け金：💰' + fmt(bet) + '</span></div>';
       h5 += '<div class="reels" id="slotReels">' +
@@ -1327,7 +1441,6 @@
         '<span>🥕🥕🥕：3倍＋エリクサー</span><span>🐰/💎/💰 2個：1.5倍</span>' +
         '</div></div>';
 
-      // 装備ガチャセクション
       h5 += '<div class="casino-sec">';
       h5 += '<div class="row"><b>🎁 装備ガチャ（Lv' + S.rec.max + '基準）</b><span style="font-size:11.5px;color:#fda4af">ミシック天井まであと <b>' + pityLeft + '</b> 回</span></div>';
       h5 += '<small class="lead">冒険者ガチャは青以上確定、伝説ガチャは紫以上確定＆高レア率UP！</small>';
@@ -1352,7 +1465,6 @@
       box.innerHTML = h5;
     }
 
-    // 出発階セレクター更新
     var depSel = $('departFloor');
     var curVal = depSel.value;
     var opts = [];
@@ -1391,6 +1503,119 @@
     S.bag.splice(S.bag.indexOf(matIt), 1);
     calc(true);
     say('⚗️ 錬金成功！「' + gen(baseIt).name + '」に【' + af.n + ' +' + af.v + '%】を継承した！');
+    dirty = true;
+    renderLive();
+    save();
+  }
+
+  // ===== 名前入力＆デバッグモード =====
+  function openNameModal(forceEmpty) {
+    $('nameInput').value = forceEmpty ? '' : (S.name || '');
+    $('nameModal').classList.add('open');
+    setTimeout(function () { $('nameInput').focus(); }, 30);
+  }
+
+  function applyPlayerName() {
+    var val = ($('nameInput').value || '').trim();
+    S.name = val || 'うさぎ';
+    $('nameModal').classList.remove('open');
+    if (isDebug()) {
+      say('🛠️ 隠しコマンド発動！デバッグモードが解放されました！');
+    } else {
+      say('🐰 冒険者「' + S.name + '」としてダンジョンに挑む！');
+    }
+    dirty = true;
+    renderLive();
+    save();
+  }
+
+  function initDebugUI() {
+    $('dbgKind').innerHTML = K.map(function (k, idx) {
+      return '<option value="' + idx + '">' + k.n + '</option>';
+    }).join('');
+    $('dbgMat').innerHTML = MAT.map(function (m, idx) {
+      return '<option value="' + idx + '"' + (idx === MAT.length - 1 ? ' selected' : '') + '>' + m + '</option>';
+    }).join('');
+    $('dbgRar').innerHTML = RAR.map(function (r, idx) {
+      return '<option value="' + idx + '"' + (idx === 5 ? ' selected' : '') + '>' + r + '</option>';
+    }).join('');
+    updateDebugBases();
+  }
+
+  function updateDebugBases() {
+    var kIdx = +$('dbgKind').value || 0;
+    var k = K[kIdx] || K[0];
+    $('dbgBase').innerHTML = k.b.map(function (bName, idx) {
+      return '<option value="' + idx + '"' + (idx === k.b.length - 1 ? ' selected' : '') + '>' + esc(bName) + '</option>';
+    }).join('');
+  }
+
+  function openDebugModal() {
+    if (!isDebug()) return;
+    $('dbgFloorInput').value = S.floor;
+    $('dbgLvInput').value = S.lv;
+    $('dbgItemLv').value = Math.max(1, S.floor);
+    $('debugModal').classList.add('open');
+  }
+
+  function createDebugItem(equipNow) {
+    var kIdx = +$('dbgKind').value || 0;
+    var bIdx = +$('dbgBase').value || 0;
+    var mIdx = +$('dbgMat').value || 0;
+    var rar = +$('dbgRar').value || 0;
+    var iLv = Math.max(1, Math.min(99999, +$('dbgItemLv').value || 1));
+    var plus = Math.max(0, Math.min(99, +$('dbgPlus').value || 0));
+
+    var it = mkItem(Math.floor(Math.random() * 2147483647), kIdx, iLv, rar, mIdx, bIdx, plus);
+    var g = gen(it);
+    S.rec.drops++;
+    if (rar > S.rec.best) S.rec.best = rar;
+    S.rec.seenB[g.bi] = 1;
+    S.rec.seenM[g.mat] = 1;
+
+    if (equipNow) {
+      var sl = slotOf(it), w = worst(sl), cur = S.eq[w];
+      if (cur) S.bag.push(cur);
+      S.eq[w] = it;
+      calc(true);
+      say('🛠️ [デバッグ] [' + RAR[rar] + '] ' + g.name + ' を生成して即装備した！');
+    } else {
+      S.bag.push(it);
+      trim();
+      say('🛠️ [デバッグ] [' + RAR[rar] + '] ' + g.name + ' をバッグに生成した！');
+    }
+    dirty = true;
+    renderLive();
+    save();
+  }
+
+  function equipDebugGodSet() {
+    var iLv = Math.max(1, Math.min(99999, +$('dbgItemLv').value || S.floor || 100));
+    var plus = Math.max(0, Math.min(99, +$('dbgPlus').value || 99));
+    // 剣・兜・鎧・靴・盾・指輪の最強ベースをミシックで生成
+    var presets = [
+      ['w', 0, K[0].b.length - 1],
+      ['h', 10, K[10].b.length - 1],
+      ['b', 11, K[11].b.length - 1],
+      ['f', 12, K[12].b.length - 1],
+      ['a1', 13, K[13].b.length - 1],
+      ['a2', 15, K[15].b.length - 1]
+    ];
+    presets.forEach(function (pr) {
+      var slot = pr[0], kIdx = pr[1], bIdx = pr[2];
+      var cur = S.eq[slot];
+      if (cur) S.bag.push(cur);
+      var it = mkItem(Math.floor(Math.random() * 2147483647), kIdx, iLv, 5, MAT.length - 1, bIdx, plus);
+      var g = gen(it);
+      S.rec.seenB[g.bi] = 1;
+      S.rec.seenM[g.mat] = 1;
+      S.eq[slot] = it;
+    });
+    S.rec.best = 5;
+    calc(true);
+    S.php = P.hp;
+    S.pmp = P.mp;
+    say('👑 [デバッグ] 全部位ミシック(+' + plus + ')最強装備セットを装着した！');
     dirty = true;
     renderLive();
     save();
@@ -1448,15 +1673,22 @@
     var sl = slotOf(it), w = worst(sl), cur = S.eq[w];
     S.bag.splice(S.bag.indexOf(it), 1); if (cur) S.bag.push(cur); S.eq[w] = it; calc(true); dirty = true;
   }
-  function enhCost(it) { return Math.round(30 * Math.pow(1.7, it.p) * (it.l / 10 + 1) * (it.r + 1)); }
+  function enhCost(it) { return Math.round(30 * Math.pow(1.7, Math.min(20, it.p)) * (it.l / 10 + 1) * (it.r + 1)); }
   function enhance(it) {
     if (it.p >= 10 || S.gold < enhCost(it)) return;
     S.gold -= enhCost(it); it.p++; it._g = null; calc(true); dirty = true;
   }
 
   // ===== セーブ・ロード =====
-  function pack(it) { return [it.s, it.k, it.l, it.r, it.p, it.x, it.ex || []]; }
-  function unpack(a) { return { s: a[0], k: a[1], l: a[2], r: a[3], p: a[4] || 0, x: a[5] || 0, ex: a[6] || [], id: uid++ }; }
+  function pack(it) {
+    return [it.s, it.k, it.l, it.r, it.p, it.x, it.ex || [], it.m !== undefined ? it.m : -1, it.b !== undefined ? it.b : -1];
+  }
+  function unpack(a) {
+    var it = { s: a[0], k: a[1], l: a[2], r: a[3], p: a[4] || 0, x: a[5] || 0, ex: a[6] || [], id: uid++ };
+    if (a[7] !== undefined && a[7] >= 0) it.m = a[7];
+    if (a[8] !== undefined && a[8] >= 0) it.b = a[8];
+    return it;
+  }
   function save() {
     try {
       var o = JSON.parse(JSON.stringify(S, function (k, v) { return (k === 'bag' || k === 'eq' || k === 'shop') ? undefined : v; }));
@@ -1544,6 +1776,9 @@
       (eqSlot ? '' : '<button class="b mini sub" ' + a + ' data-a="lock" type="button">' + (it.x ? '🔓' : '🔒') + '</button>') + '</div></div>';
   }
   function renderStatic() {
+    $('pname').textContent = S.name || 'うさぎ';
+    $('opendbg').style.display = isDebug() ? 'inline-block' : 'none';
+
     var h = '';
     SLOTS.forEach(function (sl) { var it = S.eq[sl[0]]; h += '<div style="margin-top:4px"><small class="lead">' + sl[1] + '</small>' + (it ? itemHtml(it, sl[0]) : '<div class="it r0"><b>（なし）</b></div>') + '</div>'; });
     $('eq').innerHTML = h;
@@ -1684,6 +1919,47 @@
     if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
       document.activeElement.blur();
     }
+    var dbgAct = e.target.closest ? e.target.closest('[data-dbg]') : null;
+    if (dbgAct && isDebug()) {
+      var da = dbgAct.getAttribute('data-dbg');
+      var dv = +dbgAct.getAttribute('data-v');
+      if (da === 'exp') {
+        say('🛠️ [デバッグ] 経験値 +' + fmt(dv) + ' 獲得！');
+        addExp(dv);
+      } else if (da === 'lv') {
+        S.lv += dv;
+        calc(); S.php = P.hp; S.pmp = P.mp;
+        say('🛠️ [デバッグ] レベルが ' + S.lv + ' になった！');
+      } else if (da === 'gold') {
+        S.gold += dv;
+        say('🛠️ [デバッグ] 所持金 +' + fmt(dv) + 'G 獲得！');
+      } else if (da === 'heal') {
+        calc(); S.php = P.hp; S.pmp = P.mp;
+        say('🛠️ [デバッグ] HP・MPが完全回復した！');
+      } else if (da === 'wipe') {
+        if (!S.inTown && D && D.mobs.length) {
+          D.mobs.slice().forEach(function (m) { killMob(m); });
+          D.mobs = [];
+          say('🛠️ [デバッグ] フロアの魔物を一掃した！');
+        }
+      } else if (da === 'warp') {
+        $('debugModal').classList.remove('open');
+        departDungeon(dv);
+        return;
+      } else if (da === 'dex') {
+        K.forEach(function (k) { for (var i = 0; i < k.b.length; i++) S.rec.seenB[k._off + i] = 1; });
+        for (var m = 0; m < MAT.length; m++) S.rec.seenM[m] = 1;
+        if (!S.rec.seenE) S.rec.seenE = {};
+        ALL_MOB_NAMES.forEach(function (mob) { S.rec.seenE[mob[1]] = Math.max(1, S.rec.seenE[mob[1]] || 0); });
+        say('🛠️ [デバッグ] 冒険者の図鑑を100%全開放した！');
+      } else if (da === 'items') {
+        CONS.forEach(function (c) { S.items[c.id] = (S.items[c.id] || 0) + 99; });
+        say('🛠️ [デバッグ] 全ての消耗品を +99個 補充した！');
+      }
+      dirty = true; renderLive(); save();
+      return;
+    }
+
     var dirBtn = e.target.closest ? e.target.closest('[data-dir]') : null;
     if (dirBtn && !S.inTown) {
       var d = dirBtn.getAttribute('data-dir').split(',');
@@ -1795,6 +2071,14 @@
   };
 
   document.addEventListener('keydown', function (e) {
+    if ($('nameModal').classList.contains('open')) {
+      if (e.key === 'Enter') { e.preventDefault(); applyPlayerName(); }
+      return;
+    }
+    if ($('debugModal').classList.contains('open')) {
+      if (e.key === 'Escape') $('debugModal').classList.remove('open');
+      return;
+    }
     if ($('dexModal').classList.contains('open')) {
       if (e.key === 'Escape') $('dexModal').classList.remove('open');
       return;
@@ -1828,6 +2112,28 @@
   $('closedex').onclick = function () { $('dexModal').classList.remove('open'); };
   $('dexModal').onclick = function (e) { if (e.target === $('dexModal')) $('dexModal').classList.remove('open'); };
 
+  // 名前・デバッグイベント
+  $('nameBtn').onclick = function () { openNameModal(false); };
+  $('saveNameBtn').onclick = function () { applyPlayerName(); };
+  $('opendbg').onclick = function () { openDebugModal(); };
+  $('closedbg').onclick = function () { $('debugModal').classList.remove('open'); };
+  $('debugModal').onclick = function (e) { if (e.target === $('debugModal')) $('debugModal').classList.remove('open'); };
+  $('dbgKind').onchange = updateDebugBases;
+  $('dbgSetLvBtn').onclick = function () {
+    var lv = Math.max(1, Math.min(99999, +$('dbgLvInput').value || 1));
+    S.lv = lv; S.exp = 0; calc(); S.php = P.hp; S.pmp = P.mp;
+    say('🛠️ [デバッグ] レベルを Lv' + S.lv + ' に設定した！');
+    dirty = true; renderLive(); save();
+  };
+  $('dbgWarpBtn').onclick = function () {
+    var fl = Math.max(1, Math.min(999999, +$('dbgFloorInput').value || 1));
+    $('debugModal').classList.remove('open');
+    departDungeon(fl);
+  };
+  $('dbgMakeBagBtn').onclick = function () { createDebugItem(false); };
+  $('dbgMakeEqBtn').onclick = function () { createDebugItem(true); };
+  $('dbgGodSetBtn').onclick = function () { equipDebugGodSet(); };
+
   $('auto').onclick = function () { S.auto = !S.auto; dirty = true; renderLive(); save(); };
   $('best').onclick = function () { best(); say('⚡ ベスト装備にした！'); renderLive(); save(); };
   $('sellall').onclick = function () {
@@ -1842,14 +2148,17 @@
       slotSpinning = false;
       lastGacha = [];
       S = newState(); logs = []; calc(); S.php = P.hp; S.pmp = P.mp; refreshShop(); buildFloor(1); dirty = true; renderLive(); save();
+      openNameModal(true);
     }
   };
 
   // ===== 起動 =====
+  initDebugUI();
   S = load(); calc(); $('fsell').value = S.sell;
   if (!S.shop || S.shop.length === 0) refreshShop();
   buildFloor(S.floor);
   renderLive();
+  if (!S.name) openNameModal(true);
 })();
 </script>
 </body>
