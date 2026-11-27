@@ -36,6 +36,7 @@
   button.b.sp { background: #342b47; border-color: #7c5cc4; color: #e9d8fd; font-size: 11.5px; min-height: 32px; padding: 3px 5px; }
   button.b.use { background: #243b35; border-color: #4d9e86; color: #ccfbee; font-size: 11.5px; min-height: 30px; padding: 2px 6px; }
   button.b.mythic { background: linear-gradient(135deg, #581c87, #9f1239); border-color: #f43f5e; color: #ffe4e6; }
+  button.b.allin { background: linear-gradient(135deg, #b91c1c, #d97706); border-color: #fcd34d; color: #fffbeb; font-weight: 900; }
   select, input[type="text"], input[type="number"] { background: #232327; color: var(--ink); border-color: var(--line); font-weight: 500; font-size: 13px; width: 100%; cursor: text; user-select: auto; }
   select { cursor: pointer; }
   .name-tag { display: inline-flex; align-items: center; gap: 4px; background: var(--card2); border: 1px solid var(--line); border-radius: 99px; padding: 0 8px; font-size: 12px; cursor: pointer; color: var(--gold); }
@@ -116,6 +117,21 @@
   .paytable { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px 8px; font-size: 11px; color: var(--soft); background: #1c1c21; border-radius: 8px; padding: 6px 8px; margin-top: 6px; }
   .gacha-res { max-height: 210px; overflow-y: auto; margin-top: 6px; border-top: 1px solid var(--line); padding-top: 4px; }
   .new-badge { display: inline-block; background: #e11d48; color: #fff; font-size: 10px; font-weight: 700; padding: 0 5px; border-radius: 6px; margin-left: 4px; vertical-align: middle; }
+
+  /* 競馬場 */
+  .race-track { background: #16261c; border: 2px solid #3f624c; border-radius: 12px; padding: 8px; margin: 8px 0; display: flex; flex-direction: column; gap: 6px; }
+  .race-lane { display: grid; grid-template-columns: 92px 1fr 34px; align-items: center; gap: 6px; font-size: 12px; }
+  .race-lane-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+  .race-lane-name.picked { color: var(--gold); }
+  .race-bar { position: relative; height: 22px; background: #1f3527; border-radius: 99px; border: 1px solid #33523e; overflow: hidden; }
+  .race-bar::after { content: "🏁"; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 12px; opacity: 0.7; }
+  .race-runner { position: absolute; top: 50%; transform: translate(-50%, -50%); font-size: 16px; transition: left 0.07s linear; z-index: 2; }
+  .race-live-box { background: #141418; border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; font-size: 12px; color: var(--gold); text-align: center; min-height: 28px; }
+  .horse-card { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 10px; border: 2px solid var(--line); background: var(--card2); cursor: pointer; margin-top: 5px; }
+  .horse-card.sel { border-color: var(--mint); background: #1d3328; }
+  .horse-card.crab { border-style: dashed; border-color: #f43f5e; }
+  .horse-card.crab.sel { border-style: solid; border-color: #fb7185; background: #3b1925; }
+  .odds-badge { font-weight: 900; font-size: 13px; color: var(--gold); background: #1c1c21; border: 1px solid #52525b; border-radius: 8px; padding: 2px 8px; white-space: nowrap; }
 
   .it { border: 2px solid var(--line); border-radius: 12px; padding: 6px 8px; margin-top: 6px; background: var(--card2); }
   .it b { display: block; font-size: 13px; word-break: break-all; }
@@ -222,7 +238,7 @@
     <div id="townView" class="town-box" style="display:none">
       <div class="town-banner">
         <div class="row"><b style="color:#ffbf93">🏘️ 冒険者の街「うさぎの街」</b><span id="mealStatus" style="font-size:11.5px;color:#fde68a"></span></div>
-        <small class="lead">HP・MPは全快！装備の購入や錬金、遊技場で運試ししよう。</small>
+        <small class="lead">HP・MPは全快！装備の購入や錬金、遊技場・競馬場で運試ししよう。</small>
       </div>
       <div class="town-tabs" id="townTabs">
         <button class="b sub mini active" data-ttab="inn" type="button">🏨 宿屋・食事</button>
@@ -230,6 +246,7 @@
         <button class="b sub mini" data-ttab="shop" type="button">⚔️ 装備屋</button>
         <button class="b sub mini" data-ttab="alch" type="button">⚗️ 錬金釜</button>
         <button class="b sub mini" data-ttab="gacha" type="button">🎰 ガチャ・スロット</button>
+        <button class="b sub mini" data-ttab="race" type="button">🏇 競馬場</button>
       </div>
       <div class="town-panel" id="townPanel"></div>
       <div class="depart-bar">
@@ -293,6 +310,7 @@
           <li><b>🏨 宿屋・食事</b>：無料休憩＆出発前の弁当バフ。</li>
           <li><b>⚗️ 錬金釜</b>：不要な装備の特殊効果（AF）をベース装備へ移植・数値合算（最大6枠）。</li>
           <li><b>🎰 ガチャ・スロット</b>：50連ミシック天井付きガチャ＆3リールスロット。</li>
+          <li><b>🏇 競馬場</b>：5頭から1着を予想！最高持ち金全額ベット（ALL IN）可能。「質問の蟹」は1/100の確率で100倍配当！</li>
         </ul>
       </div>
     </div>
@@ -452,7 +470,6 @@
       [[698,0.10,0.00],[698,0.10,0.11],[698,0.10,0.22],[698,0.28,0.33],[622,0.26,0.64],[784,0.26,0.92],[698,0.48,1.20]]
         .forEach(function (n) { tone('square', n[0], n[0], n[1], n[2], 0.08); });
     } else if (name === 'horror') {
-      // なの姫・暗黒なの姫登場ホラーファンファーレ（不協和音トライトーン＋半音下降）
       [[440,415,0.26,0.00],[622,587,0.26,0.28],[415,392,0.26,0.56],[294,277,0.35,0.84],[208,138,0.65,1.22]]
         .forEach(function (n) {
           tone('square', n[0], n[1], n[2], n[3], 0.085);
@@ -505,7 +522,7 @@
   var ADJ = ['輝く', '燃える', '凍てつく', '古びた', '呪われた', '祝福の', '荒ぶる', '静かな', '歌う', '眠る', '飢えた', '気高い', '狂気の', '忘れられた', '伝説の', '禁じられた', '夜明けの', '黄昏の', '嵐の', '秘められた',
              'しょーもない', 'ありがたい', 'ぬるぬるの', 'きらきらの', 'ふわふわの', 'ごつい', 'とがった', 'まるい', 'おかしな', '最強の', '泣き虫の', '怒りの', '笑う', 'こっそり', '堂々たる', 'ぴかぴかの', 'どっしりした', '軽やかな', '真夜中の', '朝焼けの'];
 
-  // 特殊装備「なの装備(臭い)」5種（バカみたいに弱いけど超高額で売れる）
+  // 特殊装備「なの装備(臭い)」5種
   var NANO_EQUIPS = [
     { idx: 0, s: 'w', k: 0, name: 'なのソード(臭い)', st: { atk: 1, def: 0, hp: 0, spd: 0, mag: 0 } },
     { idx: 1, s: 'b', k: 11, name: 'なのアーマー(臭い)', st: { atk: 0, def: 1, hp: 1, spd: 0, mag: 0 } },
@@ -597,6 +614,15 @@
   var SLOT_SYMBOLS = ['🐰', '💎', '⚔️', '💰', '🥕'];
   var SLOT_BETS = [50, 300, 2000, 10000];
 
+  // 競馬場データ（合計weight=100、質問の蟹は1%=1/100で100倍配当）
+  var HORSE_LIST = [
+    { id: 0, icon: '👸', name: 'なの姫', odds: 2.4, weight: 38, rank: '1番人気', desc: '圧倒的王者の風格で安定感抜群' },
+    { id: 1, icon: '🎓', name: 'ひじき', odds: 3.3, weight: 28, rank: '2番人気', desc: '計算尽くのペース配分で堅実に伸びる' },
+    { id: 2, icon: '🧐', name: 'ぜんちん', odds: 4.6, weight: 20, rank: '3番人気', desc: '鋭い眼光で好機を見極める実力馬' },
+    { id: 3, icon: '😷', name: 'なすちん', odds: 7.0, weight: 13, rank: '4番人気', desc: '体調次第で驚異の末脚を見せる伏兵' },
+    { id: 4, icon: '🦀', name: '質問の蟹', odds: 100, weight: 1, rank: '大穴(1%)', desc: 'まず勝てないが100回に1回だけ奇跡の横歩き！' }
+  ];
+
   var SLOTS = [['w', '武器'], ['h', '頭'], ['b', '体'], ['f', '足'], ['a1', 'アクセ1'], ['a2', 'アクセ2']];
   var BAG_MAX = 300, MAP_W = 19, MAP_H = 15, VIEW_W = 11, VIEW_H = 7;
 
@@ -677,6 +703,9 @@
   var S, P, D, uid = 1, dirty = true, logs = [], focusBossId = null;
   var townTab = 'inn', dexTab = 'equip', alchTarget = 'eq:w', alchMatId = '';
   var lastGacha = [], slotReels = ['🐰', '💎', '⚔️'], slotSpinning = false, slotWinState = [false, false, false];
+  var raceHorseIdx = 0, raceBet = 100, raceRunning = false, racePos = [0, 0, 0, 0, 0], raceComment = '出走馬を選んで賭け金を決めよう！', lastRaceResult = '';
+
+  function isTownBusy() { return slotSpinning || raceRunning; }
 
   function newState() {
     return { name: '', mute: false, lv: 1, exp: 0, gold: 100, floor: 1, auto: true, sell: 0, inTown: false, meal: null,
@@ -960,7 +989,7 @@
     if (changed) calc(true);
   }
 
-  // ===== ダンジョン自動生成（特殊フロア・50階超ボス・100階暗黒なの姫対応） =====
+  // ===== ダンジョン自動生成 =====
   function buildFloor(fl) {
     var grid = [], seen = [], rooms = [], x, y, i;
     for (y = 0; y < MAP_H; y++) { grid[y] = []; seen[y] = []; for (x = 0; x < MAP_W; x++) { grid[y][x] = 1; seen[y][x] = 0; } }
@@ -1388,6 +1417,7 @@
             S.meal = null;
             S.inTown = true;
             slotSpinning = false;
+            raceRunning = false;
             calc();
             S.php = P.hp;
             S.pmp = P.mp;
@@ -1406,12 +1436,16 @@
     spawnBossMinion();
   }
 
-  // ===== 街システム（宿屋・道具屋・装備屋・錬金釜・ガチャ＆スロット） =====
+  // ===== 街システム（宿屋・道具屋・装備屋・錬金釜・ガチャ＆スロット・競馬場） =====
   function enterTown() {
     S.inTown = true;
     S.buff = { atk: 0, def: 0 };
     S.meal = null;
     slotSpinning = false;
+    raceRunning = false;
+    if (S.gold > 0 && (raceBet > S.gold || raceBet <= 0)) {
+      raceBet = Math.max(1, Math.min(100, Math.floor(S.gold)));
+    }
     calc();
     S.php = P.hp;
     S.pmp = P.mp;
@@ -1424,7 +1458,7 @@
   }
 
   function departDungeon(fl) {
-    if (slotSpinning) return;
+    if (isTownBusy()) return;
     S.floor = Math.max(1, fl);
     if (S.floor > S.rec.max) S.rec.max = S.floor;
     S.inTown = false;
@@ -1511,7 +1545,7 @@
   }
 
   function spinSlot() {
-    if (slotSpinning) return;
+    if (isTownBusy()) return;
     var bet = SLOT_BETS[S.slotBetIdx || 0] || 50;
     if (S.gold < bet) {
       say('🎰 ゴールドが足りない！');
@@ -1618,6 +1652,138 @@
     save();
   }
 
+  // ===== 競馬場ロジック =====
+  function startHorseRace() {
+    if (isTownBusy()) return;
+    var bet = Math.floor(Number(raceBet) || 0);
+    var maxGold = Math.floor(S.gold);
+    if (maxGold <= 0) {
+      say('🏇 所持金がないため賭けられない！');
+      renderLive();
+      return;
+    }
+    if (bet <= 0 || bet > maxGold) {
+      say('🏇 賭け金は 1 〜 ' + fmt(maxGold) + 'G の範囲で指定してください！');
+      renderLive();
+      return;
+    }
+
+    S.gold -= bet;
+    raceRunning = true;
+    racePos = [0, 0, 0, 0, 0];
+    var picked = HORSE_LIST[raceHorseIdx] || HORSE_LIST[0];
+    raceComment = '🔫 ファンファーレ！全馬一斉にスタート！！（本命：' + picked.icon + picked.name + '）';
+    sfx('reel', 0);
+    renderLive();
+
+    // 勝率ウェイトに従い1着馬を厳密に抽選（質問の蟹は1/100）
+    var roll = Math.random() * 100, acc = 0, winnerIdx = 0;
+    for (var i = 0; i < HORSE_LIST.length; i++) {
+      acc += HORSE_LIST[i].weight;
+      if (roll < acc) { winnerIdx = i; break; }
+    }
+
+    // 2着〜5着のフィニッシュ位置（80〜96%）を生成
+    var others = [0, 1, 2, 3, 4].filter(function (idx) { return idx !== winnerIdx; });
+    others.sort(function () { return Math.random() - 0.5; });
+    var finishTargets = [0, 0, 0, 0, 0];
+    finishTargets[winnerIdx] = 100;
+    others.forEach(function (idx, rankOffset) {
+      finishTargets[idx] = Math.max(74, 96 - rankOffset * 4 - rnd(3));
+    });
+
+    // 各馬のペース個性（逃げ・差し・質問の蟹の遅れ＆ワープ）
+    var midFactors = HORSE_LIST.map(function (h, idx) {
+      if (idx === 4 && idx !== winnerIdx) return 0.25 + Math.random() * 0.15; // 負ける時の蟹は遅い
+      if (idx === 4 && idx === winnerIdx) return 0.32; // 勝つ時の蟹は中盤まで最下位付近から大逆転
+      return 0.85 + Math.random() * 0.35;
+    });
+
+    var totalTicks = 24;
+    var tick = 0;
+    var timer = setInterval(function () {
+      tick++;
+      var t = tick / totalTicks;
+
+      for (var i = 0; i < 5; i++) {
+        if (tick >= totalTicks) {
+          racePos[i] = finishTargets[i];
+        } else {
+          var ease;
+          if (i === 4 && i === winnerIdx) {
+            // 質問の蟹が勝つ1%の奇跡：70%地点まで遅れてから一気にワープ逆転
+            ease = t < 0.7 ? (t / 0.7) * 0.34 : 0.34 + Math.pow((t - 0.7) / 0.3, 1.5) * 0.66;
+          } else {
+            var curve = Math.pow(t, 1 / midFactors[i]);
+            var wobble = Math.sin(tick * 0.9 + i * 1.7) * 1.8 * (1 - t);
+            ease = Math.max(0, Math.min(0.99, curve + wobble / 100));
+          }
+          racePos[i] = Math.round(finishTargets[i] * ease * 10) / 10;
+        }
+      }
+
+      if (tick % 2 === 1) sfx('reel', tick);
+
+      if (tick === 8) {
+        var leadIdx = 0;
+        for (var j = 1; j < 5; j++) if (racePos[j] > racePos[leadIdx]) leadIdx = j;
+        raceComment = '📣 序盤戦！先頭を切るのは ' + HORSE_LIST[leadIdx].icon + ' ' + HORSE_LIST[leadIdx].name + '！';
+      } else if (tick === 16) {
+        if (winnerIdx === 4) {
+          raceComment = '🦀 なんと最下位の「質問の蟹」が猛烈な横歩きで加速を始めた！？';
+        } else {
+          var leadIdx2 = 0;
+          for (var k = 1; k < 5; k++) if (racePos[k] > racePos[leadIdx2]) leadIdx2 = k;
+          raceComment = '🔥 最終コーナー！' + HORSE_LIST[leadIdx2].icon + ' ' + HORSE_LIST[leadIdx2].name + ' が先頭で直線へ！';
+        }
+      } else if (tick === 21 && winnerIdx === 4) {
+        raceComment = '⚡ ありえない！！🦀 質問の蟹が全頭ごぼう抜きで先頭に躍り出た！！';
+      }
+
+      // レーン位置と実況のみ滑らか更新
+      for (var r = 0; r < 5; r++) {
+        var runnerEl = $('raceRunner_' + r);
+        if (runnerEl) runnerEl.style.left = Math.min(94, Math.max(5, racePos[r] * 0.89 + 5)) + '%';
+      }
+      var liveEl = $('raceLiveText');
+      if (liveEl) liveEl.textContent = raceComment;
+
+      if (tick >= totalTicks) {
+        clearInterval(timer);
+        raceRunning = false;
+        finishHorseRace(winnerIdx, bet);
+      }
+    }, 75);
+  }
+
+  function finishHorseRace(winnerIdx, bet) {
+    var winHorse = HORSE_LIST[winnerIdx];
+    var isWin = (winnerIdx === raceHorseIdx);
+    if (isWin) {
+      var payout = Math.floor(bet * winHorse.odds);
+      S.gold += payout;
+      sfx(winHorse.odds >= 100 ? 'jackpot' : 'win');
+      raceComment = '🏆 1着 ' + winHorse.icon + ' ' + winHorse.name + '！！的中おめでとう！💰+' + fmt(payout) + ' 獲得！';
+      lastRaceResult = '🎉 的中！1着：' + winHorse.icon + winHorse.name + '（' + winHorse.odds + '倍）→ 💰+' + fmt(payout);
+      if (winHorse.odds >= 100) {
+        say('🦀🎊 奇跡発生！！1/100の【質問の蟹】が1着でゴール！！100倍配当 💰+' + fmt(payout) + ' を獲得した！！');
+      } else {
+        say('🏇 レース的中！1着 ' + winHorse.icon + winHorse.name + '（' + winHorse.odds + '倍）で 💰+' + fmt(payout) + ' 獲得！');
+      }
+    } else {
+      sfx('miss');
+      raceComment = '🏁 1着は ' + winHorse.icon + ' ' + winHorse.name + '（' + winHorse.odds + '倍）……予想ハズレ！';
+      lastRaceResult = '💸 ハズレ… 1着：' + winHorse.icon + winHorse.name + '（' + winHorse.odds + '倍）';
+      say('🏇 レース結果：1着は ' + winHorse.icon + winHorse.name + '。賭け金 💰' + fmt(bet) + ' は没収された……');
+    }
+    if (S.gold > 0 && raceBet > S.gold) {
+      raceBet = Math.floor(S.gold);
+    }
+    dirty = true;
+    renderLive();
+    save();
+  }
+
   function renderTownPanel() {
     var box = $('townPanel');
     var tabs = $('townTabs').querySelectorAll('button');
@@ -1715,9 +1881,9 @@
       h5 += '<div class="grid g4" style="margin-bottom:6px">' +
         SLOT_BETS.map(function (bVal, idx) {
           var active = (S.slotBetIdx || 0) === idx;
-          return '<button class="b mini ' + (active ? 'on' : 'sub') + '" data-tact="sbet" data-idx="' + idx + '" type="button"' + (slotSpinning ? ' disabled' : '') + '>💰' + fmt(bVal) + '</button>';
+          return '<button class="b mini ' + (active ? 'on' : 'sub') + '" data-tact="sbet" data-idx="' + idx + '" type="button"' + (isTownBusy() ? ' disabled' : '') + '>💰' + fmt(bVal) + '</button>';
         }).join('') + '</div>';
-      h5 += '<button class="b" style="width:100%" data-tact="spin" type="button"' + (slotSpinning || S.gold < bet ? ' disabled' : '') + '>' +
+      h5 += '<button class="b" style="width:100%" data-tact="spin" type="button"' + (isTownBusy() || S.gold < bet ? ' disabled' : '') + '>' +
         (slotSpinning ? '🎰 回転中……！' : '🎰 スロットを回す（💰' + fmt(bet) + '）') + '</button>';
       h5 += '<div class="paytable">' +
         '<span>🐰🐰🐰：30倍＋伝説装備</span><span>💎💎💎：12倍＋紫以上装備</span>' +
@@ -1746,6 +1912,70 @@
       }
       h5 += '</div>';
       box.innerHTML = h5;
+    } else if (townTab === 'race') {
+      var maxGold = Math.floor(S.gold);
+      var selHorse = HORSE_LIST[raceHorseIdx] || HORSE_LIST[0];
+      var validBet = Math.max(0, Math.floor(Number(raceBet) || 0));
+      var estWin = Math.floor(validBet * selHorse.odds);
+      var canStart = !isTownBusy() && maxGold > 0 && validBet >= 1 && validBet <= maxGold;
+
+      var h6 = '<div class="row"><b>🏇 うさぎ競馬場（単勝・1着予想）</b><span style="font-size:11.5px;color:var(--gold)">最高賭け金：💰' + fmt(maxGold) + '</span></div>';
+      h6 += '<small class="lead">1着になる馬を予想！最高持ち金全額ベット（ALL IN）も可能。</small>';
+
+      h6 += '<div class="race-track">';
+      HORSE_LIST.forEach(function (h, idx) {
+        var leftPct = Math.min(94, Math.max(5, (racePos[idx] || 0) * 0.89 + 5));
+        h6 += '<div class="race-lane">' +
+          '<span class="race-lane-name' + (idx === raceHorseIdx ? ' picked' : '') + '">' + h.icon + ' ' + esc(h.name) + '</span>' +
+          '<div class="race-bar"><span class="race-runner" id="raceRunner_' + idx + '" style="left:' + leftPct + '%">' + h.icon + '</span></div>' +
+          '<span style="font-size:11px;color:var(--gold);text-align:right">' + h.odds + '倍</span>' +
+          '</div>';
+      });
+      h6 += '<div class="race-live-box" id="raceLiveText">' + esc(raceComment) + '</div>';
+      h6 += '</div>';
+
+      h6 += '<div style="margin-bottom:6px"><small class="lead">① 1着予想の馬をタップして選択：</small>';
+      HORSE_LIST.forEach(function (h, idx) {
+        var isSel = idx === raceHorseIdx;
+        var cls = 'horse-card' + (isSel ? ' sel' : '') + (h.id === 4 ? ' crab' : '');
+        h6 += '<div class="' + cls + '" data-tact="rhorse" data-idx="' + idx + '">' +
+          '<div><b>' + (isSel ? '✅ ' : '') + h.icon + ' ' + esc(h.name) + ' <small style="color:var(--soft);font-weight:400">(' + h.rank + ' / 勝率' + h.weight + '%)</small></b>' +
+          '<small style="display:block;color:var(--soft);font-size:11px">' + esc(h.desc) + '</small></div>' +
+          '<span class="odds-badge">' + h.odds + '倍</span></div>';
+      });
+      h6 += '</div>';
+
+      h6 += '<div class="casino-sec" style="margin-bottom:0">';
+      h6 += '<div class="row" style="margin-bottom:4px"><b>② 賭け金（1 〜 ' + fmt(maxGold) + 'G）</b><span style="font-size:11.5px;color:var(--mint)">的中時：💰' + fmt(estWin) + '</span></div>';
+      h6 += '<input type="number" id="raceBetInput" min="1" max="' + Math.max(1, maxGold) + '" value="' + validBet + '"' + (isTownBusy() || maxGold <= 0 ? ' disabled' : '') + '>';
+      h6 += '<div class="grid g4" style="margin-top:6px">' +
+        '<button class="b mini sub" data-tact="rbet" data-mode="add100" type="button"' + (isTownBusy() || maxGold <= 0 ? ' disabled' : '') + '>+100G</button>' +
+        '<button class="b mini sub" data-tact="rbet" data-mode="add1k" type="button"' + (isTownBusy() || maxGold <= 0 ? ' disabled' : '') + '>+1,000G</button>' +
+        '<button class="b mini sub" data-tact="rbet" data-mode="half" type="button"' + (isTownBusy() || maxGold <= 0 ? ' disabled' : '') + '>半分(50%)</button>' +
+        '<button class="b mini allin" data-tact="rbet" data-mode="all" type="button"' + (isTownBusy() || maxGold <= 0 ? ' disabled' : '') + '>🔥 全額(ALL IN)</button>' +
+        '</div>';
+      h6 += '<button class="b" style="width:100%;margin-top:6px" data-tact="rstart" type="button"' + (canStart ? '' : ' disabled') + '>' +
+        (raceRunning ? '🏇 レース出走中……！！' : maxGold <= 0 ? '💸 所持金がありません' : '🏇 ' + selHorse.icon + selHorse.name + ' に 💰' + fmt(validBet) + ' 賭けて出走！') + '</button>';
+      if (lastRaceResult) {
+        h6 += '<div style="margin-top:5px;font-size:11.5px;color:var(--sky);text-align:center">' + esc(lastRaceResult) + '</div>';
+      }
+      h6 += '</div>';
+      box.innerHTML = h6;
+
+      var betInp = $('raceBetInput');
+      if (betInp) {
+        betInp.onchange = betInp.oninput = function () {
+          var v = Math.floor(Number(betInp.value) || 0);
+          raceBet = Math.max(0, Math.min(maxGold, v));
+          var startBtn = box.querySelector('[data-tact="rstart"]');
+          var winSpan = box.querySelector('.casino-sec .row span');
+          if (winSpan) winSpan.textContent = '的中時：💰' + fmt(Math.floor(raceBet * selHorse.odds));
+          if (startBtn) {
+            startBtn.disabled = isTownBusy() || maxGold <= 0 || raceBet < 1 || raceBet > maxGold;
+            startBtn.textContent = '🏇 ' + selHorse.icon + selHorse.name + ' に 💰' + fmt(raceBet) + ' 賭けて出走！';
+          }
+        };
+      }
     }
 
     var depSel = $('departFloor');
@@ -2175,6 +2405,7 @@
       $('remain').textContent = '最高到達：地下 ' + S.rec.max + ' 階';
       var curMeal = MEALS.filter(function (x) { return x.id === S.meal; })[0];
       $('mealStatus').textContent = curMeal ? (curMeal.icon + curMeal.name + ' 発動中') : '';
+      $('departBtn').disabled = isTownBusy();
     } else {
       $('dungeonView').style.display = 'block';
       $('townView').style.display = 'none';
@@ -2318,8 +2549,11 @@
     }
     var tTab = e.target.closest ? e.target.closest('[data-ttab]') : null;
     if (tTab) {
-      if (slotSpinning) return;
+      if (isTownBusy()) return;
       townTab = tTab.getAttribute('data-ttab');
+      if (townTab === 'race' && S.gold > 0 && (raceBet > S.gold || raceBet <= 0)) {
+        raceBet = Math.max(1, Math.min(100, Math.floor(S.gold)));
+      }
       renderTownPanel();
       return;
     }
@@ -2331,7 +2565,7 @@
     }
     var tAct = e.target.closest ? e.target.closest('[data-tact]') : null;
     if (tAct) {
-      if (slotSpinning) return;
+      if (isTownBusy()) return;
       var act = tAct.getAttribute('data-tact');
       if (act === 'rest') {
         S.php = P.hp; S.pmp = P.mp;
@@ -2389,6 +2623,24 @@
         return;
       } else if (act === 'spin') {
         spinSlot();
+        return;
+      } else if (act === 'rhorse') {
+        raceHorseIdx = +tAct.getAttribute('data-idx');
+        sfx('stop');
+        renderTownPanel();
+        return;
+      } else if (act === 'rbet') {
+        var maxGold = Math.floor(S.gold);
+        var mode = tAct.getAttribute('data-mode');
+        if (mode === 'add100') raceBet = Math.min(maxGold, (Math.floor(Number(raceBet) || 0)) + 100);
+        else if (mode === 'add1k') raceBet = Math.min(maxGold, (Math.floor(Number(raceBet) || 0)) + 1000);
+        else if (mode === 'half') raceBet = Math.max(1, Math.floor(maxGold / 2));
+        else if (mode === 'all') raceBet = maxGold;
+        sfx('stop');
+        renderTownPanel();
+        return;
+      } else if (act === 'rstart') {
+        startHorseRace();
         return;
       }
       dirty = true; renderLive(); save();
@@ -2467,7 +2719,7 @@
   $('town').onclick = function () { enterTown(); };
   $('departBtn').onclick = function () { departDungeon(+$('departFloor').value || S.floor); };
   $('quickAlch').onclick = function () {
-    if (slotSpinning) return;
+    if (isTownBusy()) return;
     townTab = 'alch';
     if (!S.inTown) enterTown();
     else renderTownPanel();
@@ -2519,7 +2771,9 @@
   $('reset').onclick = function () {
     if (confirm('最初からやり直すよ。集めた装備も消えるけど、いいかな？')) {
       slotSpinning = false;
+      raceRunning = false;
       lastGacha = [];
+      lastRaceResult = '';
       S = newState(); logs = []; calc(); S.php = P.hp; S.pmp = P.mp; refreshShop(); buildFloor(1); dirty = true; renderLive(); save();
       openNameModal(true);
     }
