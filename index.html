@@ -81,7 +81,9 @@
       border-radius: 99px;
       padding: 6px 6px 6px 18px;
       margin-bottom: 20px;
+      transition: border-color 0.15s;
     }
+    .search-box:focus-within { border-color: var(--orange); }
     .search-input {
       flex: 1;
       min-width: 0;
@@ -241,10 +243,12 @@
       border-radius: 99px;
       border: 2px dashed var(--line);
     }
+    footer p + p { margin-top: 4px; }
 
     @media (max-width: 560px) {
       .logo { font-size: 28px; }
       .news-item { flex-direction: column; align-items: flex-start; gap: 2px; }
+      footer { border-radius: 22px; }
     }
   </style>
 </head>
@@ -413,6 +417,7 @@
   <footer>
     <p>🐰 Copyright (C) Mozuu!-Japan &amp; Mozubeya. All Rights Reserved. 🐻</p>
     <p>QRコードは株式会社デンソーウェーブの登録商標です。</p>
+    <p>ご用件の方は<a href="mailto:mozuku.harapeko@gmail.com">mozuku.harapeko@gmail.com</a>まで</p>
   </footer>
 </div>
 
@@ -469,7 +474,7 @@
     var links = document.querySelectorAll('a[href]');
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute('href');
-      if (!href || href.charAt(0) === '#') continue;
+      if (!href || href.charAt(0) === '#' || href.indexOf('mailto:') === 0) continue;
       links[i].setAttribute('target', '_blank');
       links[i].setAttribute('rel', 'noopener noreferrer');
     }
