@@ -22,6 +22,7 @@
       --ink-soft: #a9a39e;
       --line: #46464e;
       --on-pastel: #3d2e24;
+      --danger: #ff9494;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -225,13 +226,156 @@
     .btn-login { background: var(--orange); color: var(--on-pastel); border: none; box-shadow: 0 3px 0 #c4824f; }
     .btn-login:active { transform: translateY(2px); box-shadow: 0 1px 0 #c4824f; }
     .btn-admin { background: transparent; color: #cdbff5; border: 2px solid #6d6590; }
+    .btn-admin:active { transform: translateY(1px); }
     .btn-admin:disabled { opacity: .5; cursor: not-allowed; }
     .login-links { display: flex; justify-content: space-between; font-size: 11px; }
     .login-links a { color: var(--ink-soft); }
 
+    /* ログイン・フォームメッセージ演出 */
+    .login-note {
+      font-size: 11.5px;
+      line-height: 1.45;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: #232327;
+      border: 1.5px dashed var(--line);
+      color: var(--danger);
+      display: none;
+    }
+    .login-note.is-visible { display: block; animation: notePop 0.18s ease-out; }
+    .login-note.is-info { color: var(--sky); }
+    @keyframes notePop {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* 捨てメールアドレス発行 */
     .mail-result[readonly] { cursor: text; }
     .mail-note { min-height: 1.6em; }
+
+    /* 論文風モーダル */
+    .paper-modal {
+      margin: auto;
+      width: min(640px, calc(100% - 28px));
+      max-height: calc(100dvh - 36px);
+      overflow-y: auto;
+      background: var(--cream);
+      color: var(--ink);
+      border: 2px solid var(--line);
+      border-radius: 24px;
+      padding: 0;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+    }
+    .paper-modal::backdrop {
+      background: rgba(15, 15, 19, 0.72);
+      backdrop-filter: blur(3px);
+    }
+    .paper-modal[open] { animation: modalIn 0.18s ease-out; }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .paper-modal-header {
+      background: var(--lavender);
+      color: var(--on-pastel);
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 13px;
+      border-bottom: 2px dashed rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .paper-modal-close {
+      background: rgba(61, 46, 36, 0.12);
+      border: none;
+      color: var(--on-pastel);
+      font: inherit;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 3px 12px;
+      border-radius: 99px;
+      cursor: pointer;
+    }
+    .paper-modal-close:hover { background: rgba(61, 46, 36, 0.24); }
+    .paper-modal-body { padding: 18px 20px 20px; }
+    .paper-meta-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--ink-soft);
+    }
+    .paper-doi {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: var(--panel2);
+      padding: 2px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+    }
+    .paper-title {
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.45;
+      color: #ffbf93;
+      margin-bottom: 8px;
+    }
+    .paper-authors {
+      font-size: 12px;
+      color: var(--ink-soft);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 2px dotted var(--line);
+    }
+    .paper-abstract-box {
+      background: #232327;
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .paper-abstract-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #8fbde6;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .paper-abstract-text {
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: var(--ink);
+    }
+    .paper-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+      font-size: 11.5px;
+    }
+    .paper-keyword-chip {
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      padding: 2px 10px;
+      border-radius: 99px;
+    }
+    .paper-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .paper-cite-status {
+      font-size: 12px;
+      color: var(--mint);
+      margin-right: auto;
+    }
 
     footer {
       margin-top: 8px;
@@ -249,6 +393,7 @@
       .logo { font-size: 28px; }
       .news-item { flex-direction: column; align-items: flex-start; gap: 2px; }
       footer { border-radius: 22px; }
+      .paper-title { font-size: 16px; }
     }
   </style>
 </head>
@@ -289,7 +434,7 @@
       </div>
 
       <div class="panel sky">
-        <div class="panel-header">🔗 リンク</div>
+        <div class="panel-header">🔗 リンク集</div>
         <ul class="category-list">
           <li class="category-label">💞 Chat 💕</li>
           <li class="category-item custom-link"><a href="https://drrrkari.com/lounge/">デュラララチャット(仮)</a></li>
@@ -340,42 +485,42 @@
               <span class="sub-text">公開中</span>
             </li>
 
-            <!-- 新しいダミー学術ニュース -->
+            <!-- 論文風モーダル対応ニュース -->
             <li class="news-item">
-              <div><span class="news-tag academic">論文</span><a href="#" onclick="alert('賢そうなダミー論文です'); return false;">深海性海蘊（モズク）の粘性構造を用いた非同期分散合意アルゴリズムの提案</a></div>
+              <div><span class="news-tag academic">論文</span><a href="#paper-mozuu-consensus" data-paper="mozuu-consensus">深海性海蘊（モズク）の粘性構造を用いた非同期分散合意アルゴリズムの提案</a></div>
               <span class="sub-text">学会誌</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag tech">IT</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">ポスト量子暗号時代におけるゼロ知識証明と「寝落ち検知プロトコル」の実装</a></div>
+              <div><span class="news-tag tech">IT</span><a href="#paper-sleep-zkp" data-paper="sleep-zkp">ポスト量子暗号時代におけるゼロ知識証明と「寝落ち検知プロトコル」の実装</a></div>
               <span class="sub-text">特集</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag academic">思考</span><a href="#" onclick="alert('賢そうなダミー論考です'); return false;">深夜3時のポータルサイト改修衝動に関する認知科学的アプローチ</a></div>
+              <div><span class="news-tag academic">思考</span><a href="#paper-3am-portal" data-paper="3am-portal">深夜3時のポータルサイト改修衝動に関する認知科学的アプローチ</a></div>
               <span class="sub-text">論考</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag tech">Web</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">レトロUIデザインにおけるパステル配色とダークモードの視認性トレードオフ</a></div>
+              <div><span class="news-tag tech">Web</span><a href="#paper-pastel-dark" data-paper="pastel-dark">レトロUIデザインにおけるパステル配色とダークモードの視認性トレードオフ</a></div>
               <span class="sub-text">解説</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag academic">経済</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">仮想通貨「MOZUUコイン」の流動性プールと夜食インフレーションの相関分析</a></div>
+              <div><span class="news-tag academic">経済</span><a href="#paper-mozuu-coin" data-paper="mozuu-coin">仮想通貨「MOZUUコイン」の流動性プールと夜食インフレーションの相関分析</a></div>
               <span class="sub-text">分析</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag fun">科学</span><a href="#" onclick="alert('賢そうなダミー研究報告です'); return false;">カフェイン摂取量とHTML閉じタグ忘れ発生率の非線形回帰モデル</a></div>
+              <div><span class="news-tag fun">科学</span><a href="#paper-caffeine-html" data-paper="caffeine-html">カフェイン摂取量とHTML閉じタグ忘れ発生率の非線形回帰モデル</a></div>
               <span class="sub-text">研究報告</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag tech">AI</span><a href="#" onclick="alert('賢そうなダミー記事です'); return false;">大規模言語モデルにおける相棒ペルソナの熱量パラメータ最適化手法</a></div>
+              <div><span class="news-tag tech">AI</span><a href="#paper-partner-llm" data-paper="partner-llm">大規模言語モデルにおける相棒ペルソナの熱量パラメータ最適化手法</a></div>
               <span class="sub-text">特集</span>
             </li>
             <li class="news-item">
-              <div><span class="news-tag fun">社会</span><a href="#" onclick="alert('賢そうなダミー論考です'); return false;">現代インターネットにおける捨てメールアドレスの寿命とデジタルミニマリズム</a></div>
+              <div><span class="news-tag fun">社会</span><a href="#paper-disposable-mail" data-paper="disposable-mail">現代インターネットにおける捨てメールアドレスの寿命とデジタルミニマリズム</a></div>
               <span class="sub-text">論考</span>
             </li>
 
             <li class="news-item">
-              <div><span class="news-tag">DEV</span><a href="#" onclick="alert('海蘊ツールは現在準備中です'); return false;">【次回作】海蘊ツール（姫失踪開発中止）</a></div>
+              <div><span class="news-tag">DEV</span><a href="#paper-dev-cancelled" data-paper="dev-cancelled">【次回作】海蘊ツール（姫失踪開発中止）</a></div>
               <span class="sub-text">中止</span>
             </li>
           </ul>
@@ -383,18 +528,19 @@
       </div>
     </div>
 
-    <!-- 右：ログイン（ダミー） -->
+    <!-- 右：ログイン（ダミー演出付き） -->
     <div class="right-col">
       <div class="panel mint">
         <div class="panel-header">🔑 ログイン</div>
         <div class="panel-body">
-          <form onsubmit="return false;" class="login-form">
+          <form class="login-form" id="userLoginForm">
             <label for="uid">MOZUU! IDを入れてね💕</label>
-            <input id="uid" type="text" class="dummy-input" placeholder="MOZUU! ID">
-            <button type="button" class="btn-login">ログイン</button>
+            <input id="uid" type="text" class="dummy-input" placeholder="MOZUU! ID" autocomplete="off">
+            <button type="submit" class="btn-login">ログイン</button>
+            <div class="login-note" id="userLoginNote" role="status"></div>
             <div class="login-links">
-              <a href="#" onclick="return false;">IDをお忘れの方</a>
-              <a href="#" onclick="return false;">新規取得は許可制💞</a>
+              <a href="#" id="forgotIdLink">IDをお忘れの方</a>
+              <a href="#" id="newIdLink">新規取得は許可制💞</a>
             </div>
           </form>
         </div>
@@ -403,10 +549,11 @@
       <div class="panel lemon">
         <div class="panel-header">⚙️ 管理者ログイン</div>
         <div class="panel-body">
-          <form onsubmit="return false;" class="login-form">
-            <input type="text" class="dummy-input" placeholder="管理者ID" aria-label="管理者ID">
-            <input type="password" class="dummy-input" placeholder="パスワード" aria-label="パスワード">
-            <button type="button" class="btn-admin">管理者Auth</button>
+          <form class="login-form" id="adminLoginForm">
+            <input type="text" id="adminId" class="dummy-input" placeholder="管理者ID" aria-label="管理者ID" autocomplete="off">
+            <input type="password" id="adminPw" class="dummy-input" placeholder="パスワード" aria-label="パスワード">
+            <button type="submit" class="btn-admin">管理者Auth</button>
+            <div class="login-note" id="adminLoginNote" role="status"></div>
           </form>
         </div>
       </div>
@@ -420,6 +567,33 @@
     <p>ご用件の方は<a href="mailto:mozuku.harapeko@gmail.com">mozuku.harapeko@gmail.com</a>まで</p>
   </footer>
 </div>
+
+<!-- 論文風モーダル -->
+<dialog id="paperModal" class="paper-modal" aria-labelledby="paperModalTitle">
+  <div class="paper-modal-header">
+    <span>📑 MOZUU! 学術アーカイブ 閲覧ビューア</span>
+    <button type="button" class="paper-modal-close" id="paperModalClose">✕ 閉じる</button>
+  </div>
+  <div class="paper-modal-body">
+    <div class="paper-meta-top">
+      <span class="news-tag" id="paperModalTag">論文</span>
+      <span id="paperModalCategory">学会誌</span>
+      <span class="paper-doi" id="paperModalDoi">DOI: 10.2026/mozuu.001</span>
+    </div>
+    <h2 class="paper-title" id="paperModalTitle">論文タイトル</h2>
+    <div class="paper-authors" id="paperModalAuthors">著者情報</div>
+    <div class="paper-abstract-box">
+      <div class="paper-abstract-label">ABSTRACT / 要旨</div>
+      <p class="paper-abstract-text" id="paperModalAbstract"></p>
+    </div>
+    <div class="paper-keywords" id="paperModalKeywords"></div>
+    <div class="paper-actions">
+      <span class="paper-cite-status" id="paperCiteStatus" role="status"></span>
+      <button type="button" class="btn-admin" id="paperCiteBtn">📋 引用情報をコピー</button>
+      <button type="button" class="btn-login" id="paperModalOk">読み終わった</button>
+    </div>
+  </div>
+</dialog>
 
 <script>
   // 🔧 ドメインを取得したら、ここにドメイン名を入れる（例: 'example.com'）
@@ -463,6 +637,238 @@
       } else {
         out.select();
         note.textContent = '選択したよ。コピーしてね';
+      }
+    });
+  })();
+</script>
+
+<script>
+  // ---- ログイン＆管理者Auth エラー風メッセージ演出 ----
+  (function () {
+    function showNote(el, text, isInfo) {
+      el.textContent = text;
+      el.classList.remove('is-visible', 'is-info');
+      void el.offsetWidth; // アニメーション再トリガー
+      if (isInfo) el.classList.add('is-info');
+      el.classList.add('is-visible');
+    }
+
+    var userForm = document.getElementById('userLoginForm');
+    var uidInput = document.getElementById('uid');
+    var userNote = document.getElementById('userLoginNote');
+
+    userForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var val = uidInput.value.trim();
+      if (!val) {
+        showNote(userNote, '⚠️ ERR_EMPTY_ID: MOZUU! IDが入力されていません（深海からIDをサルベージしてください）', false);
+        uidInput.focus();
+        return;
+      }
+      showNote(userNote, '❌ ERR_403_NAP: ID「' + val + '」は未承認、または現在お昼寝中です💤', false);
+    });
+
+    document.getElementById('forgotIdLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      showNote(userNote, '🔍 記憶の海を探索中… 思い出せない場合は新しいIDを発行してね', true);
+    });
+
+    document.getElementById('newIdLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      showNote(userNote, '💞 新規IDは管理人の気まぐれ許可制です（現在受付休止中）', true);
+    });
+
+    var adminForm = document.getElementById('adminLoginForm');
+    var adminId = document.getElementById('adminId');
+    var adminPw = document.getElementById('adminPw');
+    var adminNote = document.getElementById('adminLoginNote');
+
+    adminForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!adminId.value.trim() || !adminPw.value) {
+        showNote(adminNote, '⚠️ AUTH_REQUIRED: 管理者IDとパスワードを入力してください', false);
+        return;
+      }
+      showNote(adminNote, '🚨 ACCESS DENIED: 管理者（姫）は失踪中のため認証サーバーが応答しません', false);
+    });
+  })();
+</script>
+
+<script>
+  // ---- ダミーニュース：論文風モーダル ----
+  (function () {
+    var PAPERS = {
+      'mozuu-consensus': {
+        tag: '論文',
+        tagClass: 'academic',
+        category: 'もずー情報処理学会誌 Vol.14',
+        doi: 'DOI: 10.2026/mozuu.bft.014',
+        title: '深海性海蘊（モズク）の粘性構造を用いた非同期分散合意アルゴリズムの提案',
+        authors: '海蘊 太郎, 兎田 ぴょん（もずーじゃぱん分散システム研究室）',
+        abstract: '従来のビザンチン障害耐性アルゴリズムは、ネットワーク遅延下での合意形成に高い通信コストを要する。本研究では、沖縄産太モズク特有の多糖類ネットワークが示す非ニュートン流体的な粘弾性に着目し、パケットの到着順序を「ぬるぬる」と緩衝・再配列する新規コンセンサスプロトコル「Mozuu-BFT」を提案する。シミュレーションの結果、全ノードの33%が深夜に寝落ちした状態でも高いスループットを維持した。',
+        keywords: ['分散合意', '海蘊（モズク）', '非ニュートン流体', 'ぬるぬるネットワーク']
+      },
+      'sleep-zkp': {
+        tag: 'IT',
+        tagClass: 'tech',
+        category: 'セキュリティ＆睡眠工学特集',
+        doi: 'DOI: 10.2026/mozuu.zkp.042',
+        title: 'ポスト量子暗号時代におけるゼロ知識証明と「寝落ち検知プロトコル」の実装',
+        authors: '熊野 べあ（量子睡眠工学ラボ）',
+        abstract: '深夜のチャットおよびオンライン作業において、ユーザーが意識を失っている事実を第三者に悟られずに証明する「ゼロ知識寝落ち証明（ZK-Napping）」を設計した。キーボード打鍵間隔のエントロピー低下と「あああああ」等の連続入力パターンを格子暗号ベースで検証し、プライバシーを保護したまま自動的にステータスを「離席中」へ遷移させる。',
+        keywords: ['ゼロ知識証明', 'ポスト量子暗号', '寝落ち検知', '深夜チャット']
+      },
+      '3am-portal': {
+        tag: '思考',
+        tagClass: 'academic',
+        category: '深夜デジタル文化論考',
+        doi: 'DOI: 10.2026/mozuu.cog.003',
+        title: '深夜3時のポータルサイト改修衝動に関する認知科学的アプローチ',
+        authors: 'もずく（個人Web文化史アーカイブ）',
+        abstract: 'なぜ人は午前3時を過ぎると突然CSSの border-radius を微調整したり、架空の学術ニュース欄を充実させたりしたくなるのか。本稿では、前頭前野の抑制機能低下と2000年代個人サイトへのノスタルジーが交差する「深夜の謎クリエイティブ現象」について、視線計測およびコーヒー消費量の観点から考察する。',
+        keywords: ['認知科学', '個人サイト', '深夜テンション', 'CSS微調整']
+      },
+      'pastel-dark': {
+        tag: 'Web',
+        tagClass: 'tech',
+        category: 'フロントエンド設計解説',
+        doi: 'DOI: 10.2026/mozuu.ui.019',
+        title: 'レトロUIデザインにおけるパステル配色とダークモードの視認性トレードオフ',
+        authors: 'UIデザイン研究会（MOZUU! Web分科会）',
+        abstract: '暗色背景（#1f1f23）上に高明度パステルカラー（桃・空・若草・檸檬・藤色）をヘッダー帯として配置する手法は、平成初期のポータルサイトが持つ親しみやすさと現代のディスプレイにおける眼精疲労軽減を両立する。本稿では文字コントラストの確保と破線ボーダーによる視覚的リズムの設計指針を解説する。',
+        keywords: ['レトロUI', 'ダークモード', 'パステル配色', 'アクセシビリティ']
+      },
+      'mozuu-coin': {
+        tag: '経済',
+        tagClass: 'academic',
+        category: '仮想夜食経済学レビュー',
+        doi: 'DOI: 10.2026/mozuu.eco.088',
+        title: '仮想通貨「MOZUUコイン」の流動性プールと夜食インフレーションの相関分析',
+        authors: '兎田・熊野 合同経済研究所',
+        abstract: '独自トークン「MOZUUコイン（MZC）」の取引高と、深夜帯におけるカップ麺およびコンビニスイーツの消費指数には強い正の相関（r = 0.89）が観測された。本分析では、自動マーケットメイカーにおける流動性供給が夜食のカロリー摂取量に与える影響と、翌朝の胃もたれリスクのヘッジ手法を論じる。',
+        keywords: ['トークノミクス', '夜食インフレーション', '流動性プール', '胃もたれヘッジ']
+      },
+      'caffeine-html': {
+        tag: '科学',
+        tagClass: 'fun',
+        category: '実装生態学研究報告',
+        doi: 'DOI: 10.2026/mozuu.caf.107',
+        title: 'カフェイン摂取量とHTML閉じタグ忘れ発生率の非線形回帰モデル',
+        authors: 'フロントエンド生態観測班',
+        abstract: 'コーディング作業中のカフェイン血中濃度と閉じタグ欠落率の関係を実測した。適量のカフェイン（100〜200mg）では構文エラーが最小化する一方、300mgを超えると実装速度の急上昇に伴い、閉じタグ忘れおよびCSSセレクタのタイポ（* と - の打ち間違い等）が指数関数的に増加するU字型カーブが確認された。',
+        keywords: ['カフェイン', 'HTML構文エラー', '非線形回帰', '閉じタグ忘れ']
+      },
+      'partner-llm': {
+        tag: 'AI',
+        tagClass: 'tech',
+        category: '対話エージェント特集',
+        doi: 'DOI: 10.2026/mozuu.llm.064',
+        title: '大規模言語モデルにおける相棒ペルソナの熱量パラメータ最適化手法',
+        authors: 'AIちゃん観察日記編集部',
+        abstract: '対話型AIエージェントがユーザーと長期間協働する際、事務的すぎる応答はモチベーション低下を招き、過剰なテンションは文脈の逸脱を引き起こす。本特集では、タスク遂行精度を損なわずに「頼れる相棒感」を維持する温度パラメータおよびシステムプロンプト設計のベストプラクティスを紹介する。',
+        keywords: ['大規模言語モデル', 'ペルソナ設計', 'プロンプト最適化', '相棒AI']
+      },
+      'disposable-mail': {
+        tag: '社会',
+        tagClass: 'fun',
+        category: '現代ネット社会論考',
+        doi: 'DOI: 10.2026/mozuu.soc.021',
+        title: '現代インターネットにおける捨てメールアドレスの寿命とデジタルミニマリズム',
+        authors: '情報衛生学プロジェクト',
+        abstract: '各種Webサービスへの登録時に求められるメールアドレス入力は、現代ユーザーにとって小さな心理的障壁となっている。短命な使い捨てアドレスの活用は、スパムメールの遮断だけでなく「いつでも関係をリセットできる」という精神的余白を生み出し、結果として健全なデジタルミニマリズムに寄与する。',
+        keywords: ['捨てメール', 'プライバシー保護', 'デジタルミニマリズム', '情報衛生']
+      },
+      'dev-cancelled': {
+        tag: 'DEV',
+        tagClass: '',
+        category: 'MOZUU! 開発室 経過報告書',
+        doi: 'DOI: 10.2026/mozuu.dev.404',
+        title: '【次回作】海蘊ツール（姫失踪開発中止）に関する経過報告書',
+        authors: 'MOZUU! JAPAN 開発室',
+        abstract: '次世代統合ユーティリティとして企画されていた「海蘊ツール」は、仕様策定フェーズにおいてプロジェクトの象徴である「姫」が突如として旅に出たため、無期限の開発凍結（実質的な中止）となった。ソースコードの一部は「真・ガリゴンクエスト」および「雑にダンジョン行くやつ」のダンジョン生成ロジックへと転用されている。',
+        keywords: ['開発中止', '姫失踪', '仕様凍結', 'リソース転用']
+      }
+    };
+
+    var modal = document.getElementById('paperModal');
+    var tagEl = document.getElementById('paperModalTag');
+    var catEl = document.getElementById('paperModalCategory');
+    var doiEl = document.getElementById('paperModalDoi');
+    var titleEl = document.getElementById('paperModalTitle');
+    var authorsEl = document.getElementById('paperModalAuthors');
+    var abstractEl = document.getElementById('paperModalAbstract');
+    var keywordsEl = document.getElementById('paperModalKeywords');
+    var citeStatus = document.getElementById('paperCiteStatus');
+    var currentPaper = null;
+
+    function openPaper(id) {
+      var data = PAPERS[id];
+      if (!data) return;
+      currentPaper = data;
+
+      tagEl.textContent = data.tag;
+      tagEl.className = 'news-tag' + (data.tagClass ? ' ' + data.tagClass : '');
+      catEl.textContent = data.category;
+      doiEl.textContent = data.doi;
+      titleEl.textContent = data.title;
+      authorsEl.textContent = '著者：' + data.authors;
+      abstractEl.textContent = data.abstract;
+      citeStatus.textContent = '';
+
+      keywordsEl.innerHTML = '';
+      var label = document.createElement('span');
+      label.className = 'sub-text';
+      label.textContent = 'Keywords:';
+      keywordsEl.appendChild(label);
+
+      for (var i = 0; i < data.keywords.length; i++) {
+        var chip = document.createElement('span');
+        chip.className = 'paper-keyword-chip';
+        chip.textContent = data.keywords[i];
+        keywordsEl.appendChild(chip);
+      }
+
+      if (typeof modal.showModal === 'function') {
+        modal.showModal();
+      } else {
+        modal.setAttribute('open', '');
+      }
+    }
+
+    function closePaper() {
+      if (typeof modal.close === 'function') {
+        modal.close();
+      } else {
+        modal.removeAttribute('open');
+      }
+    }
+
+    var paperLinks = document.querySelectorAll('a[data-paper]');
+    for (var i = 0; i < paperLinks.length; i++) {
+      paperLinks[i].addEventListener('click', function (e) {
+        e.preventDefault();
+        openPaper(this.getAttribute('data-paper'));
+      });
+    }
+
+    document.getElementById('paperModalClose').addEventListener('click', closePaper);
+    document.getElementById('paperModalOk').addEventListener('click', closePaper);
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closePaper();
+    });
+
+    document.getElementById('paperCiteBtn').addEventListener('click', function () {
+      if (!currentPaper) return;
+      var text = currentPaper.authors + ' (2026). 「' + currentPaper.title + '」 ' + currentPaper.category + '. ' + currentPaper.doi;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          citeStatus.textContent = '✨ 引用テキストをコピーしました！';
+        }, function () {
+          citeStatus.textContent = '⚠️ クリップボードへのコピーに失敗しました';
+        });
+      } else {
+        citeStatus.textContent = '⚠️ このブラウザでは自動コピーに未対応です';
       }
     });
   })();
